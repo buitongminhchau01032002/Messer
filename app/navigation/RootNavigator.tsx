@@ -24,6 +24,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { reLogin } from 'slice/auth';
 import { MessageDetailScreen } from 'screens/Message/pages/MessagesDetail';
 import { WalletScreen } from 'screens/Wallet';
+import { ComingCallScreen } from 'screens/ComingCall';
 
 export default function Navigation() {
     // hooks
@@ -94,6 +95,7 @@ function RootNavigator() {
                 <Stack.Screen name={RootNavigatekey.Intro} component={IntroScreen} options={{ headerShown: false }} />
                 <Stack.Screen name={RootNavigatekey.NotFound} component={NotFoundScreen} options={{ title: 'Oops!' }} />
                 <Stack.Screen name={RootNavigatekey.Modal} component={ModalScreen} />
+                <Stack.Screen name={RootNavigatekey.ComingCall} component={ComingCallScreen} options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: ''}} />
             </Stack.Group>
         </Stack.Navigator>
     );
