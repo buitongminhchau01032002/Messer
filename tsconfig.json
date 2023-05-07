@@ -1,0 +1,37 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      // This needs to be mirrored in babel.config.js
+      // Components is a directory with sub directories
+      "config/*": ["app/config/*"],
+      "utils/*": ["app/utils/*"],
+      "i18n/*": ["app/i18n/*"],
+      "slice/*": ["app/slice/*"],
+      "services/*": ["app/services/*"],
+      "components/*": ["app/components/*"],
+      "models/*": ["app/models/*"],
+      "screens/*": ["app/screens/*"],
+      "store/*": ["app/store/*"],
+      "hooks/*": ["app/hooks/*"],
+      "navigation/*": ["app/navigation/*"],
+      "assets/*": ["app/assets/*"],
+      "app/*": ["app/*"]
+    },
+    "target": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": true,
+    "skipLibCheck": false,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": false,
+    "noEmit": true,
+    "jsx": "react"
+  }
+}
