@@ -1,5 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { useNavigation } from '@react-navigation/native';
 import { APP_PADDING } from 'app/constants/Layout';
 import { AppBar } from 'components/AppBar';
 import { DropDownSelect } from 'components/DropdownSelect';
@@ -23,7 +24,7 @@ import {
     Image,
     ScrollView,
 } from 'native-base';
-import { AppTabsNavigationKey, AuthNavigationKey } from 'navigation/navigationKey';
+import { AppTabsNavigationKey, AuthNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { logout } from 'slice/auth';
@@ -40,6 +41,7 @@ export const HomeScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.H
         { label: 'Apple', value: 'apple' },
         { label: 'Banana', value: 'banana' },
     ]);
+    const navigate = useNavigation();
     return (
         <Box h="full">
             <AppBar
@@ -58,6 +60,7 @@ export const HomeScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.H
                     // shadowColor: '#000000',
                     // elevation: 6,
                 }} shadow={9}></Box>
+                <Button onPress={() => navigate.navigate(RootNavigatekey.CallWaiting)}>To call waiting</Button>
             </Box>
         </Box >
     );
