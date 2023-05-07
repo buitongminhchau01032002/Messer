@@ -20,4 +20,5 @@ export enum RootNavigatekey {
     Modal = 'Modal',
     NotFound = 'NotFound',
     ComingCall = 'ComingCall',
+    Calling = 'Calling',
 }

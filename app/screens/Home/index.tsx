@@ -61,6 +61,7 @@ export const HomeScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.H
                     // elevation: 6,
                 }} shadow={9}></Box>
                 <Button onPress={() => navigate.navigate(RootNavigatekey.ComingCall)}>To coming call</Button>
+                <Button onPress={() => navigate.navigate(RootNavigatekey.Calling)}>To calling</Button>
             </Box>
         </Box >
     );
