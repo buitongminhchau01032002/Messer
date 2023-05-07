@@ -24,6 +24,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { reLogin } from 'slice/auth';
 import { MessageDetailScreen } from 'screens/Message/pages/MessagesDetail';
 import { WalletScreen } from 'screens/Wallet';
+import { InformationScreen } from "screens/Information";
 
 export default function Navigation() {
     // hooks
@@ -83,6 +84,7 @@ function RootNavigator() {
                         options={{ headerShown: false }}
                     />
                     <Stack.Screen name={RootNavigatekey.Wallet} component={WalletScreen} />
+                    <Stack.Screen name={RootNavigatekey.Information} component={InformationScreen} />
                 </>
             )}
             <Stack.Group navigationKey={isLogin ? 'user' : 'guest'} screenOptions={{ presentation: 'modal' }}>

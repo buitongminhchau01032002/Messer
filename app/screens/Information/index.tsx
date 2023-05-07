@@ -28,7 +28,7 @@ import {
 } from 'native-base';
 import { AppTabsNavigationKey, AuthNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import { TouchableOpacity } from 'react-native';
-import { AppTabsStackScreenProps } from 'types';
+import { AppTabsStackScreenProps, RootStackScreenProps } from 'types';
 import { FontAwesome } from '@expo/vector-icons';
 
 type MenuItem = {
@@ -38,7 +38,7 @@ type MenuItem = {
     onPress?: () => void;
 };
 
-export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.Account>) => {
+export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.Information>) => {
     // navigation
     const { navigation } = props;
     // hooks
@@ -48,9 +48,7 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                 <HStack
                     space={2}
                 >
-                    <TouchableOpacity onPress={() => navigation.navigate(RootNavigatekey.Information)}>
-                        <Icon as={<FontAwesome />} name="hashtag" size={4} color={"blacks"} mr={2}></Icon>
-                    </TouchableOpacity>
+                    <Icon as={<FontAwesome />} name="hashtag" size={4} color={"blacks"} mr={2}></Icon>
                     <Icon as={<FontAwesome />} name="list" size={4} color={"blacks"} mr={5}></Icon>
                 </HStack>
             ),

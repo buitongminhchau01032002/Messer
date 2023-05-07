@@ -18,5 +18,6 @@ export enum RootNavigatekey {
     Wallet = 'Wallet',
     MessageDetail = 'MessageDetail',
     Modal = 'Modal',
+    Information = 'Information',
     NotFound = 'NotFound',
 }
