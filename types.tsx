@@ -21,7 +21,6 @@ declare global {
 export type AppTabsStackParamList = {
     [AppTabsNavigationKey.Home]: undefined;
     [AppTabsNavigationKey.Message]: undefined;
-    [AppTabsNavigationKey.FloatButton]: undefined;
     [AppTabsNavigationKey.Budget]: undefined;
     [AppTabsNavigationKey.Account]: undefined;
 };

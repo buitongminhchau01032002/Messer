@@ -15,11 +15,7 @@ export const MessageScreen = (
 
   return (
     <Flex>
-      <AppBar
-        title={t("screen-title.message")}
-        bg="#2FA6DE"
-        onPressDefaultLeftButton={() => props.navigation.openDrawer()}
-      />
+
       <Stack>
         <ScrollView>
           <MessageItem title="Hannah Baker Hannah Baker Hannah Baker Hannah Baker Hannah Baker Hannah Baker Hannah Baker" text="Today, kid goes to school very well, this is Today, kid goes to school very well, this is" isActive={true} />
