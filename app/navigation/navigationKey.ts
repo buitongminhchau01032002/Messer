@@ -21,4 +21,5 @@ export enum RootNavigatekey {
     NotFound = 'NotFound',
     ComingCall = 'ComingCall',
     Calling = 'Calling',
+    CallWaiting = 'CallWaiting',
 }

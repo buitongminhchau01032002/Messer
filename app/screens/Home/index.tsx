@@ -62,6 +62,7 @@ export const HomeScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.H
                 }} shadow={9}></Box>
                 <Button onPress={() => navigate.navigate(RootNavigatekey.ComingCall)}>To coming call</Button>
                 <Button onPress={() => navigate.navigate(RootNavigatekey.Calling)}>To calling</Button>
+                <Button onPress={() => navigate.navigate(RootNavigatekey.CallWaiting)}>To call waiting</Button>
             </Box>
         </Box >
     );
