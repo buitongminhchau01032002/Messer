@@ -1,16 +1,41 @@
-import React, { useEffect } from 'react';
-import { Box, Center, HStack, Image, NativeBaseProvider, Text, VStack, useTheme } from 'native-base';
+import React, { useEffect, useState } from 'react';
+import { Box, Center, HStack, Image, Text, VStack, useTheme } from 'native-base';
+import { runOnJS } from 'react-native-reanimated';
 import { RootStackScreenProps } from 'types';
 import { RootNavigatekey } from 'navigation/navigationKey';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { PickupButton } from './components/PickupButton';
+import { HangupButton } from './components/HangupButton';
+
 
 export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.ComingCall>) => {
     const { colors } = useTheme();
+    const [pickupButtonDragging, setPickupButtonDragging] = useState(false);
+    const [hangupButtonDragging, setHangupButtonDragging] = useState(false);
     useEffect(() => {
         props.navigation.setOptions({
             headerTintColor: colors.white,
         });
     }, [props.navigation]);
+
+    function handleOnPickupButtonDrag() {
+        'worklet';
+        runOnJS(setPickupButtonDragging)(true);
+    }
+
+    function handleOnPickupButtonDragEnd() {
+        'worklet';
+        runOnJS(setPickupButtonDragging)(false);
+    }
+
+    function handleOnHangupButtonDrag() {
+        'worklet';
+        runOnJS(setHangupButtonDragging)(true);
+    }
+
+    function handleOnHangupButtonDragEnd() {
+        'worklet';
+        runOnJS(setHangupButtonDragging)(false);
+    }
 
     return (
         <Box position="relative" flex={1}>
@@ -33,19 +58,22 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
                         Erika Mateo
                     </Text>
                 </Box>
-                <HStack px="2" alignItems='center' justifyContent='space-between'>
-                    <HStack alignItems="center" space='1'>
-                        <Center size={60} bg="green.900" rounded="full" shadow="3">
-                            <Ionicons name="call-outline" size={28} color="white" />
-                        </Center>
-                        <Feather name="chevrons-right" size={24} color={colors.green[900]} />
-                    </HStack>
-                    <HStack alignItems="center" space='1'>
-                        <Feather name="chevrons-left" size={24} color={colors.primary[900]} />
-                        <Center size={60} bg="primary.900" rounded="full" shadow="3">
-                            <Ionicons name="call-outline" size={28} color="white" />
-                        </Center>
-                    </HStack>
+                <HStack
+                    px="2"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    bg={(pickupButtonDragging || hangupButtonDragging) ? 'gray.200' : 'transparent'}
+                >
+                    <PickupButton
+                        onDragStart={handleOnPickupButtonDrag}
+                        onDragEnd={handleOnPickupButtonDragEnd}
+                        isHidden={!hangupButtonDragging}
+                    />
+                    <HangupButton
+                        onDragStart={handleOnHangupButtonDrag}
+                        onDragEnd={handleOnHangupButtonDragEnd}
+                        isHidden={!pickupButtonDragging}
+                    />
                 </HStack>
             </VStack>
         </Box>
