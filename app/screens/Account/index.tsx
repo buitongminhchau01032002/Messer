@@ -102,8 +102,11 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     <VStack space={2} mt={5} mb={10} >
                         <TouchableOpacity>
                             <HStack space={2}>
-                                <Avatar size="xl" bg="primary.900" ml={5}>
-                                    P
+                                <Avatar size={120} bg="primary.900" ml={5} source={{
+                                    uri: "https://images.unsplash.com/photo-1510771463146-e89e6e86560e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=627&q=80"
+                                }}>
+
+                                    Sa Đam
                                 </Avatar>
                                 <VStack space={1} ml={2} justifyContent={'center'}>
                                     <Text bold fontSize="md">

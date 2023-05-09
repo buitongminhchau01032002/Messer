@@ -19,5 +19,6 @@ export enum RootNavigatekey {
     MessageDetail = 'MessageDetail',
     Modal = 'Modal',
     Information = 'Information',
+    InformationQR = 'InformationQR',
     NotFound = 'NotFound',
 }

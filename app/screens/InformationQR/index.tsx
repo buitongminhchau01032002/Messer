@@ -25,15 +25,11 @@ import {
     HStack,
     Image,
     ScrollView,
-    View,
 } from 'native-base';
 import { AppTabsNavigationKey, AuthNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import { TouchableOpacity } from 'react-native';
 import { AppTabsStackScreenProps, RootStackScreenProps } from 'types';
 import { FontAwesome } from '@expo/vector-icons';
-import { block } from 'react-native-reanimated';
-import { localImages } from "../../constants/Images";
-import * as ImagePicker from 'expo-image-picker';
 
 type MenuItem = {
     title: string;
@@ -42,7 +38,7 @@ type MenuItem = {
     onPress?: () => void;
 };
 
-export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.Information>) => {
+export const InformationScreenQR = (props: RootStackScreenProps<RootNavigatekey.InformationQR>) => {
     // navigation
     const { navigation } = props;
     // hooks
@@ -94,25 +90,7 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
         },
     ];
 
-    const [image, setImage] = useState('');
 
-    const pickImage = async () => {
-        // No permissions request is necessary for launching the image library
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
-        });
-
-        console.log(result);
-
-        if (!result.canceled) {
-            setImage(result.assets[0].uri);
-            // setImage(result.assets[0].uri);
-            console.log('set')
-        }
-    };
 
 
     return (
@@ -122,20 +100,14 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
                     <VStack space={2} mt={5} mb={10} >
                         <Center>
 
-                            <TouchableOpacity onPress={pickImage}>
-                                <VStack space={2} >
-                                    <Center>
-                                        <Image
-                                            source={image ? { uri: image } : localImages.avatarPlaceholder}
-                                            fallbackSource={localImages.driverPlaceHoder}
-                                            style={{ width: 100, height: 100 }}
-                                            alt='...'
-                                            borderRadius={100}
+                            <TouchableOpacity>
+                                <VStack space={2}>
+                                    <Avatar size={200} bg="primary.900" ml={5}  source={{
+                                        uri: "https://images.unsplash.com/photo-1510771463146-e89e6e86560e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=627&q=80"
+                                    }}>
 
-                                        ></Image>
-                                    </Center>
-
-
+                                        Sa Đam
+                                    </Avatar>
                                     <VStack space={2} ml={2} alignItems='center'>
                                         <Text bold fontSize={26}>
                                             Dennis
@@ -188,6 +160,6 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
                     </VStack>
                 </VStack>
             </ScrollView>
-        </Box >
+        </Box>
     );
 };

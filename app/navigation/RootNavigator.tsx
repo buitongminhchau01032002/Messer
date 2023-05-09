@@ -25,6 +25,7 @@ import { reLogin } from 'slice/auth';
 import { MessageDetailScreen } from 'screens/Message/pages/MessagesDetail';
 import { WalletScreen } from 'screens/Wallet';
 import { InformationScreen } from "screens/Information";
+import { InformationScreenQR } from "screens/InformationQR";
 
 export default function Navigation() {
     // hooks
@@ -85,6 +86,7 @@ function RootNavigator() {
                     />
                     <Stack.Screen name={RootNavigatekey.Wallet} component={WalletScreen} />
                     <Stack.Screen name={RootNavigatekey.Information} component={InformationScreen} />
+                    <Stack.Screen name={RootNavigatekey.InformationQR} component={InformationScreenQR} />
                 </>
             )}
             <Stack.Group navigationKey={isLogin ? 'user' : 'guest'} screenOptions={{ presentation: 'modal' }}>
