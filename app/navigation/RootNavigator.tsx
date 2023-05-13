@@ -73,7 +73,7 @@ function RootNavigator() {
 
     return (
         <Stack.Navigator>
-            {!isLogin ? (
+            {isLogin ? (
                 <Stack.Screen name={RootNavigatekey.Auth} component={AuthNavigator} options={{ headerShown: false }} />
             ) : (
                 <>

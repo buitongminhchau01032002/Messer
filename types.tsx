@@ -29,6 +29,7 @@ export type AppTabsStackParamList = {
 export type AuthStackParamList = {
     [AuthNavigationKey.SignIn]: undefined;
     [AuthNavigationKey.SignUp]: undefined;
+    [AuthNavigationKey.OTP]: undefined;
 };
 
 export type RootStackParamList = {
