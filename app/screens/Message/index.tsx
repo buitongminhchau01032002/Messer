@@ -125,17 +125,18 @@ export const MessageScreen = (
         {
           messes.map((mess) =>
             !mess.isOpened ?
-              <TouchableHighlight
+
+              <TouchableOpacity
                 style={styles.rowFrontVisible}
                 onPress={() => {
-                  const newMesses = messes.map((hm) => {
-                    if (hm.id == mess.id) {
+                  const newMesses = messes.map((item) => {
+                    if (item.id == mess.id) {
                       return {
-                        ...hm,
+                        ...item,
                         isOpened: true,
                       }
                     } else {
-                      return hm
+                      return item
                     }
                   },
 
@@ -143,10 +144,10 @@ export const MessageScreen = (
                   setMesses(newMesses)
                 }}
                 underlayColor={'#aaa'}>
-                <View flexDirection={'row'}>
+                <View flexDirection={'row'} >
                   <Image source={{ uri: 'https://reactnative.dev/img/tiny_logo.png' }} size={10} alt="description of image" borderRadius={20} ></Image>
-                  <View>
-                    <Text>{mess.name}</Text>
+                  <View paddingLeft={4}>
+                    <Text fontWeight={'bold'}>{mess.name}</Text>
                     <Text>{mess.mess}</Text>
                   </View>
                   <View flex={1}></View>
@@ -155,13 +156,27 @@ export const MessageScreen = (
                     <Text>12m</Text>
                   </View>
                 </View>
-              </TouchableHighlight>
+              </TouchableOpacity>
               :
 
               <View flexDirection={'row'}>
-                <TouchableHighlight
+                <TouchableOpacity
                   style={styles.rowFrontVisibleOpened}
-                  onPress={() => { mess.isOpened = !mess.isOpened }}
+                  onPress={() => { 
+                    const newMesses = messes.map((item) => {
+                      if (item.id == mess.id) {
+                        return {
+                          ...item,
+                          isOpened: false,
+                        }
+                      } else {
+                        return item
+                      }
+                    },
+  
+                    )
+                    setMesses(newMesses)
+                   }}
                   underlayColor={'#aaa'}>
                   <View flexDirection={'row'}>
                     <Image source={{ uri: 'https://reactnative.dev/img/tiny_logo.png' }} size={10} alt="description of image" borderRadius={20} ></Image>
@@ -175,7 +190,7 @@ export const MessageScreen = (
                       <Text>12m</Text>
                     </View>
                   </View>
-                </TouchableHighlight>
+                </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.backRightBtn, styles.backRightBtnRight]}
                   onPress={() => { }}
@@ -236,7 +251,7 @@ const styles = StyleSheet.create({
     height: 60,
     padding: 10,
     marginBottom: 15,
-    marginLeft: -10,
+    marginLeft: -5,
   },
   rowBack: {
     alignItems: 'center',
