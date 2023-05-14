@@ -15,6 +15,7 @@ import {
     Box,
     Pressable,
     IconButton,
+    useTheme,
 } from 'native-base';
 import { AppTabsNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import React, { useEffect, useRef, useState } from 'react';
@@ -74,7 +75,17 @@ const userList = [
 
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { APP_PADDING } from 'app/constants/Layout';
-import { BellOffIcon, EllipsisIcon, LinkIcon, LogoutIcon, TrashIcon, VolumeMuteIcon } from 'components/Icons/Light';
+import {
+    BellIcon,
+    BellOffIcon,
+    EllipsisIcon,
+    LinkIcon,
+    LogoutIcon,
+    PlusIcon,
+    SearchIcon,
+    TrashIcon,
+    VolumeMuteIcon,
+} from 'components/Icons/Light';
 
 const rightSwipeActions = () => {
     return (
@@ -117,29 +128,36 @@ const ListItem = (item: { name: string; avt: string; onPress?: () => void }) => 
 );
 export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.Message>) => {
     const { navigation } = props;
+    const { colors } = useTheme();
     useEffect(() => {
         props.navigation.setOptions({
             headerTitle: 'Channels',
+            // backBu
             headerLeft: () => (
-                <HStack marginLeft={6}>
-                    <Ionicons name="notifications" size={24} color="black" />
+                <HStack mx={4}>
+                    <BellIcon size="md" color="primary.900" />
                 </HStack>
             ),
 
             headerRight: () => (
-                <HStack marginRight={6} space={6}>
-                    <EvilIcons name="search" size={36} color="black" />
-                    <Ionicons name="add-outline" size={36} color="black" />
+                <HStack space={4} alignItems={'center'} mr={4}>
+                    <TouchableOpacity onPress={() => navigation.navigate(RootNavigatekey.Search)}>
+                        <SearchIcon size="md" color="primary.900" />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => {}}>
+                        <PlusIcon size="md" color="primary.900" />
+                    </TouchableOpacity>
                 </HStack>
             ),
+            headerTitleStyle: { color: colors.blue[900] },
         });
     }, [props.navigation]);
 
     return (
-        <View backgroundColor={'white'} flex={1} pt={APP_PADDING}>
-            <ScrollView flex={1}>
+        <View backgroundColor={'white'} flex={1}>
+            <ScrollView flex={1} showsVerticalScrollIndicator={false}>
                 <VStack space={2}>
-                    <ScrollView horizontal>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                         <HStack space={4}>
                             {userList.map((item, idx) => (
                                 <VStack width={16} space={1} alignItems="center" ml={idx === 0 ? 4 : 0}>

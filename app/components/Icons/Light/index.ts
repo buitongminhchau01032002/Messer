@@ -12,3 +12,5 @@ export { LinkIcon } from './Link';
 export { VolumeMuteIcon } from './VolumeMute';
 export { BellOffIcon } from './BellOff';
 export { LogoutIcon } from './Logout';
+export { SearchIcon } from './Search';
+export { PlusIcon } from './Plus';
