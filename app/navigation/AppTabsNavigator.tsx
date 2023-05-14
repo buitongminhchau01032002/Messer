@@ -9,7 +9,7 @@ import { Avatar, Box, Button, Icon, View, useTheme } from 'native-base';
 import { useBackgroundColor } from 'hooks/index';
 import { AccountScreen } from 'screens/Account';
 import { FakeScreen } from 'screens/FloatButton';
-import { BudgetScreen } from "screens/Budget";
+import { BudgetScreen } from 'screens/Budget';
 import { MyTabBar } from './MyTabBar';
 import { MicIcon } from 'components/Icons/Light/Mic';
 import { MessageCircleIcon } from 'components/Icons/Light/Message';
@@ -19,51 +19,49 @@ import { UserIcon } from 'components/Icons/Light/User';
 const BottomTab = createBottomTabNavigator<AppTabsStackParamList>();
 
 export default function AppTabsNavigator() {
-  const { tabBarBackground } = useBackgroundColor();
-  const { colors } = useTheme();
-  return (
-    <BottomTab.Navigator
-      initialRouteName={AppTabsNavigationKey.Home}
-      tabBar={props => <MyTabBar {...props} />}
-      screenOptions={{
-        headerShadowVisible: false,
-      }}
-    >
-      <BottomTab.Screen
-        name={AppTabsNavigationKey.Home}
-        component={HomeScreen}
-        options={{
-          title: AppTabsNavigationKey.Home,
-          tabBarIcon: () => <MicIcon size='md' color='primary.900' />,
-        }}
-      />
-      <BottomTab.Screen
-        name={AppTabsNavigationKey.Message}
-        component={MessageScreen}
-        options={{
-          title: AppTabsNavigationKey.Message,
-          tabBarIcon: () => <MessageCircleIcon size='md' color='primary.900' />,
-        }}
-      />
-      <BottomTab.Screen
-        name={AppTabsNavigationKey.Budget}
-        component={BudgetScreen}
-        options={{
-          title: AppTabsNavigationKey.Budget,
-          tabBarIcon: () => (
-            <BellIcon size='md' color='primary.900' />
-          ),
-        }}
-      />
-      <BottomTab.Screen
-        name={AppTabsNavigationKey.Account}
-        component={AccountScreen}
-        options={{
-          title: 'Account',
-          tabBarIcon: () => <UserIcon size='md' color='primary.900' />,
-        }}
-      />
-    </BottomTab.Navigator>
-  );
+    const { tabBarBackground } = useBackgroundColor();
+    const { colors } = useTheme();
+    return (
+        <BottomTab.Navigator
+            initialRouteName={AppTabsNavigationKey.Home}
+            tabBar={(props) => <MyTabBar {...props} />}
+            screenOptions={{
+                headerShadowVisible: false,
+            }}
+        >
+            <BottomTab.Screen
+                name={AppTabsNavigationKey.Home}
+                component={HomeScreen}
+                options={{
+                    title: AppTabsNavigationKey.Home,
+                    tabBarIcon: () => <MicIcon size="md" color="primary.900" />,
+                }}
+            />
+            <BottomTab.Screen
+                name={AppTabsNavigationKey.Message}
+                component={MessageScreen}
+                options={{
+                    headerShadowVisible: true,
+                    title: AppTabsNavigationKey.Message,
+                    tabBarIcon: () => <MessageCircleIcon size="md" color="primary.900" />,
+                }}
+            />
+            <BottomTab.Screen
+                name={AppTabsNavigationKey.Budget}
+                component={BudgetScreen}
+                options={{
+                    title: AppTabsNavigationKey.Budget,
+                    tabBarIcon: () => <BellIcon size="md" color="primary.900" />,
+                }}
+            />
+            <BottomTab.Screen
+                name={AppTabsNavigationKey.Account}
+                component={AccountScreen}
+                options={{
+                    title: 'Account',
+                    tabBarIcon: () => <UserIcon size="md" color="primary.900" />,
+                }}
+            />
+        </BottomTab.Navigator>
+    );
 }
-
