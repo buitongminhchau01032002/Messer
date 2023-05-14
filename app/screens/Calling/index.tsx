@@ -4,6 +4,7 @@ import { RootStackScreenProps } from 'types';
 import { RootNavigatekey } from 'navigation/navigationKey';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { Pressable } from 'react-native';
+import { RemoteVideo } from './components/RemoteVideo';
 
 export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Calling>) => {
     const { colors } = useTheme();
@@ -32,19 +33,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
                     alt=""
                 />
             </Box>
-            <Box position="absolute" top="10" w={132} h={200} right="4" bottom="0">
-                {/* VIDEO CALL */}
-                <Image
-                    h="full"
-                    w="full"
-                    shadow="3"
-                    rounded="lg"
-                    source={{
-                        uri: 'https://images.unsplash.com/photo-1504199367641-aba8151af406?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80',
-                    }}
-                    alt=""
-                />
-            </Box>
+            <RemoteVideo />
             <VStack px="7" pt="24" pb="24" justifyContent="space-between" h="full">
                 <Box>
                     <Text color="primary.900" fontWeight="bold" fontSize="32">
