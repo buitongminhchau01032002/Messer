@@ -71,7 +71,7 @@ export const useCustomNativeBaseColor = () => {
         },
         config: {
             // Changing initialColorMode to 'dark'
-            initialColorMode: 'light',
+            // initialColorMode: 'dark',
         },
     });
 };
