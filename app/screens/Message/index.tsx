@@ -13,6 +13,8 @@ import {
     ScrollView,
     VStack,
     Box,
+    Pressable,
+    IconButton,
 } from 'native-base';
 import { AppTabsNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import React, { useEffect, useRef, useState } from 'react';
@@ -72,44 +74,49 @@ const userList = [
 
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { APP_PADDING } from 'app/constants/Layout';
+import { BellOffIcon, EllipsisIcon, LinkIcon, LogoutIcon, TrashIcon, VolumeMuteIcon } from 'components/Icons/Light';
 
 const rightSwipeActions = () => {
     return (
-        <VStack space={4} bg="black">
-            <Box width={32}></Box>
-            <Box width={32}></Box>
-            <Box width={32}></Box>
-        </VStack>
+        <HStack px={4} space={4} alignItems="center" bg="black" justifyContent="center">
+            <IconButton borderRadius={100} bg="gray.700" icon={<LogoutIcon color="white" size="sm" />} />
+            <IconButton borderRadius={100} bg="gray.700" icon={<BellOffIcon color="white" size="sm" />} />
+            <IconButton borderRadius={100} bg="gray.700" icon={<LinkIcon color="white" size="sm" />} />
+            <IconButton borderRadius={100} bg="gray.700" icon={<TrashIcon color="primary.900" size="sm" />} />
+        </HStack>
     );
 };
 
-const ListItem = (item: { name: string; avt: string }) => (
+const ListItem = (item: { name: string; avt: string; onPress?: () => void }) => (
     <GestureHandlerRootView>
         <Swipeable renderRightActions={rightSwipeActions} renderLeftActions={() => <View />}>
-            <HStack space={4} pl={4} bg="white">
-                <Image
-                    alt="..."
-                    source={{ uri: item.avt }}
-                    style={{ width: 64, height: 64 }}
-                    borderRadius={100}
-                ></Image>
-                <VStack flex={1} space={2} justifyContent="center">
-                    <Text bold fontSize="md">
-                        {item.name}
-                    </Text>
-                    <Text isTruncated color="gray.500">
-                        {item.avt}
-                    </Text>
-                </VStack>
-                <VStack justifyContent="center" space={2} mx={4}>
-                    <Text>hi</Text>
-                    <Text color="blue.900">3m</Text>
-                </VStack>
-            </HStack>
+            <Pressable onPress={item.onPress}>
+                <HStack space={4} pl={4} bg="white">
+                    <Image
+                        alt="..."
+                        source={{ uri: item.avt }}
+                        style={{ width: 64, height: 64 }}
+                        borderRadius={100}
+                    ></Image>
+                    <VStack flex={1} space={2} justifyContent="center">
+                        <Text bold fontSize="md">
+                            {item.name}
+                        </Text>
+                        <Text isTruncated color="gray.500">
+                            {item.avt}
+                        </Text>
+                    </VStack>
+                    <VStack justifyContent="center" space={2} mx={4} alignItems="center">
+                        <EllipsisIcon color="primary.900" size="sm" />
+                        <Text color="blue.900">3m</Text>
+                    </VStack>
+                </HStack>
+            </Pressable>
         </Swipeable>
     </GestureHandlerRootView>
 );
 export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.Message>) => {
+    const { navigation } = props;
     useEffect(() => {
         props.navigation.setOptions({
             headerTitle: 'Channels',
@@ -165,7 +172,11 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     </ScrollView>
                     <VStack space={2}>
                         {userList.map((item, idx) => (
-                            <ListItem {...item} key={idx} />
+                            <ListItem
+                                {...item}
+                                key={idx}
+                                onPress={() => navigation.navigate(RootNavigatekey.MessageDetail)}
+                            />
                         ))}
                     </VStack>
                 </VStack>

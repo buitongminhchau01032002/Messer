@@ -6,7 +6,6 @@ import { RootNavigatekey } from 'navigation/navigationKey';
 import { PickupButton } from './components/PickupButton';
 import { HangupButton } from './components/HangupButton';
 
-
 export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.ComingCall>) => {
     const { colors } = useTheme();
     const [pickupButtonDragging, setPickupButtonDragging] = useState(false);
@@ -17,27 +16,25 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
         });
     }, [props.navigation]);
 
-
     const handleOnPickupButtonDrag = useCallback(() => {
         'worklet';
         runOnJS(setPickupButtonDragging)(true);
-    }, [])
-
+    }, []);
 
     const handleOnPickupButtonDragEnd = useCallback(() => {
         'worklet';
         runOnJS(setPickupButtonDragging)(false);
-    }, [])
+    }, []);
 
     const handleOnHangupButtonDrag = useCallback(() => {
         'worklet';
         runOnJS(setHangupButtonDragging)(true);
-    }, [])
+    }, []);
 
     const handleOnHangupButtonDragEnd = useCallback(() => {
         'worklet';
         runOnJS(setHangupButtonDragging)(false);
-    }, [])
+    }, []);
 
     return (
         <Box position="relative" flex={1}>
@@ -60,23 +57,25 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
                         Erika Mateo
                     </Text>
                 </Box>
-                <HStack
-                    alignItems="center"
-                    justifyContent="space-between"
-                    style={{ width: 320 }}
-                // bg={(pickupButtonDragging || hangupButtonDragging) ? 'gray.200' : 'transparent'}
-                >
-                    <PickupButton
-                        onDragStart={handleOnPickupButtonDrag}
-                        onDragEnd={handleOnPickupButtonDragEnd}
-                        isVisible={!hangupButtonDragging}
-                    />
-                    <HangupButton
-                        onDragStart={handleOnHangupButtonDrag}
-                        onDragEnd={handleOnHangupButtonDragEnd}
-                        isVisible={!pickupButtonDragging}
-                    />
-                </HStack>
+                <Center>
+                    <HStack
+                        alignItems="center"
+                        justifyContent="space-between"
+                        style={{ width: 320 }}
+                        // bg={(pickupButtonDragging || hangupButtonDragging) ? 'gray.200' : 'transparent'}
+                    >
+                        <PickupButton
+                            onDragStart={handleOnPickupButtonDrag}
+                            onDragEnd={handleOnPickupButtonDragEnd}
+                            isVisible={!hangupButtonDragging}
+                        />
+                        <HangupButton
+                            onDragStart={handleOnHangupButtonDrag}
+                            onDragEnd={handleOnHangupButtonDragEnd}
+                            isVisible={!pickupButtonDragging}
+                        />
+                    </HStack>
+                </Center>
             </VStack>
         </Box>
     );

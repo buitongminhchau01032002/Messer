@@ -7,3 +7,8 @@ export { ImageIcon } from './Image';
 export { NavigationIcon } from './Navigation';
 export { PhoneIcon } from './Phone';
 export { VideoIcon } from './Video';
+export { TrashIcon } from './Trash';
+export { LinkIcon } from './Link';
+export { VolumeMuteIcon } from './VolumeMute';
+export { BellOffIcon } from './BellOff';
+export { LogoutIcon } from './Logout';
