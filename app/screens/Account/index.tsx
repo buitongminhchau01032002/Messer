@@ -30,7 +30,7 @@ import { AppTabsNavigationKey, AuthNavigationKey, RootNavigatekey } from 'naviga
 import { TouchableOpacity } from 'react-native';
 import { AppTabsStackScreenProps } from 'types';
 import { FontAwesome } from '@expo/vector-icons';
-
+import { NavigateScreen } from 'components/Navigate';
 type MenuItem = {
     title: string;
     icon: React.ReactNode;
@@ -122,40 +122,16 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                         Setting
                     </Text>
                     <VStack space={2}>
-                        {menuItem.map((m, idx) => (
-                            <VStack key={idx} ml={2}>
-                                <TouchableOpacity onPress={m.onPress}>
-                                    <HStack py={2} alignItems="center">
-                                        <HStack space="lg" alignItems="center">
-                                            {m.icon}
-                                            <Text fontSize="md">{m.title}</Text>
-                                        </HStack>
-                                        <Center position="absolute" h="100%" right={0}>
-                                            <Icon as={<FontAwesome />} name="chevron-right"></Icon>
-                                        </Center>
-                                    </HStack>
-                                </TouchableOpacity>
-                            </VStack>
+                        {menuItem.map((m) => (
+                            <NavigateScreen m={m}></NavigateScreen>
                         ))}
                     </VStack>
                     <Text fontSize="sm" my={2}>
                         Message
                     </Text>
                     <VStack space={2}>
-                        {menuItem2.map((m, idx) => (
-                            <VStack key={idx} ml={2}>
-                                <TouchableOpacity onPress={m.onPress}>
-                                    <HStack py={2} alignItems="center">
-                                        <HStack space="lg" alignItems="center">
-                                            {m.icon}
-                                            <Text fontSize="md">{m.title}</Text>
-                                        </HStack>
-                                        <Center position="absolute" h="100%" right={0}>
-                                            <Icon as={<FontAwesome />} name="chevron-right"></Icon>
-                                        </Center>
-                                    </HStack>
-                                </TouchableOpacity>
-                            </VStack>
+                        {menuItem2.map((m) => (
+                            <NavigateScreen m={m}></NavigateScreen>
                         ))}
                     </VStack>
                 </VStack>
