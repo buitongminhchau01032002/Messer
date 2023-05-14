@@ -8,7 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { GestureHandlerRootView, PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
-import { Center, HStack, useTheme } from 'native-base';
+import { Center, HStack, Text, useTheme } from 'native-base';
 import { Feather, Ionicons } from '@expo/vector-icons';
 type ContextType = {
     translateX: number;
@@ -17,10 +17,10 @@ type ContextType = {
 type PickupButtonPropsType = {
     onDragStart: Function;
     onDragEnd: Function;
-    isHidden: boolean;
+    isVisible: boolean;
 };
 
-export function HangupButton({onDragStart, onDragEnd, isHidden}:PickupButtonPropsType) {
+export function HangupButton({ onDragStart, onDragEnd, isVisible }: PickupButtonPropsType) {
     const { colors } = useTheme();
 
     const translateX = useSharedValue(0);
@@ -34,6 +34,9 @@ export function HangupButton({onDragStart, onDragEnd, isHidden}:PickupButtonProp
             translateX.value = event.translationX + context.translateX;
             if (translateX.value > 0) {
                 translateX.value = 0;
+            }
+            if (translateX.value < -260) {
+                translateX.value = -260;
             }
         },
         onEnd: () => {
@@ -55,11 +58,18 @@ export function HangupButton({onDragStart, onDragEnd, isHidden}:PickupButtonProp
         <GestureHandlerRootView>
             <PanGestureHandler onGestureEvent={panGestureEvent}>
                 <Animated.View style={[rStyle]}>
-                    <HStack alignItems="center" space="1" opacity={isHidden ? 100: 0}>
-                        <Feather name="chevrons-left" size={24} color={colors.primary[900]} />
-                        <Center size={60} bg="primary.900" rounded="full" shadow="3">
+                    <HStack alignItems="center" space="1">
+
+                        {!isVisible ? <Center size={60} bg="green.900" rounded="full" shadow="3" opacity={0.5}>
                             <Ionicons name="call-outline" size={28} color="white" />
-                        </Center>
+                        </Center> :
+                            <>
+                                <Feather name="chevrons-left" size={24} color={colors.primary[900]} />
+                                <Center size={60} bg="primary.900" rounded="full" shadow="3">
+                                    <Ionicons name="call-outline" size={28} color="white" style={{ transform: [{ scaleX: -1 }] }} />
+                                </Center>
+                            </>
+                        }
                     </HStack>
                 </Animated.View>
             </PanGestureHandler>

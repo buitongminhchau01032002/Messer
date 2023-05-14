@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Box, Center, HStack, Image, Text, VStack, useTheme } from 'native-base';
 import { runOnJS } from 'react-native-reanimated';
 import { RootStackScreenProps } from 'types';
@@ -17,25 +17,27 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
         });
     }, [props.navigation]);
 
-    function handleOnPickupButtonDrag() {
+
+    const handleOnPickupButtonDrag = useCallback(() => {
         'worklet';
         runOnJS(setPickupButtonDragging)(true);
-    }
+    }, [])
 
-    function handleOnPickupButtonDragEnd() {
+
+    const handleOnPickupButtonDragEnd = useCallback(() => {
         'worklet';
         runOnJS(setPickupButtonDragging)(false);
-    }
+    }, [])
 
-    function handleOnHangupButtonDrag() {
+    const handleOnHangupButtonDrag = useCallback(() => {
         'worklet';
         runOnJS(setHangupButtonDragging)(true);
-    }
+    }, [])
 
-    function handleOnHangupButtonDragEnd() {
+    const handleOnHangupButtonDragEnd = useCallback(() => {
         'worklet';
         runOnJS(setHangupButtonDragging)(false);
-    }
+    }, [])
 
     return (
         <Box position="relative" flex={1}>
@@ -59,20 +61,20 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
                     </Text>
                 </Box>
                 <HStack
-                    px="2"
                     alignItems="center"
                     justifyContent="space-between"
-                    bg={(pickupButtonDragging || hangupButtonDragging) ? 'gray.200' : 'transparent'}
+                    style={{ width: 320 }}
+                // bg={(pickupButtonDragging || hangupButtonDragging) ? 'gray.200' : 'transparent'}
                 >
                     <PickupButton
                         onDragStart={handleOnPickupButtonDrag}
                         onDragEnd={handleOnPickupButtonDragEnd}
-                        isHidden={!hangupButtonDragging}
+                        isVisible={!hangupButtonDragging}
                     />
                     <HangupButton
                         onDragStart={handleOnHangupButtonDrag}
                         onDragEnd={handleOnHangupButtonDragEnd}
-                        isHidden={!pickupButtonDragging}
+                        isVisible={!pickupButtonDragging}
                     />
                 </HStack>
             </VStack>
