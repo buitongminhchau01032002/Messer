@@ -10,8 +10,9 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { GestureHandlerRootView, PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
-import { Center, HStack, Text, useTheme } from 'native-base';
+import { Center, HStack, IconButton, Text, useTheme } from 'native-base';
 import { Feather, Ionicons } from '@expo/vector-icons';
+import { PhoneIcon, PhoneOffIcon } from 'components/Icons/Light';
 type ContextType = {
     translateX: number;
 };
@@ -43,7 +44,7 @@ export function PickupButton({ onDragStart, onDragEnd, isVisible }: PickupButton
         },
         onEnd: () => {
             translateX.value = withSpring(0);
-            onDragEnd()
+            onDragEnd();
         },
     });
     const rStyle = useAnimatedStyle(() => {
@@ -59,15 +60,27 @@ export function PickupButton({ onDragStart, onDragEnd, isVisible }: PickupButton
         <GestureHandlerRootView>
             <PanGestureHandler onGestureEvent={panGestureEvent}>
                 <Animated.View style={[rStyle]}>
-                    <HStack alignItems="center" space="1" >
-                        {!isVisible ? <Center size={60} bg="primary.900" rounded="full" shadow="3" opacity={0.5}>
-                            <Ionicons name="call-outline" size={28} color="white" style={{ transform: [{ scaleX: -1 }] }} />
-                        </Center> : <>
-                            <Center size={60} bg="green.900" rounded="full" shadow="3">
-                                <Ionicons name="call-outline" size={28} color="white" />
-                            </Center>
-                            <Feather name="chevrons-right" size={24} color={colors.green[900]} />
-                        </>}
+                    <HStack alignItems="center" space="1">
+                        {!isVisible ? (
+                            <IconButton
+                                size={60}
+                                bg="primary.900"
+                                rounded="full"
+                                opacity={0.5}
+                                icon={<PhoneOffIcon size="lg" color="white" />}
+                            />
+                        ) : (
+                            <>
+                                <IconButton
+                                    size={60}
+                                    bg="green.900"
+                                    rounded="full"
+                                    disabled
+                                    icon={<PhoneIcon size="lg" color="white" />}
+                                />
+                                <Feather name="chevrons-right" size={24} color={colors.green[900]} />
+                            </>
+                        )}
                     </HStack>
                 </Animated.View>
             </PanGestureHandler>

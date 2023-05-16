@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Center, HStack, Image, NativeBaseProvider, Text, VStack, useTheme } from 'native-base';
+import { Box, Center, HStack, IconButton, Image, NativeBaseProvider, Text, VStack, useTheme } from 'native-base';
 import { RootStackScreenProps } from 'types';
 import { RootNavigatekey } from 'navigation/navigationKey';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { Pressable } from 'react-native';
 import { RemoteVideo } from './components/RemoteVideo';
+import { MicIcon, MicOffIcon, PhoneIcon } from 'components/Icons/Light';
 
 export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Calling>) => {
     const { colors } = useTheme();
@@ -17,7 +18,8 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     }, [props.navigation]);
 
     function handleToggleMic() {
-        setIsOnMic(!isOnMic)
+        console.log('sadfasdf');
+        setIsOnMic(!isOnMic);
     }
 
     return (
@@ -34,7 +36,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
                 />
             </Box>
             <RemoteVideo />
-            <VStack px="7" pt="24" pb="24" justifyContent="space-between" h="full">
+            <VStack px="7" pt="24" pb="20" justifyContent="space-between" h="full">
                 <Box>
                     <Text color="primary.900" fontWeight="bold" fontSize="32">
                         Erika
@@ -42,23 +44,35 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
                 </Box>
                 <HStack alignItems="center" justifyContent="center" space="10">
                     {/* MIC */}
-                    <Pressable onPress={handleToggleMic}>
-                        {isOnMic ? (
-                            <Feather name="mic" size={24} color={colors.white} />
-                        ) : (
-                            <Feather name="mic-off" size={24} color={colors.white} />
-                        )}
-                    </Pressable>
+                    <IconButton
+                        onPress={handleToggleMic}
+                        size={12}
+                        bg="gray:900:alpha.50"
+                        rounded="full"
+                        icon={isOnMic ? <MicIcon size="lg" color="white" /> : <MicOffIcon size="lg" color="white" />}
+                    />
                     {/* HANGUP */}
                     <Pressable>
-                        <Center size="20" rounded="full" justifyContent="center" alignItems="center" bg="primary.900">
-                            <Ionicons name="call-outline" size={30} color="white" />
-                        </Center>
+                        <IconButton
+                            size="20"
+                            rounded="full"
+                            bg="primary.900"
+                            icon={<PhoneIcon size="xl" color="white" />}
+                        />
                     </Pressable>
                     {/* VOLUME */}
-                    <Pressable>
-                        <Feather name="volume" size={24} color={colors.white} />
-                    </Pressable>
+                    <IconButton
+                        size={12}
+                        bg="gray:900:alpha.50"
+                        rounded="full"
+                        icon={
+                            isOnMic ? (
+                                <Feather name="volume" size={24} color={colors.white} />
+                            ) : (
+                                <Feather name="volume" size={24} color={colors.white} />
+                            )
+                        }
+                    />
                 </HStack>
             </VStack>
         </Box>

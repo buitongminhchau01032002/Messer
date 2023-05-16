@@ -45,8 +45,8 @@ export function RemoteVideo({}: RemoteVideoPropsType) {
             if (translateY.value < 0) {
                 translateY.value = 0;
             }
-            if (translateY.value > SCREEN_DIMENSION.height - 200 - 40) {
-                translateY.value = SCREEN_DIMENSION.height - 200 - 40;
+            if (translateY.value > SCREEN_DIMENSION.height - 200 - 144 - 40) {
+                translateY.value = SCREEN_DIMENSION.height - 200 - 144 - 40;
             }
         },
         onEnd: () => {
@@ -68,7 +68,7 @@ export function RemoteVideo({}: RemoteVideoPropsType) {
         };
     });
     return (
-        <GestureHandlerRootView style={{ flex: 1, width: '100%', height: '100%', position: 'absolute', zIndex: 99999 }}>
+        <GestureHandlerRootView style={{ width: '100%', top: 0, bottom: 144, position: 'absolute', zIndex: 99999 }}>
             <PanGestureHandler onGestureEvent={panGestureEvent}>
                 <Animated.View style={[rStyle]}>
                     <Box w={132} h={200} position="absolute" top="10" right="4">
