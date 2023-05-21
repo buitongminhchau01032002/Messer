@@ -21,7 +21,7 @@ export const LoginScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignIn
         navigation.setOptions({
             headerRight: (props) =>
                 <Text color="blue.900"
-                    onPress={() => navigation.navigate(AuthNavigationKey.OTP)}>
+                    onPress={() => navigation.replace(AuthNavigationKey.SignUp)}>
                     Sign up
                 </Text>,
             title: '',
