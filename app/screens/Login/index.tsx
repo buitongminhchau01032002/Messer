@@ -21,7 +21,7 @@ export const LoginScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignIn
         navigation.setOptions({
             headerRight: (props) =>
                 <Text color="blue.900"
-                    onPress={() => navigation.navigate(AuthNavigationKey.SignUp)}>
+                    onPress={() => navigation.navigate(AuthNavigationKey.OTP)}>
                     Sign up
                 </Text>,
             title: '',
@@ -43,7 +43,7 @@ export const LoginScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignIn
             .required("Email cannot be empty!"),
 
         password: Yup.string()
-            .min(6, "Minimum 6 characters")
+            .equals(['123456'], "Incorrect password")
             .required("Password cannot be empty!"),
     });
     return (
@@ -79,7 +79,7 @@ export const LoginScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignIn
                                         onChangeText={(text) => setFieldValue("email", text)}
                                         placeholder=" Email"
                                         size='lg'
-                                        color="primary.900"
+                                        color="blue.900"
                                         InputLeftElement={
                                             <Icon
                                                 as={<MaterialIcons name="mail" />}
@@ -90,14 +90,14 @@ export const LoginScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignIn
                                         } />
                                     <FormControl.ErrorMessage>{errors.email}</FormControl.ErrorMessage>
                                 </FormControl>
-                                <FormControl isInvalid={Boolean(errors.email)} h={90}>
+                                <FormControl isInvalid={Boolean(errors.password)} h={90}>
                                     <FormControl.Label>Password</FormControl.Label>
                                     <Input
                                         value={values.password}
                                         onChangeText={(text) => setFieldValue("password", text)}
                                         placeholder="Password"
                                         size='lg'
-                                        color="primary.900"
+                                        color="blue.900"
                                         InputLeftElement={
                                             <Icon
                                                 as={<MaterialIcons name="lock" />}

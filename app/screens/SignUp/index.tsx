@@ -15,6 +15,12 @@ export const SignUpScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignU
     const { navigation, route } = props
     const [isValidateOnChange, setIsValidateOnChange] = useState(false)
 
+
+    function handleSubmitForm(values : object) {
+        navigation.navigate(AuthNavigationKey.OTP)
+    }
+    
+
     useEffect(() => {
         navigation.setOptions({
             title: '',
@@ -50,13 +56,97 @@ export const SignUpScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignU
             .required("Password cannot be empty!"),
     });
     return (
-        <Box flex={1} w="100%" bg="white" alignItems="center">
+      <Box flex={1} w="100%" bg="white" alignItems="center">
             <Box safeArea p="2" w="90%" maxW="290">
                 <Heading size="xl" fontWeight="bold" color="blue.900" _dark={{
                     color: "warmGray.50"
                 }}>
-                   OTP Sreen
+                    Sign Up
                 </Heading>
+              
+
+
+                <Formik
+                    initialValues={initFormValue}
+                    validationSchema={SignInSchema}
+                    onSubmit={values => handleSubmitForm(values)}
+                    validateOnChange={isValidateOnChange}
+                >
+                    {({ handleSubmit, errors, values, validateForm, setFieldValue }) => (
+                        <VStack h={400}>
+
+                            <VStack space={4} mt="5" flex={1}>
+                            <FormControl isInvalid={Boolean(errors.phoneNumber)} h={90}>
+                                    <FormControl.Label>Phone Number</FormControl.Label>
+                                    <Input
+                                        autoCapitalize="none"
+                                        value={values.phoneNumber}
+                                        onChangeText={(text) => setFieldValue("phoneNumber", text)}
+                                        placeholder="Phone Number"
+                                        size='lg'
+                                        color="blue.900"
+                                        InputLeftElement={
+                                            <Icon
+                                                as={<MaterialIcons name="phone" />}
+                                                size={5}
+                                                ml="2"
+                                                color="primary.900"
+                                            />
+                                        } />
+                                    <FormControl.ErrorMessage>{errors.phoneNumber}</FormControl.ErrorMessage>
+                                </FormControl>
+                                <FormControl isInvalid={Boolean(errors.email)} h={90}>
+                                    <FormControl.Label>Email Address</FormControl.Label>
+                                    <Input
+                                        autoCapitalize="none"
+                                        value={values.email}
+                                        onChangeText={(text) => setFieldValue("email", text)}
+                                        placeholder=" Email"
+                                        size='lg'
+                                        color="blue.900"
+                                        InputLeftElement={
+                                            <Icon
+                                                as={<MaterialIcons name="mail" />}
+                                                size={5}
+                                                ml="2"
+                                                color="primary.900"
+                                            />
+                                        } />
+                                    <FormControl.ErrorMessage>{errors.email}</FormControl.ErrorMessage>
+                                </FormControl>
+                                <FormControl isInvalid={Boolean(errors.password)} h={90}>
+                                    <FormControl.Label>Password</FormControl.Label>
+                                    <Input
+                                        value={values.password}
+                                        onChangeText={(text) => setFieldValue("password", text)}
+                                        placeholder="Password"
+                                        size='lg'
+                                        color="blue.900"
+                                        InputLeftElement={
+                                            <Icon
+                                                as={<MaterialIcons name="lock" />}
+                                                size={5}
+                                                ml="2"
+                                                color="primary.900"
+                                            />
+                                        }
+                                        type={show ? "text" : "password"} InputRightElement={<Pressable onPress={() => setShow(!show)}>
+                                            <Icon as={<MaterialIcons name={show ? "visibility" : "visibility-off"} />} size={5} mr="2" color="primary.900" />
+                                        </Pressable>}
+                                    />
+                                    <FormControl.ErrorMessage>{errors.password}</FormControl.ErrorMessage>
+                                </FormControl>
+                            </VStack>
+                            <CButton onPress={() => {
+                                setIsValidateOnChange(true)
+                                validateForm().then(() =>  handleSubmit() )
+                            }}>
+                                Sign up
+                            </CButton>
+                        </VStack>
+
+                    )}
+                </Formik>
 
 
             </Box>
