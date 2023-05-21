@@ -48,7 +48,7 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                 <HStack
                     space={2}
                 >
-                    <TouchableOpacity onPress={() => navigation.navigate(RootNavigatekey.Information)}>
+                    <TouchableOpacity onPress={() => navigation.navigate(RootNavigatekey.InformationQR)}>
                         <Icon as={<FontAwesome />} name="hashtag" size={4} color={"blacks"} mr={2}></Icon>
                     </TouchableOpacity>
                     <Icon as={<FontAwesome />} name="list" size={4} color={"blacks"} mr={5}></Icon>
