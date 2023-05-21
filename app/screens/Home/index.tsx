@@ -44,11 +44,7 @@ export const HomeScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.H
     const navigate = useNavigation();
     return (
         <Box h="full">
-            <AppBar
-                title={t('screen-title.home')}
-                bg="primary.900"
-                onPressDefaultLeftButton={() => props.navigation.openDrawer()}
-            />
+            
             <Box p={APP_PADDING} w="full" flex={1}>
                 <Text>Welcome to Home</Text>
                 <Box h={20} bg='primary.100' style={{

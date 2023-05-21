@@ -41,8 +41,7 @@ export default function AppTabsNavigator() {
                 name={AppTabsNavigationKey.Message}
                 component={MessageScreen}
                 options={{
-                    headerShadowVisible: true,
-                    title: AppTabsNavigationKey.Message,
+                    title: 'Channels',
                     tabBarIcon: () => <MessageCircleIcon size="md" color="primary.900" />,
                 }}
             />

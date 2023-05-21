@@ -14,3 +14,5 @@ export { BellOffIcon } from './BellOff';
 export { LogoutIcon } from './Logout';
 export { PhoneOffIcon } from './PhoneOff';
 export { MicOffIcon } from './MicOff';
+export { SearchIcon } from './Search';
+export { PlusIcon } from './Plus';
