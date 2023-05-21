@@ -29,6 +29,8 @@ import { ComingCallScreen } from 'screens/ComingCall';
 import { CallingScreen } from 'screens/Calling';
 import { CallWaitingScreen } from 'screens/CallWaiting';
 import { SearchScreen } from 'screens/Search';
+import { InformationScreen } from "screens/Information";
+import { InformationScreenQR } from "screens/InformationQR";
 
 export default function Navigation() {
     // hooks
@@ -88,6 +90,8 @@ function RootNavigator() {
                         options={{ headerShown: false }}
                     />
                     <Stack.Screen name={RootNavigatekey.Wallet} component={WalletScreen} />
+                    <Stack.Screen name={RootNavigatekey.Information} component={InformationScreen} />
+                    <Stack.Screen name={RootNavigatekey.InformationQR} component={InformationScreenQR} />
                 </>
             )}
             <Stack.Group navigationKey={isLogin ? 'user' : 'guest'}>

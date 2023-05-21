@@ -28,9 +28,9 @@ import {
 } from 'native-base';
 import { AppTabsNavigationKey, AuthNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import { TouchableOpacity } from 'react-native';
-import { AppTabsStackScreenProps } from 'types';
+import { AppTabsStackScreenProps, RootStackScreenProps } from 'types';
 import { FontAwesome } from '@expo/vector-icons';
-import { NavigateScreen } from 'components/Navigate';
+
 type MenuItem = {
     title: string;
     icon: React.ReactNode;
@@ -38,7 +38,7 @@ type MenuItem = {
     onPress?: () => void;
 };
 
-export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.Account>) => {
+export const InformationScreenQR = (props: RootStackScreenProps<RootNavigatekey.InformationQR>) => {
     // navigation
     const { navigation } = props;
     // hooks
@@ -48,9 +48,7 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                 <HStack
                     space={2}
                 >
-                    <TouchableOpacity onPress={() => navigation.navigate(RootNavigatekey.Information)}>
-                        <Icon as={<FontAwesome />} name="hashtag" size={4} color={"blacks"} mr={2}></Icon>
-                    </TouchableOpacity>
+                    <Icon as={<FontAwesome />} name="hashtag" size={4} color={"blacks"} mr={2}></Icon>
                     <Icon as={<FontAwesome />} name="list" size={4} color={"blacks"} mr={5}></Icon>
                 </HStack>
             ),
@@ -100,38 +98,64 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
             <ScrollView>
                 <VStack space={2}>
                     <VStack space={2} mt={5} mb={10} >
-                        <TouchableOpacity>
-                            <HStack space={2}>
-                                <Avatar size={120} bg="primary.900" ml={5} source={{
-                                    uri: "https://images.unsplash.com/photo-1510771463146-e89e6e86560e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=627&q=80"
-                                }}>
+                        <Center>
 
-                                    Sa Đam
-                                </Avatar>
-                                <VStack space={1} ml={2} justifyContent={'center'}>
-                                    <Text bold fontSize="md">
-                                        Dennis
-                                    </Text>
-                                    <Text color="gray.400">hello@depper.com</Text>
-                                    <Text color="gray.400">+123 456789</Text>
+                            <TouchableOpacity>
+                                <VStack space={2}>
+                                    <Avatar size={200} bg="primary.900" ml={5}  source={{
+                                        uri: "https://images.unsplash.com/photo-1510771463146-e89e6e86560e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=627&q=80"
+                                    }}>
+
+                                        Sa Đam
+                                    </Avatar>
+                                    <VStack space={2} ml={2} alignItems='center'>
+                                        <Text bold fontSize={26}>
+                                            Dennis
+                                        </Text>
+                                        <Text color="gray.400" fontSize={16}>hello@depper.com</Text>
+                                    </VStack>
                                 </VStack>
-                            </HStack>
-                        </TouchableOpacity>
+                            </TouchableOpacity>
+                        </Center>
                     </VStack>
                     <Text fontSize="sm" my={2}>
                         Setting
                     </Text>
                     <VStack space={2}>
-                        {menuItem.map((m) => (
-                            <NavigateScreen m={m}></NavigateScreen>
+                        {menuItem.map((m, idx) => (
+                            <VStack key={idx} ml={2}>
+                                <TouchableOpacity onPress={m.onPress}>
+                                    <HStack py={2} alignItems="center">
+                                        <HStack space="lg" alignItems="center">
+                                            {m.icon}
+                                            <Text fontSize="md">{m.title}</Text>
+                                        </HStack>
+                                        <Center position="absolute" h="100%" right={0}>
+                                            <Icon as={<FontAwesome />} name="chevron-right"></Icon>
+                                        </Center>
+                                    </HStack>
+                                </TouchableOpacity>
+                            </VStack>
                         ))}
                     </VStack>
                     <Text fontSize="sm" my={2}>
                         Message
                     </Text>
                     <VStack space={2}>
-                        {menuItem2.map((m) => (
-                            <NavigateScreen m={m}></NavigateScreen>
+                        {menuItem2.map((m, idx) => (
+                            <VStack key={idx} ml={2}>
+                                <TouchableOpacity onPress={m.onPress}>
+                                    <HStack py={2} alignItems="center">
+                                        <HStack space="lg" alignItems="center">
+                                            {m.icon}
+                                            <Text fontSize="md">{m.title}</Text>
+                                        </HStack>
+                                        <Center position="absolute" h="100%" right={0}>
+                                            <Icon as={<FontAwesome />} name="chevron-right"></Icon>
+                                        </Center>
+                                    </HStack>
+                                </TouchableOpacity>
+                            </VStack>
                         ))}
                     </VStack>
                 </VStack>
