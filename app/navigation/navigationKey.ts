@@ -1,6 +1,7 @@
 export enum AuthNavigationKey {
     SignIn = 'SignIn',
     SignUp = 'SignUp',
+    OTP = 'OTP',
 }
 
 export enum AppTabsNavigationKey {
