@@ -51,7 +51,10 @@ export type AppTabsStackScreenProps<Screen extends keyof AppTabsStackParamList> 
     BottomTabScreenProps<AppTabsStackParamList, Screen>,
     NativeStackScreenProps<RootStackParamList>>;
 
-export type AuthStackScreenProps<T extends keyof AuthStackParamList> = NativeStackScreenProps<AuthStackParamList, T>;
+// export type AuthStackScreenProps<T extends keyof AuthStackParamList> = NativeStackScreenProps<AuthStackParamList, T>;
+export type AuthStackScreenProps<T extends keyof AuthStackParamList> = CompositeScreenProps<
+NativeStackScreenProps<AuthStackParamList, T>,
+NativeStackScreenProps<RootStackParamList>>;
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<
     RootStackParamList,

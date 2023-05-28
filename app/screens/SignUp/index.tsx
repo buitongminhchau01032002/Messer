@@ -8,16 +8,25 @@ import { Formik } from "formik";
 import { UserType } from "models/User";
 import { Platform, Pressable } from "react-native";
 import * as Yup from "yup";
+import { RootNavigatekey } from "navigation/navigationKey";
+import { useAppDispatch } from "hooks/index";
+import { reLogin } from "slice/auth";
 
 
 export const SignUpScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignUp>) => {
+
+    // hooks
+    const dispatch = useAppDispatch();
 
     const { navigation, route } = props
     const [isValidateOnChange, setIsValidateOnChange] = useState(false)
 
 
     function handleSubmitForm(values : object) {
-        navigation.navigate(AuthNavigationKey.OTP)
+        // call api login => success 
+        // dispatch(reLogin({token: ''}));
+
+        navigation.navigate(RootNavigatekey.Information)
     }
     
 

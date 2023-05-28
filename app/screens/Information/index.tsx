@@ -26,14 +26,19 @@ import {
     Image,
     ScrollView,
     View,
+    FormControl,
+    Input,
 } from 'native-base';
 import { AppTabsNavigationKey, AuthNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
-import { TouchableOpacity } from 'react-native';
+import { Platform, TouchableOpacity } from 'react-native';
 import { AppTabsStackScreenProps, RootStackScreenProps } from 'types';
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { block } from 'react-native-reanimated';
 import { localImages } from "../../constants/Images";
 import * as ImagePicker from 'expo-image-picker';
+import * as Yup from "yup";
+import { Formik } from 'formik';
+import { CButton } from 'components/Button';
 
 type MenuItem = {
     title: string;
@@ -59,40 +64,25 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
         });
     }, [props.navigation]);
 
-    const menuItem: MenuItem[] = [
-        {
-            title: 'Nofication',
-            icon: <Icon as={<FontAwesome />} name="bell" size="xl" color={"primary.900"} />,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
-        },
-        {
-            title: 'Pricacy and Security',
-            icon: <Icon as={<FontAwesome />} name="shield" size="xl" color={"primary.900"} />,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
 
-        },
-        {
-            title: 'Theme',
-            icon: <Icon as={<FontAwesome />} name="file" size="xl" color={"primary.900"}></Icon>,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
+    const [isValidateOnChange, setIsValidateOnChange] = useState(false)
+    const initFormValue = {
+        fullName: "",
+        gender: "",
+        platform: Platform.OS,
+    };
+    // schema validation
+    const SignInSchema = Yup.object({
+        fullName: Yup.string()
+            .required("Full name cannot be empty!"),
+        gender: Yup.string()
+            .required("Please choose your gender!"),
 
-        },
-        {
-            title: 'Language',
-            icon: <Icon as={<FontAwesome />} name="globe" size="xl" color={"primary.900"}></Icon>,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
+    });
 
-        }
-    ];
-    const menuItem2: MenuItem[] = [
-        {
-            title: 'Direct share',
-            icon: <Icon as={<FontAwesome />} name="share" size="xl" color={"primary.900"}></Icon>,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
-
-
-        },
-    ];
+    function handleSuccessSignIn(values: object) {
+        navigation.replace(RootNavigatekey.Auth, {screen: AuthNavigationKey.SignIn});
+    }
 
     const [image, setImage] = useState('');
 
@@ -134,58 +124,76 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
 
                                         ></Image>
                                     </Center>
-
-
-                                    <VStack space={2} ml={2} alignItems='center'>
+                                </VStack>
+                            </TouchableOpacity>
+                            <VStack space={2} ml={2} alignItems='center'>
                                         <Text bold fontSize={26}>
                                             Dennis
                                         </Text>
                                         <Text color="gray.400" fontSize={16}>hello@depper.com</Text>
                                     </VStack>
-                                </VStack>
-                            </TouchableOpacity>
                         </Center>
                     </VStack>
-                    <Text fontSize="sm" my={2}>
-                        Setting
-                    </Text>
-                    <VStack space={2}>
-                        {menuItem.map((m, idx) => (
-                            <VStack key={idx} ml={2}>
-                                <TouchableOpacity onPress={m.onPress}>
-                                    <HStack py={2} alignItems="center">
-                                        <HStack space="lg" alignItems="center">
-                                            {m.icon}
-                                            <Text fontSize="md">{m.title}</Text>
-                                        </HStack>
-                                        <Center position="absolute" h="100%" right={0}>
-                                            <Icon as={<FontAwesome />} name="chevron-right"></Icon>
-                                        </Center>
-                                    </HStack>
-                                </TouchableOpacity>
+                    <Formik
+                        initialValues={initFormValue}
+                        validationSchema={SignInSchema}
+                        onSubmit={values => handleSuccessSignIn(values)}
+                        validateOnChange={isValidateOnChange}
+                    >
+                        {({ handleSubmit, errors, values, validateForm, setFieldValue }) => (
+                            <VStack h={340}>
+
+                                <VStack space={4} mt="5" flex={1}>
+                                    <FormControl isRequired isInvalid={Boolean(errors.fullName)} h={90}>
+                                        <FormControl.Label>Full name</FormControl.Label>
+                                        <Input
+                                            autoCapitalize="none"
+                                            value={values.fullName}
+                                            onChangeText={(text) => setFieldValue("fullName", text)}
+                                            placeholder="ex: Hoang Tran"
+                                            size='lg'
+                                            color="blue.900"
+
+                                        />
+                                        <FormControl.ErrorMessage>{errors.fullName}</FormControl.ErrorMessage>
+                                    </FormControl>
+                                    <FormControl isRequired isInvalid={Boolean(errors.gender)} h={90}>
+                                        <FormControl.Label>Gender</FormControl.Label>
+                                        {/* <Input
+                                            autoCapitalize="none"
+                                            value={values.gender}
+                                            onChangeText={(text) => setFieldValue("gender", text)}
+                                            placeholder="ex: Hoang Tran"
+                                            size='lg'
+                                            color="blue.900"
+                                            
+                                            /> */}
+                                        <Select minWidth="200" accessibilityLabel="Choose your gender" placeholder="Choose your gender" size='lg'color="blue.900"
+                                        selectedValue={values.gender}
+                                        onValueChange={(text: any) => setFieldValue("gender", text)}
+                                        
+                                         _selectedItem={{
+                                            endIcon: <CheckIcon size={5} />
+                                        }} mt="1">
+                                            <Select.Item label="Male" value="male" />
+                                            <Select.Item label="Female" value="female" />
+                                        </Select>
+                                        <FormControl.ErrorMessage>{errors.gender}</FormControl.ErrorMessage>
+                                    </FormControl>
+
+                                </VStack>
+                                <CButton onPress={() => {
+                                    setIsValidateOnChange(true)
+                                    validateForm().then(() => { handleSubmit()})
+                                }}>
+                                    Sign in
+                                </CButton>
                             </VStack>
-                        ))}
-                    </VStack>
-                    <Text fontSize="sm" my={2}>
-                        Message
-                    </Text>
-                    <VStack space={2}>
-                        {menuItem2.map((m, idx) => (
-                            <VStack key={idx} ml={2}>
-                                <TouchableOpacity onPress={m.onPress}>
-                                    <HStack py={2} alignItems="center">
-                                        <HStack space="lg" alignItems="center">
-                                            {m.icon}
-                                            <Text fontSize="md">{m.title}</Text>
-                                        </HStack>
-                                        <Center position="absolute" h="100%" right={0}>
-                                            <Icon as={<FontAwesome />} name="chevron-right"></Icon>
-                                        </Center>
-                                    </HStack>
-                                </TouchableOpacity>
-                            </VStack>
-                        ))}
-                    </VStack>
+
+                        )}
+                    </Formik>
+
+
                 </VStack>
             </ScrollView>
         </Box >

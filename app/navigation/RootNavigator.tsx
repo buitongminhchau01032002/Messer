@@ -51,7 +51,8 @@ export default function Navigation() {
         await loadingI18nSource();
         // rehydrate
         const token = (await storage.get('token')) ?? '';
-        dispatch(reLogin({ token: token }));
+        // dispatch(reLogin({ token: token }));
+        
         dispatch(
             changeApplicationState({
                 isAppReady: true,
@@ -77,10 +78,10 @@ function RootNavigator() {
     if (!isAppReady) {
         return <IntroScreen />;
     }
-
+    console.log(isLogin)
     return (
         <Stack.Navigator>
-            {isLogin ? (
+            {!isLogin ? (
                 <Stack.Screen name={RootNavigatekey.Auth} component={AuthNavigator} options={{ headerShown: false }} />
             ) : (
                 <>
@@ -90,11 +91,11 @@ function RootNavigator() {
                         options={{ headerShown: false }}
                     />
                     <Stack.Screen name={RootNavigatekey.Wallet} component={WalletScreen} />
-                    <Stack.Screen name={RootNavigatekey.Information} component={InformationScreen} />
                     <Stack.Screen name={RootNavigatekey.InformationQR} component={InformationScreenQR} />
                 </>
             )}
             <Stack.Group navigationKey={isLogin ? 'user' : 'guest'}>
+            <Stack.Screen name={RootNavigatekey.Information} component={InformationScreen} />
                 <Stack.Screen
                     name={RootNavigatekey.MessageDetail}
                     component={MessageDetailScreen}

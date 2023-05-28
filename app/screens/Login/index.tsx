@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, Center, FormControl, HStack, Heading, Input, Link, VStack, Text, Icon } from "native-base";
 import { CButton } from "components/Button";
 import { AppTabsStackScreenProps, AuthStackScreenProps } from "types";
-import { AuthNavigationKey } from "navigation/navigationKey";
+import { AuthNavigationKey, RootNavigatekey } from "navigation/navigationKey";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { Formik } from "formik";
 import { UserType } from "models/User";
@@ -21,7 +21,11 @@ export const LoginScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignIn
         navigation.setOptions({
             headerRight: (props) =>
                 <Text color="blue.900"
-                    onPress={() => navigation.replace(AuthNavigationKey.SignUp)}>
+                    // onPress={() => navigation.replace(AuthNavigationKey.SignUp)}
+                    onPress={() => navigation.replace(RootNavigatekey.Information)}
+                    >
+
+                    
                     Sign up
                 </Text>,
             title: '',
