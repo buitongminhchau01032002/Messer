@@ -21,8 +21,8 @@ export const LoginScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignIn
         navigation.setOptions({
             headerRight: (props) =>
                 <Text color="blue.900"
-                    // onPress={() => navigation.replace(AuthNavigationKey.SignUp)}
-                    onPress={() => navigation.replace(RootNavigatekey.Information)}
+                     onPress={() => navigation.navigate(AuthNavigationKey.SignUp)}
+                   // onPress={() => navigation.replace(RootNavigatekey.Information)}
                     >
 
                     
