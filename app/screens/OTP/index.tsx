@@ -9,7 +9,7 @@ import { Formik } from "formik";
 import { UserType } from "models/User";
 import { Platform, Pressable } from "react-native";
 import * as Yup from "yup";
-import OTPInputView from '@twotalltotems/react-native-otp-input'
+//import OTPInputView from '@twotalltotems/react-native-otp-input'
 
 
 export const OTPScreen = (props: AuthStackScreenProps<AuthNavigationKey.OTP>) => {
@@ -60,7 +60,7 @@ export const OTPScreen = (props: AuthStackScreenProps<AuthNavigationKey.OTP>) =>
                 <VStack h={220}>
                     <VStack space={4}  flex={1} alignItems={"center"}>
                         
-                        <OTPInputView
+                        {/* <OTPInputView
                            selectionColor="#3498DB"
                             style={{ width: '80%' }}
                             pinCount={4}
@@ -74,7 +74,7 @@ export const OTPScreen = (props: AuthStackScreenProps<AuthNavigationKey.OTP>) =>
                             onCodeFilled={(code => {
                                 console.log(`Code is ${code}, you are good to go!`)
                             })}
-                        />
+                        /> */}
                     </VStack>
                     <CButton >
                         Next
