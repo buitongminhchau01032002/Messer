@@ -103,6 +103,8 @@ import {
     TrashIcon,
     VolumeMuteIcon,
 } from 'components/Icons/Light';
+import { db } from 'config/firebase';
+import { addDoc, collection } from 'firebase/firestore/lite';
 
 const rightSwipeActions = () => {
     return (
@@ -182,7 +184,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     <TouchableOpacity onPress={() => navigation.navigate(RootNavigatekey.Search)}>
                         <SearchIcon size="md" color="primary.900" />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => {}}>
+                    <TouchableOpacity onPress={() => { }}>
                         <PlusIcon size="md" color="primary.900" />
                     </TouchableOpacity>
                 </HStack>
@@ -198,31 +200,45 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                         <HStack space={4}>
                             {userList.map((item, idx) => (
-                                <VStack width={16} space={1} alignItems="center" ml={idx === 0 ? 4 : 0}>
-                                    <Center width={16} height={16} position="relative">
-                                        <Image
-                                            borderRadius={100}
-                                            alt="..."
-                                            width="full"
-                                            height="full"
-                                            source={{ uri: item.avt }}
-                                        ></Image>
-                                        <Box
-                                            borderWidth={2}
-                                            borderColor="white"
-                                            borderRadius={100}
-                                            position="absolute"
-                                            width={4}
-                                            height={4}
-                                            bg="green.900"
-                                            bottom={0}
-                                            right={0}
-                                        ></Box>
-                                    </Center>
-                                    <Text textAlign="center" fontSize="xs" isTruncated noOfLines={1}>
-                                        {item.name}
-                                    </Text>
-                                </VStack>
+                                <TouchableOpacity onPress={async () => {
+                                    try {
+                                        const docRef = await addDoc(collection(db, "users"), {
+                                            first: "Ada",
+                                            last: "Lovelace",
+                                            born: 1815
+                                        });
+                                        console.log("Document written with ID: ", docRef.id);
+                                    } catch (e) {
+                                        console.error("Error adding document: ", e);
+                                    }
+                                }}>
+                                    <VStack width={16} space={1} alignItems="center" ml={idx === 0 ? 4 : 0}>
+                                        <Center width={16} height={16} position="relative">
+                                            <Image
+                                                borderRadius={100}
+                                                alt="..."
+                                                width="full"
+                                                height="full"
+                                                source={{ uri: item.avt }}
+                                            ></Image>
+                                            <Box
+                                                borderWidth={2}
+                                                borderColor="white"
+                                                borderRadius={100}
+                                                position="absolute"
+                                                width={4}
+                                                height={4}
+                                                bg="green.900"
+                                                bottom={0}
+                                                right={0}
+                                            ></Box>
+                                        </Center>
+                                        <Text textAlign="center" fontSize="xs" isTruncated noOfLines={1}>
+                                            {item.name}
+                                        </Text>
+                                    </VStack>
+                                </TouchableOpacity>
+
                             ))}
                         </HStack>
                     </ScrollView>
