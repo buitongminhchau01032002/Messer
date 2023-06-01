@@ -1,5 +1,5 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs } from 'firebase/firestore/lite';
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: 'AIzaSyDvKaKvCacVSBONANqPjVA6cv7kNFwEq1k',
@@ -9,8 +9,12 @@ const firebaseConfig = {
     messagingSenderId: '805121390882',
     appId: '1:805121390882:web:300a309b7c1a4a62b04d7b',
 };
-
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+
+// Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(app);
 
-export { db };
+
+export { db  };

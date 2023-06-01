@@ -25,6 +25,12 @@ import { MessageItem } from './components/MessageItem';
 import { EvilIcons, FontAwesome, FontAwesome5, Ionicons, Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Animated, TouchableHighlight, StyleSheet, TouchableOpacity } from 'react-native';
 import { FlatList, GestureHandlerRootView, RectButton } from 'react-native-gesture-handler';
+import { addDoc, collection, getDoc, onSnapshot, query, doc, getDocs, where, or, documentId, orderBy, Timestamp, updateDoc, arrayUnion } from 'firebase/firestore';
+import { db } from 'config/firebase';
+import TimeAgo from 'javascript-time-ago'
+import en from 'javascript-time-ago/locale/en'
+
+const currentUserId = "vSiv500SKpWqxPLOjYVY";
 
 
 const userList = [
@@ -90,6 +96,7 @@ const userList = [
     },
 ];
 
+
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { APP_PADDING } from 'app/constants/Layout';
 import {
@@ -103,72 +110,39 @@ import {
     TrashIcon,
     VolumeMuteIcon,
 } from 'components/Icons/Light';
-import { db } from 'config/firebase';
-import { addDoc, collection } from 'firebase/firestore/lite';
+import { ListItem } from './components/ListItem';
 
-const rightSwipeActions = () => {
-    return (
-        <HStack px={4} space={4} alignItems="center" bg="black" justifyContent="center">
-            <IconButton borderRadius={100} bg="gray.700" icon={<LogoutIcon color="white" size="sm" />} />
-            <IconButton borderRadius={100} bg="gray.700" icon={<BellOffIcon color="white" size="sm" />} />
-            <IconButton borderRadius={100} bg="gray.700" icon={<LinkIcon color="white" size="sm" />} />
-            <IconButton borderRadius={100} bg="gray.700" icon={<TrashIcon color="primary.900" size="sm" />} />
-        </HStack>
-    );
-};
 
-const ListItem = (item: { name: string; avt: string; isRead: boolean; onPress?: () => void }) => (
-    <GestureHandlerRootView>
-        <Swipeable renderRightActions={rightSwipeActions} renderLeftActions={() => <View />}>
-            <Pressable onPress={item.onPress}>
-                <HStack space={4} pl={4} bg="white">
-                    <Image
-                        alt="..."
-                        source={{ uri: item.avt }}
-                        style={{ width: 64, height: 64 }}
-                        borderRadius={100}
-                    ></Image>
-                    <VStack flex={1} space={0} justifyContent="center">
-                        <HStack alignItems={'center'} space={2}>
-                            <Text
-                                bold={item.isRead ? false : true}
-                                fontSize="md"
-                                color={item.isRead ? 'gray.500' : 'black'}
-                            >
-                                {item.name}
-                            </Text>
-                            {!item.isRead ? (
-                                <Box
-                                    borderWidth={2}
-                                    borderColor="white"
-                                    borderRadius={100}
-                                    width={4}
-                                    height={4}
-                                    bg="blue.500"
-                                ></Box>
-                            ) : (
-                                <></>
-                            )}
-                            <Box></Box>
-                        </HStack>
-                        <Text isTruncated color={item.isRead ? 'gray.500' : 'black'} bold={item.isRead ? false : true}>
-                            {item.avt}
-                        </Text>
-                    </VStack>
-                    <VStack justifyContent="center" space={2} mx={4} alignItems="center">
-                        <EllipsisIcon color="primary.900" size="sm" />
-                        <Text color="blue.900">3m</Text>
-                    </VStack>
-                </HStack>
-            </Pressable>
-        </Swipeable>
-    </GestureHandlerRootView>
-);
+
+
 export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.Message>) => {
     const { navigation } = props;
     const { colors } = useTheme();
+    const [messes, setMesses] = useState([])
 
-    const [messes, setMesses] = useState(userList)
+    useEffect(() => {
+
+        const fetchRoomData = async () => {
+            const q = query(collection(db, "SingleRoom"), or(where('userId1', '==', currentUserId), where('userId2', '==', currentUserId)));
+            const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                const messes = [];
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    messes.push({
+                        id: doc.id,
+                        ...data
+                    });
+                });
+                setMesses(messes)
+                console.log("changeeeeeee")
+            });
+        }
+
+        fetchRoomData().catch(console.error)
+    }, []);
+
+
+
     useEffect(() => {
         props.navigation.setOptions({
             headerTitle: 'Channels',
@@ -202,12 +176,27 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                             {userList.map((item, idx) => (
                                 <TouchableOpacity onPress={async () => {
                                     try {
-                                        const docRef = await addDoc(collection(db, "users"), {
-                                            first: "Ada",
-                                            last: "Lovelace",
-                                            born: 1815
+                                        const room = await addDoc(collection(db, "SingleRoom"), {
+                                            userId1: "1",
+                                            userId2: "2",
+                                            pinMessage: [],
+                                            unnotification: [],
+                                            messages: [],
+                                            imageStore: [],
+                                            linkStore: [],
+                                            lastMessage: "3"
                                         });
-                                        console.log("Document written with ID: ", docRef.id);
+                                        console.log("Document written with ID: ", room.id);
+
+                                        const message = await addDoc(collection(db, "Message"), {
+                                            type: "text",
+                                            content: "2",
+                                            files: [],
+                                            sender: "1"
+                                        });
+                                        console.log("Document written with ID: ", message.id);
+
+
                                     } catch (e) {
                                         console.error("Error adding document: ", e);
                                     }
@@ -243,12 +232,17 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                         </HStack>
                     </ScrollView>
                     <VStack space={2}>
-                        {userList.map((item, idx) => (
+                        {messes.map((item, idx) => (
                             <ListItem
                                 {...item}
-                                key={idx}
-                                onPress={() => {
+                                key={item.id}
+                                onPress={async () => {
                                     navigation.navigate(RootNavigatekey.MessageDetail);
+                                    const roomRef = doc(db, "SingleRoom", item.id);
+                                    await updateDoc(roomRef, {
+                                        reads: arrayUnion(currentUserId)
+                                    });
+
                                 }}
                             />
                         ))}
@@ -258,3 +252,4 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         </View>
     );
 };
+
