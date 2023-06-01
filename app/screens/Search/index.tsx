@@ -1,63 +1,39 @@
 import { APP_PADDING } from 'app/constants/Layout';
 import { SearchIcon } from 'components/Icons/Light/Search';
+import { db } from 'config/firebase';
+import { query, collection, where, onSnapshot, or, getDocs } from 'firebase/firestore';
 import { ScrollView, View, Text, HStack, useTheme, TextField, Input, Box, VStack, Image, Divider } from 'native-base';
 import { RootNavigatekey } from 'navigation/navigationKey';
 import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { RootStackScreenProps } from 'types';
-
-const userList = [
-    {
-        name: 'Thang abc dgac ',
-        avt: 'https://images.unsplash.com/photo-1682687220801-eef408f95d71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-    },
-    {
-        name: 'Thang',
-        avt: 'https://images.unsplash.com/photo-1682687220801-eef408f95d71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-    },
-    {
-        name: 'Thang',
-        avt: 'https://images.unsplash.com/photo-1682687220801-eef408f95d71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-    },
-    {
-        name: 'Thang',
-        avt: 'https://images.unsplash.com/photo-1682687220801-eef408f95d71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-    },
-    {
-        name: 'Thang',
-        avt: 'https://images.unsplash.com/photo-1682687220801-eef408f95d71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-    },
-    {
-        name: 'Thang',
-        avt: 'https://images.unsplash.com/photo-1682687220801-eef408f95d71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-    },
-    {
-        name: 'Thang',
-        avt: 'https://images.unsplash.com/photo-1682687220801-eef408f95d71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-    },
-    {
-        name: 'Thang',
-        avt: 'https://images.unsplash.com/photo-1682687220801-eef408f95d71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-    },
-    {
-        name: 'Thang',
-        avt: 'https://images.unsplash.com/photo-1682687220801-eef408f95d71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-    },
-    {
-        name: 'Thang',
-        avt: 'https://images.unsplash.com/photo-1682687220801-eef408f95d71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-    },
-    {
-        name: 'Thang',
-        avt: 'https://images.unsplash.com/photo-1682687220801-eef408f95d71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-    },
-];
+import { ListItem } from './component/ListItem';
 
 export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>) => {
     const { navigation } = props;
     const { colors } = useTheme();
+    const [searchText, setSearchText] = useState("");
     const [isInputFocused, setInputFocused] = useState(false);
+    const [searchingUsers, setSearchingUser] = useState([]);
+
+
+    const fetchUserData = async () => {
+        const searchUser = []
+        const q = query(collection(db, "user"), where('name', '==', searchText));
+        const searchUserSnapshot = await getDocs(q);
+        searchUserSnapshot.forEach((u) => {
+            searchUser.push(u.data());
+        });
+        setSearchingUser(searchUser);
+    }
+
+    // useEffect(() => {
+
+
+    //     fetchUserData().catch(console.error)
+    // }, [searchText]);
+
     useEffect(() => {
         props.navigation.setOptions({
             headerTitle: 'Search',
@@ -67,25 +43,7 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
         });
     }, [props.navigation]);
 
-    const ListItem = (item: { name: string; avt: string; onPress?: () => void }) => (
-        <TouchableOpacity onPress={() => {}}>
-            <View>
-                <HStack space={6} alignItems={'center'} my = {2}>
-                    <Image
-                        alt="..."
-                        source={{ uri: item.avt }}
-                        size={16}
-                        borderRadius={100}
-                    ></Image>
-                    <Text bold fontSize="md">
-                        {item.name}
-                    </Text>
-                </HStack>
-                {/* <Divider/> */}
-            </View>
-        </TouchableOpacity>
-        
-    );
+
 
     return (
         <View backgroundColor={'white'} flex={1} p={8}>
@@ -101,6 +59,7 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
                     borderColor={isInputFocused ? 'red.900' : 'black'}
                 >
                     <Input
+                        onChangeText={(text) => { setSearchText(text) }}
                         flex={1}
                         placeholder="Input"
                         borderWidth={0}
@@ -108,6 +67,7 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
                         color={'blue.900'}
                         mt="2"
                         backgroundColor={'white'}
+                        onSubmitEditing={() => fetchUserData().catch(console.error)}
                     />
                     <SearchIcon size={'sm'} color={'red.500'} />
                 </View>
@@ -115,13 +75,13 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
                     Channel
                 </Text>
                 <VStack space={4}>
-                    {userList.map((item, idx) => (
+                    {searchingUsers.map((item, idx) => (
                         <ListItem
                             {...item}
                             key={idx}
                             onPress={() => navigation.navigate(RootNavigatekey.MessageDetail)}
                         />
-                        
+
                     ))}
                 </VStack>
             </ScrollView>

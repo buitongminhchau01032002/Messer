@@ -1,6 +1,6 @@
 import { BellOffIcon, EllipsisIcon, LinkIcon, LogoutIcon, TrashIcon } from "components/Icons/Light";
 import { db } from "config/firebase";
-import { query, collection, where, documentId, getDocs, onSnapshot, Timestamp } from "firebase/firestore";
+import { query, collection, where, documentId, getDocs, onSnapshot, Timestamp, getDoc, doc } from "firebase/firestore";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 import { HStack, VStack, Box, Text, Image, IconButton, } from "native-base";
@@ -72,12 +72,10 @@ export const ListItem = (item: { userId1: string, userId2: string, reads: string
         const fetchUserData = async () => {
             var otherUser;
 
-            const userQuery = query(collection(db, "user"), where(documentId(), '==', otherUserId));
+            const userQuery = doc(db, "user", otherUserId);
 
-            const textedUserSnapshot = await getDocs(userQuery);
-            textedUserSnapshot.forEach((u) => {
-                otherUser = u.data();
-            });
+            const textedUserSnapshot = await getDoc(userQuery);
+            otherUser = textedUserSnapshot.data();
             setName(otherUser.name)
             setImg(otherUser.avatar)
         }
