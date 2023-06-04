@@ -1,5 +1,5 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { initializeApp } from 'firebase/app';
+import { DocumentData, QueryDocumentSnapshot, SnapshotOptions, WithFieldValue, getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
     apiKey: 'AIzaSyDvKaKvCacVSBONANqPjVA6cv7kNFwEq1k',
@@ -12,9 +12,15 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-
 // Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(app);
 
+export const converter = <T>() => ({
+    toFirestore: (data: T) => data,
+    fromFirestore: (snap: QueryDocumentSnapshot, options: SnapshotOptions) => ({
+        id: snap.id,
+        ...snap.data(options),
+    } as T),
+});
 
-export { db  };
+export { db };

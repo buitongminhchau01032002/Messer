@@ -31,18 +31,26 @@ import {
 import { AppTabsNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, ScrollView } from 'react-native';
+import { ActivityIndicator, Platform, ScrollView } from 'react-native';
 import { AppTabsStackScreenProps, RootStackScreenProps } from 'types';
 import { MessageItem } from '../components/MessageItem';
-import { SendType } from '../type';
+import { Message, SendType, User } from '../type';
+import { addDoc, collection, getDoc, onSnapshot, query, doc, getDocs, where, or, documentId, orderBy, Timestamp, updateDoc, arrayUnion, FieldPath, DocumentData, QueryDocumentSnapshot, SnapshotOptions, WithFieldValue, serverTimestamp } from 'firebase/firestore';
+import { converter, db } from 'config/firebase';
 
 export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.MessageDetail>) => {
     const { navigation, route } = props;
     // hooks
     const { colors } = useTheme();
     // states
-    const [quoteMessage, setQuoteMessage] = useState('');
+    const [quoteMessage, setQuoteMessage] = useState<Message>();
+    const [content, setContent] = useState('');
     const scrollRef = useRef<ScrollView | null>(null);
+    const [isLoading, setIsLoading] = useState(true); // Set loading to true on component mount
+    const [isSending, setIsSending] = useState(false); // Set loading to true on component mount
+    const [messages, setMessages] = useState<Message[]>([]); // Initial empty array of users
+    const curentUser = 'CPYyJYf2Rj2kUd8rCvff'
+    const currentRoom = "3T7VtjOcHbbi2oTVa5gX"
 
     useEffect(() => {
         navigation.setOptions({
@@ -60,6 +68,60 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
             headerTitleStyle: { color: colors.blue[900] },
         });
     }, [navigation]);
+
+
+
+    useEffect(() => {
+        const messageRef = collection(db, 'SingleRoom', currentRoom, 'Message')
+        const messageQuery = query(messageRef, orderBy('createdAt', 'asc'))
+
+        setIsLoading(true)
+        const unsub = onSnapshot(messageQuery.withConverter(converter<Message>()), async (messagesSnap) => {
+            const newMessages = []
+            for (const message of messagesSnap.docs) {
+                const newMessage = message.data()
+                // populate reply
+                if (newMessage.replyMessage) {
+                    const replyMessage = (await getDoc(doc(messageRef, newMessage.replyMessage as string).withConverter(converter<Message>()))).data()!
+                    replyMessage.sender = (await getDoc(doc(db, 'User', replyMessage.sender as string).withConverter(converter<User>()))).data()!
+
+                    newMessage.replyMessage = replyMessage;
+                }
+                // populate user
+                newMessage.sender = (await getDoc(doc(db, 'User', newMessage.sender as string).withConverter(converter<User>()))).data()!
+                newMessages.push(newMessage)
+            }
+            console.log(messages)
+            setMessages(newMessages)
+            setIsLoading(false)
+        });
+
+        return () => unsub()
+    }, []);
+
+    const handleSendMessage = (content: string) => {
+        if (!content) {
+            return
+        }
+
+        setIsSending(true)
+        const newMessage: Message = {
+            content,
+            sender: curentUser,
+            type: 'text',
+            createdAt: serverTimestamp(),
+        }
+        if (quoteMessage) {
+            newMessage.replyMessage = quoteMessage.id
+        }
+
+        addDoc(collection(db, 'SingleRoom', currentRoom, 'Message'), newMessage).then(values => {
+            setIsSending(false)
+        })
+        setContent('')
+        setQuoteMessage(undefined)
+    }
+
     return (
         <Box flex={1} bg="white">
             <KeyboardAvoidingView flex={1}>
@@ -70,45 +132,17 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                         showsVerticalScrollIndicator={false}
                     >
                         <VStack space={2}>
-                            <MessageItem
-                                content={
-                                    'NativeBase started out as an open source framework that enabled developers to build high-quality mobile apps using React Native. The first version included UITabBar on iOS and Drawer on Android. NativeBase v1 was very well-received by the dev community.'
-                                }
-                                quote="abcd"
-                                sendType={SendType.Receive}
-                                onLongPress={() => {
-                                    setQuoteMessage('abcd');
-                                }}
-                            />
-                            <MessageItem
-                                content={
-                                    'NativeBase started out as an open source framework that enabled developers to build high-quality mobile apps using React Native. The first version included UITabBar on iOS and Drawer on Android. NativeBase v1 was very well-received by the dev community.'
-                                }
-                                sendType={SendType.Send}
-                                onLongPress={() => {
-                                    setQuoteMessage('abcd');
-                                }}
-                            />
-                            <MessageItem
-                                content={
-                                    'NativeBase started out as an open source framework that enabled developers to build high-quality mobile apps using React Native. The first version included UITabBar on iOS and Drawer on Android. NativeBase v1 was very well-received by the dev community.'
-                                }
-                                quote="abcd"
-                                sendType={SendType.Send}
-                                onLongPress={() => {
-                                    setQuoteMessage('abcd');
-                                }}
-                            />
-                            <MessageItem
-                                content={
-                                    'NativeBase started out as an open source framework that enabled developers to build high-quality mobile apps using React Native. The first version included UITabBar on iOS and Drawer on Android. NativeBase v1 was very well-received by the dev community.'
-                                }
-                                quote="abcd"
-                                sendType={SendType.Receive}
-                                onLongPress={() => {
-                                    setQuoteMessage('abcd');
-                                }}
-                            />
+                            {messages.map(message =>
+                                <MessageItem
+                                    key={message.id}
+                                    message={message}
+                                    sendType={curentUser === (message.sender as User).id ? SendType.Send : SendType.Receive}
+                                    onLongPress={() => {
+                                        setQuoteMessage(message);
+                                    }}
+                                />
+                            )}
+                            {isLoading && <ActivityIndicator color={colors.primary[900]} />}
                         </VStack>
                     </ScrollView>
                 </Box>
@@ -125,17 +159,14 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                             <Divider orientation="vertical" thickness={2} bg="primary.900"></Divider>
                             <VStack flex={1} w="100%">
                                 <Text bold color="white">
-                                    Name
+                                    {(quoteMessage.sender as User).name}
                                 </Text>
                                 <Text numberOfLines={3}>
-                                    We provide a set of commonly used interface icons which you can directly use in your
-                                    project. All our icons are create using createIcon function from NativeBase. We
-                                    provide a set of commonly used interface icons which you can directly use in your
-                                    project. All our icons are create using createIcon function from NativeBase.
+                                    {quoteMessage.content}
                                 </Text>
                             </VStack>
                             <VStack justifyContent="center" h="full">
-                                <Pressable onPress={() => setQuoteMessage('')}>
+                                <Pressable onPress={() => setQuoteMessage(undefined)}>
                                     <CloseIcon />
                                 </Pressable>
                             </VStack>
@@ -149,6 +180,8 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                             <ImageIcon color="primary.900" size="md" />
                         </TouchableOpacity>
                         <Input
+                            value={content}
+                            onChangeText={(text) => setContent(text)}
                             flex={1}
                             placeholder="Message"
                             fontSize="md"
@@ -158,8 +191,8 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                             multiline
                             onFocus={() => scrollRef.current?.scrollToEnd({ animated: true })}
                         />
-                        <TouchableOpacity px={2} py={3}>
-                            <NavigationIcon color="primary.900" size="md" />
+                        <TouchableOpacity px={2} py={3} disabled={isSending} onPress={() => handleSendMessage(content)}>
+                            {isSending ? <ActivityIndicator color={colors.primary[900]} /> : <NavigationIcon color="primary.900" size="md" />}
                         </TouchableOpacity>
                     </HStack>
                 </Box>
@@ -167,3 +200,4 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
         </Box>
     );
 };
+

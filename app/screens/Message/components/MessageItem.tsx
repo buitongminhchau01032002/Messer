@@ -3,26 +3,24 @@ import { TouchableOpacity } from "components/TouchableOpacity";
 import { Avatar, Box, Divider, HStack, HamburgerIcon, Menu, Pressable, Text, VStack } from "native-base";
 import React, { useLayoutEffect, useRef } from "react";
 import { View } from "react-native";
-import { SendType } from "../type";
+import { Message, SendType, User } from "../type";
 import { EllipsisIcon } from "components/Icons/Light";
 
 type Props = {
-  content: string;
+  message: Message
   sendType: SendType;
-  quote?: string;
   isFocus?: boolean;
   onLongPress?: () => void;
 };
 export const MessageItem = (props: Props) => {
-  const { content, sendType, quote, isFocus = true, onLongPress } = props;
-  useLayoutEffect(() => { }, []);
+  const { message, sendType, isFocus = true, onLongPress } = props;
   if (sendType === SendType.Receive) {
     return (
       <HStack space="sm">
-        <Avatar source={{ uri: "à dfa" }} size="sm"></Avatar>
+        <Avatar source={{ uri: (message.sender as User).avatar }} size="sm"></Avatar>
         <TouchableOpacity maxWidth="70%" onLongPress={onLongPress}>
           <VStack borderRadius="md" p={APP_PADDING} bg="primary.900" space="2">
-            {quote ? (
+            {message.replyMessage ? (
               <HStack
                 bg="primary.200"
                 p={APP_PADDING}
@@ -34,22 +32,17 @@ export const MessageItem = (props: Props) => {
                   thickness={2}
                   bg="primary.900"
                 ></Divider>
-                <VStack flex={1} w="100%">
+                <VStack>
                   <Text bold color="white" fontSize="xs">
-                    Name
+                    {((message.replyMessage as Message).sender as User).name}
                   </Text>
-                  <Text numberOfLines={2} fontSize="xs">
-                    We provide a set of commonly used interface icons which you
-                    can directly use in your project. All our icons are create
-                    using createIcon function from NativeBase. We provide a set
-                    of commonly used interface icons which you can directly use
-                    in your project. All our icons are create using createIcon
-                    function from NativeBase.
+                  <Text numberOfLines={4} fontSize="xs">
+                    {(message.replyMessage as Message).content}
                   </Text>
                 </VStack>
               </HStack>
             ) : undefined}
-            <Text color="white">{content}</Text>
+            <Text color="white">{message.content}</Text>
           </VStack>
         </TouchableOpacity>
         <HStack flex={1} alignItems='flex-end' >
@@ -59,6 +52,7 @@ export const MessageItem = (props: Props) => {
             </TouchableOpacity>
           }}>
             <Menu.Item onPress={() => console.log('abdf')}><Text bold fontSize='md'>Forward</Text></Menu.Item>
+            <Menu.Item onPress={() => console.log('abdf')}><Text bold fontSize='md'>Quote</Text></Menu.Item>
             <Menu.Item><Text bold fontSize='md'>Copy</Text></Menu.Item>
             <Menu.Item><Text bold fontSize='md' color='primary.900'>Remove</Text></Menu.Item>
           </Menu> : undefined}
@@ -81,7 +75,7 @@ export const MessageItem = (props: Props) => {
         </HStack>
         <TouchableOpacity maxWidth="70%" onLongPress={onLongPress}>
           <VStack borderRadius="md" p={APP_PADDING} bg="blue.900" space="2">
-            {quote ? (
+            {message.replyMessage ? (
               <HStack
                 bg="blue.200"
                 p={APP_PADDING}
@@ -93,22 +87,17 @@ export const MessageItem = (props: Props) => {
                   thickness={2}
                   bg="blue.900"
                 ></Divider>
-                <VStack flex={1} w="100%">
+                <VStack>
                   <Text bold color="white" fontSize="xs">
-                    Name
+                    {((message.replyMessage as Message).sender as User).name}
                   </Text>
                   <Text numberOfLines={2} fontSize="xs">
-                    We provide a set of commonly used interface icons which you
-                    can directly use in your project. All our icons are create
-                    using createIcon function from NativeBase. We provide a set
-                    of commonly used interface icons which you can directly use
-                    in your project. All our icons are create using createIcon
-                    function from NativeBase.
+                    {(message.replyMessage as Message).content}
                   </Text>
                 </VStack>
               </HStack>
             ) : undefined}
-            <Text color="white">{content}</Text>
+            <Text color="white">{message.content}</Text>
           </VStack>
         </TouchableOpacity>
       </HStack>

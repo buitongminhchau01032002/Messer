@@ -30,7 +30,7 @@ import { db } from 'config/firebase';
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 
-const currentUserId = "vSiv500SKpWqxPLOjYVY";
+const currentUserId = "CPYyJYf2Rj2kUd8rCvff";
 
 
 const userList = [
@@ -123,7 +123,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
     useEffect(() => {
 
         const fetchRoomData = async () => {
-            const q = query(collection(db, "SingleRoom"), or(where('userId1', '==', currentUserId), where('userId2', '==', currentUserId)));
+            const q = query(collection(db, "SingleRoom"), or(where('user1', '==', currentUserId), where('user2', '==', currentUserId)));
             const unsubscribe = onSnapshot(q, (querySnapshot) => {
                 const messes = [];
                 querySnapshot.forEach((doc) => {
