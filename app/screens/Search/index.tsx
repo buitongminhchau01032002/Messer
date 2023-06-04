@@ -20,7 +20,7 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
 
     const fetchUserData = async () => {
         const searchUser = []
-        const q = query(collection(db, "user"), where('name', '==', searchText));
+        const q = query(collection(db, "user"), where('name', '>=', searchText), where('name', '<=', searchText+ '\uf8ff'));
         const searchUserSnapshot = await getDocs(q);
         searchUserSnapshot.forEach((u) => {
             searchUser.push(u.data());

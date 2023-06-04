@@ -15,7 +15,9 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -23,7 +25,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./app/assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.anbui.messer"
     },
     "web": {
       "favicon": "./app/assets/images/favicon.png"

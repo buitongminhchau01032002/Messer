@@ -11,6 +11,8 @@ import * as Yup from "yup";
 import { RootNavigatekey } from "navigation/navigationKey";
 import { useAppDispatch } from "hooks/index";
 import { reLogin } from "slice/auth";
+import { auth } from "config/firebase";
+import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
 
 
 export const SignUpScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignUp>) => {
@@ -22,13 +24,10 @@ export const SignUpScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignU
     const [isValidateOnChange, setIsValidateOnChange] = useState(false)
 
 
-    function handleSubmitForm(values : object) {
-        // call api login => success 
-        // dispatch(reLogin({token: ''}));
-
-        navigation.navigate(RootNavigatekey.Information)
+    function handleSignUp(values) {
+        navigation.navigate(RootNavigatekey.Information, { email: values.email, password: values.password, phone: values.phoneNumber })
     }
-    
+
 
     useEffect(() => {
         navigation.setOptions({
@@ -64,28 +63,29 @@ export const SignUpScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignU
             .min(6, "Minimum 6 characters")
             .required("Password cannot be empty!"),
     });
+
     return (
-      <Box flex={1} w="100%" bg="white" alignItems="center">
+        <Box flex={1} w="100%" bg="white" alignItems="center">
             <Box safeArea p="2" w="90%" maxW="290">
                 <Heading size="xl" fontWeight="bold" color="blue.900" _dark={{
                     color: "warmGray.50"
                 }}>
                     Sign Up
                 </Heading>
-              
+
 
 
                 <Formik
                     initialValues={initFormValue}
                     validationSchema={SignInSchema}
-                    onSubmit={values => handleSubmitForm(values)}
+                    onSubmit={values => handleSignUp(values)}
                     validateOnChange={isValidateOnChange}
                 >
                     {({ handleSubmit, errors, values, validateForm, setFieldValue }) => (
                         <VStack h={400}>
 
                             <VStack space={4} mt="5" flex={1}>
-                            <FormControl isInvalid={Boolean(errors.phoneNumber)} h={90}>
+                                <FormControl isInvalid={Boolean(errors.phoneNumber)} h={90}>
                                     <FormControl.Label>Phone Number</FormControl.Label>
                                     <Input
                                         autoCapitalize="none"
@@ -148,7 +148,9 @@ export const SignUpScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignU
                             </VStack>
                             <CButton onPress={() => {
                                 setIsValidateOnChange(true)
-                                validateForm().then(() =>  handleSubmit() )
+                                validateForm().then(() => {
+                                    handleSubmit()
+                                })
                             }}>
                                 Sign up
                             </CButton>

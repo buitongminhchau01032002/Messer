@@ -30,6 +30,7 @@ export const ListItem = (item: { userId1: string, userId2: string, reads: string
     const [time, setTime] = useState("")
     const [read, setRead] = useState(false)
 
+    
     useEffect(() => {
         const reads = item.reads ?? []
         setRead(reads.includes(currentUserId));
@@ -40,14 +41,15 @@ export const ListItem = (item: { userId1: string, userId2: string, reads: string
 
             const messagesQuery = query(collection(db, "Message"), where(documentId(), 'in', item.messages));
             const hm = onSnapshot(messagesQuery, (querySnapshot) => {
-                let messages = [];
+                // let messages = [];
                 querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    messages.push(data);
+                    // const data = doc.data();
+                    // messages.push(data);
+                    setLastMessage(doc.data().content)
                 });
 
-                messages.sort((a, b) => { return (a.createAt as Timestamp).toMillis() - (b.createAt as Timestamp).toMillis() })
-                setLastMessage(messages[messages.length - 1].content)
+                // messages.sort((a, b) => { return (a.createAt as Timestamp).toMillis() - (b.createAt as Timestamp).toMillis() })
+                // setLastMessage(messages[messages.length - 1].content)
 
                 TimeAgo.addDefaultLocale(en)
                 const timeAgo = new TimeAgo('en-US')
