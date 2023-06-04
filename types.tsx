@@ -35,9 +35,9 @@ export type RootStackParamList = {
     [RootNavigatekey.AppTabs]: NavigatorScreenParams<AppTabsStackParamList> | undefined;
     [RootNavigatekey.Auth]: NavigatorScreenParams<AuthStackParamList> | undefined;
     [RootNavigatekey.Wallet]: undefined;
-    [RootNavigatekey.Information]: undefined;
+    [RootNavigatekey.Information]: {email: string , password: string, phone: string};
     [RootNavigatekey.InformationQR]: undefined;
-    [RootNavigatekey.MessageDetail]: undefined;
+    [RootNavigatekey.MessageDetail]: {type: string , roomId: string};
     [RootNavigatekey.NotFound]: undefined;
     [RootNavigatekey.Intro]: undefined;
     [RootNavigatekey.Modal]: undefined;

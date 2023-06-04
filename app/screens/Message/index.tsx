@@ -192,7 +192,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                                             type: "text",
                                             content: "2",
                                             files: [],
-                                            sender: "1"
+                                            sender: "1",
                                         });
                                         console.log("Document written with ID: ", message.id);
 
@@ -237,7 +237,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                                 {...item}
                                 key={item.id}
                                 onPress={async () => {
-                                    navigation.navigate(RootNavigatekey.MessageDetail);
+                                    navigation.navigate(RootNavigatekey.MessageDetail, { type: "", roomId: "" });
                                     const roomRef = doc(db, "SingleRoom", item.id);
                                     await updateDoc(roomRef, {
                                         reads: arrayUnion(currentUserId)

@@ -39,6 +39,10 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Yup from "yup";
 import { Formik } from 'formik';
 import { CButton } from 'components/Button';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from 'config/firebase';
+import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
+import { getToken } from 'firebase/messaging';
 
 type MenuItem = {
     title: string;
@@ -49,7 +53,9 @@ type MenuItem = {
 
 export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.Information>) => {
     // navigation
+    const { email, password, phone } = props.route.params
     const { navigation } = props;
+
     // hooks
     useEffect(() => {
         props.navigation.setOptions({
@@ -80,8 +86,33 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
 
     });
 
-    function handleSuccessSignIn(values: object) {
-        navigation.replace(RootNavigatekey.Auth, {screen: AuthNavigationKey.SignIn});
+    async function handleSuccessSignIn(values) {
+        // const deviceToken = await getToken(messaging, { vapidKey: "BJJdsMAPga6bGAvN4k-pBmeEU9NZbuCD-k_-vZdUUruF-QmsO0oOTjTs9Nu27x7FNIyDuKPu_EhPEi2wZ4q6h5A" } )
+        if (!auth.currentUser) {
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    console.log(userCredential.user.uid)
+                    setDoc(doc(db, "User", userCredential.user.uid), {
+                        avartar: "",
+                        email: email,
+                        name: values.fullName,
+                        gender: values.gender,
+                        phone: phone,
+                        deviceToken: "deviceToken"
+                    });
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    console.error
+                });
+        } else {
+            console.log("update")
+        }
+
+        // navigation.replace(RootNavigatekey.Auth, { screen: AuthNavigationKey.SignIn });
+
     }
 
     const [image, setImage] = useState('');
@@ -127,11 +158,11 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
                                 </VStack>
                             </TouchableOpacity>
                             <VStack space={2} ml={2} alignItems='center'>
-                                        <Text bold fontSize={26}>
-                                            Dennis
-                                        </Text>
-                                        <Text color="gray.400" fontSize={16}>hello@depper.com</Text>
-                                    </VStack>
+                                <Text bold fontSize={26}>
+                                    Dennis
+                                </Text>
+                                <Text color="gray.400" fontSize={16}>hello@depper.com</Text>
+                            </VStack>
                         </Center>
                     </VStack>
                     <Formik
@@ -168,13 +199,13 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
                                             color="blue.900"
                                             
                                             /> */}
-                                        <Select minWidth="200" accessibilityLabel="Choose your gender" placeholder="Choose your gender" size='lg'color="blue.900"
-                                        selectedValue={values.gender}
-                                        onValueChange={(text: any) => setFieldValue("gender", text)}
-                                        
-                                         _selectedItem={{
-                                            endIcon: <CheckIcon size={5} />
-                                        }} mt="1">
+                                        <Select minWidth="200" accessibilityLabel="Choose your gender" placeholder="Choose your gender" size='lg' color="blue.900"
+                                            selectedValue={values.gender}
+                                            onValueChange={(text: any) => setFieldValue("gender", text)}
+
+                                            _selectedItem={{
+                                                endIcon: <CheckIcon size={5} />
+                                            }} mt="1">
                                             <Select.Item label="Male" value="male" />
                                             <Select.Item label="Female" value="female" />
                                         </Select>
@@ -184,7 +215,7 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
                                 </VStack>
                                 <CButton onPress={() => {
                                     setIsValidateOnChange(true)
-                                    validateForm().then(() => { handleSubmit()})
+                                    validateForm().then(() => { handleSubmit() })
                                 }}>
                                     Sign in
                                 </CButton>

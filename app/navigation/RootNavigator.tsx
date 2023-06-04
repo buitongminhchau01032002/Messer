@@ -31,6 +31,8 @@ import { CallWaitingScreen } from 'screens/CallWaiting';
 import { SearchScreen } from 'screens/Search';
 import { InformationScreen } from "screens/Information";
 import { InformationScreenQR } from "screens/InformationQR";
+import { auth } from 'config/firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 export default function Navigation() {
     // hooks
@@ -52,7 +54,7 @@ export default function Navigation() {
         // rehydrate
         const token = (await storage.get('token')) ?? '';
         // dispatch(reLogin({ token: token }));
-        
+
         dispatch(
             changeApplicationState({
                 isAppReady: true,
@@ -72,16 +74,26 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function RootNavigator() {
     // hooks
     const isAppReady = useAppSelector((state) => state.application.isAppReady);
-    const { isLogin } = useAppSelector((state) => state.auth);
+    // const { isLogin } = useAppSelector((state) => state.auth);
+    const [isLogin, setIsLogin] = useState(auth.currentUser ? true : false)
 
-    // console.log(isAppReady);
+    // signOut(auth)
+    console.log(auth.currentUser?.email);
     if (!isAppReady) {
         return <IntroScreen />;
     }
-    console.log(isLogin)
+
+    onAuthStateChanged(auth, (user) => {
+        console.log("current user", user?.email)
+        if (user) {
+            setIsLogin(true)
+        } else {
+            setIsLogin(false)
+        }
+    });
     return (
         <Stack.Navigator>
-            {isLogin ? (
+            {!isLogin ? (
                 <Stack.Screen name={RootNavigatekey.Auth} component={AuthNavigator} options={{ headerShown: false }} />
             ) : (
                 <>
@@ -95,7 +107,7 @@ function RootNavigator() {
                 </>
             )}
             <Stack.Group navigationKey={isLogin ? 'user' : 'guest'}>
-            <Stack.Screen name={RootNavigatekey.Information} component={InformationScreen} />
+                <Stack.Screen name={RootNavigatekey.Information} component={InformationScreen} />
                 <Stack.Screen
                     name={RootNavigatekey.MessageDetail}
                     component={MessageDetailScreen}
