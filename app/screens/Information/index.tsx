@@ -40,9 +40,10 @@ import * as Yup from "yup";
 import { Formik } from 'formik';
 import { CButton } from 'components/Button';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth, db } from 'config/firebase';
+import { auth, db, storage } from 'config/firebase';
 import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
 import { getToken } from 'firebase/messaging';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 type MenuItem = {
     title: string;
@@ -55,6 +56,13 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
     // navigation
     const { email, password, phone } = props.route.params
     const { navigation } = props;
+    const [isValidateOnChange, setIsValidateOnChange] = useState(false)
+    const initFormValue = {
+        fullName: "",
+        gender: "",
+        platform: Platform.OS,
+    };
+    const [imageUrl, setImageUrl] = useState('');
 
     // hooks
     useEffect(() => {
@@ -71,12 +79,7 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
     }, [props.navigation]);
 
 
-    const [isValidateOnChange, setIsValidateOnChange] = useState(false)
-    const initFormValue = {
-        fullName: "",
-        gender: "",
-        platform: Platform.OS,
-    };
+
     // schema validation
     const SignInSchema = Yup.object({
         fullName: Yup.string()
@@ -89,24 +92,37 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
     async function handleSuccessSignIn(values) {
         // const deviceToken = await getToken(messaging, { vapidKey: "BJJdsMAPga6bGAvN4k-pBmeEU9NZbuCD-k_-vZdUUruF-QmsO0oOTjTs9Nu27x7FNIyDuKPu_EhPEi2wZ4q6h5A" } )
         if (!auth.currentUser) {
+            //upload avatar
+            const imgResponse = await fetch(imageUrl)
+            const blob = await imgResponse.blob()
+            const name = imageUrl.substring(imageUrl.lastIndexOf('/') + 1)
+            const storageRef = ref(storage, "images/".concat(name));
 
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    console.log(userCredential.user.uid)
-                    setDoc(doc(db, "User", userCredential.user.uid), {
-                        avatar: "",
-                        email: email,
-                        name: values.fullName,
-                        gender: values.gender,
-                        phone: phone,
-                        deviceToken: "deviceToken"
+            uploadBytes(storageRef, blob).then((snapshot) => {
+                // console.log(snapshot.ref);
+            });
+
+            getDownloadURL(storageRef)
+                .then((url) => {
+                    createUserWithEmailAndPassword(auth, email, password)
+                    .then((userCredential) => {
+                        console.log(userCredential.user.uid)
+                        setDoc(doc(db, "User", userCredential.user.uid), {
+                            avatar: url,
+                            email: email,
+                            name: values.fullName,
+                            gender: values.gender,
+                            phone: phone,
+                            deviceToken: "deviceToken"
+                        });
+                    })
+                    .catch((error) => {
+                        const errorCode = error.code;
+                        const errorMessage = error.message;
+                        console.error
                     });
+                  
                 })
-                .catch((error) => {
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    console.error
-                });
         } else {
             console.log("update")
         }
@@ -115,7 +131,7 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
 
     }
 
-    const [image, setImage] = useState('');
+
 
     const pickImage = async () => {
         // No permissions request is necessary for launching the image library
@@ -125,13 +141,8 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
             aspect: [4, 3],
             quality: 1,
         });
-
-        console.log(result);
-
         if (!result.canceled) {
-            setImage(result.assets[0].uri);
-            // setImage(result.assets[0].uri);
-            console.log('set')
+            setImageUrl(result.assets[0].uri);
         }
     };
 
@@ -147,7 +158,7 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
                                 <VStack space={2} >
                                     <Center>
                                         <Image
-                                            source={image ? { uri: image } : localImages.avatarPlaceholder}
+                                            source={imageUrl ? { uri: imageUrl } : localImages.avatarPlaceholder}
                                             fallbackSource={localImages.driverPlaceHoder}
                                             style={{ width: 100, height: 100 }}
                                             alt='...'

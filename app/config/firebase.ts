@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { DocumentData, QueryDocumentSnapshot, SnapshotOptions, WithFieldValue, getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getMessaging } from "firebase/messaging";
+import { getStorage } from "firebase/storage";
 
 // PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
 
@@ -23,6 +24,8 @@ const auth = getAuth(app);
 //notification
 // const messaging = getMessaging(app);
 
+const storage = getStorage(app);
+
 export const converter = <T>() => ({
     toFirestore: (data: T) => data,
     fromFirestore: (snap: QueryDocumentSnapshot, options: SnapshotOptions) => ({
@@ -31,4 +34,4 @@ export const converter = <T>() => ({
     } as T),
 });
 
-export { db, auth };
+export { db, auth, storage };

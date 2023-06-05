@@ -1,5 +1,5 @@
 import { BellOffIcon, EllipsisIcon, LinkIcon, LogoutIcon, TrashIcon } from "components/Icons/Light";
-import { db } from "config/firebase";
+import { auth, db } from "config/firebase";
 import { query, collection, where, documentId, getDocs, onSnapshot, Timestamp, getDoc, doc } from "firebase/firestore";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
@@ -10,7 +10,7 @@ import { View, Pressable } from "react-native";
 import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
 
 
-const currentUserId = "vSiv500SKpWqxPLOjYVY";
+
 
 const rightSwipeActions = () => {
     return (
@@ -24,6 +24,7 @@ const rightSwipeActions = () => {
 };
 
 export const ListItem = (item: { user1: string, user2: string, reads: string[], messages: string[], onPress?: () => void }) => {
+    const currentUserId = auth.currentUser?.uid;
     const [imgUrl, setImg] = useState("");
     const [name, setName] = useState("");
     const [lastMessage, setLastMessage] = useState("");
