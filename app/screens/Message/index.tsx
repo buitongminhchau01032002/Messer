@@ -239,7 +239,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                                 {...item}
                                 key={item.id}
                                 onPress={async () => {
-                                    navigation.navigate(RootNavigatekey.MessageDetail, { type: "single", roomId: item.id });
+                                    navigation.navigate(RootNavigatekey.MessageDetail, { type: "single", room: item });
                                     const roomCol = collection(db, "SingleRoom", item.id, "ReadUser");
                                     addDoc(roomCol, { user: currentUserId })
 

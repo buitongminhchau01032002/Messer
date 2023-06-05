@@ -5,7 +5,13 @@ export enum SendType {
     Receive = 'Receive',
 }
 
-export type SingleRoom = any;
+export type SingleRoom = {
+    id?: string,
+    lastMessages?: string,
+    reads:[],
+    user1: string,
+    user2: string
+};
 export type Room = any;
 export type Message = {
     id?: string;

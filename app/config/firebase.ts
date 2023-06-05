@@ -31,4 +31,4 @@ export const converter = <T>() => ({
     } as T),
 });
 
-export { db };
+export { db, auth };

@@ -39,7 +39,10 @@ import { addDoc, collection, getDoc, onSnapshot, query, doc, getDocs, where, or,
 import { converter, db } from 'config/firebase';
 
 export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.MessageDetail>) => {
+    //navigate
     const { navigation, route } = props;
+    //navigate params
+    const { room } = route.params
     // hooks
     const { colors } = useTheme();
     // states
@@ -49,8 +52,11 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
     const [isLoading, setIsLoading] = useState(true); // Set loading to true on component mount
     const [isSending, setIsSending] = useState(false); // Set loading to true on component mount
     const [messages, setMessages] = useState<Message[]>([]); // Initial empty array of users
+    const [users, setUsers] = useState([])
+
     const curentUser = 'CPYyJYf2Rj2kUd8rCvff'
     const currentRoom = "3T7VtjOcHbbi2oTVa5gX"
+
 
     useEffect(() => {
         navigation.setOptions({
@@ -72,30 +78,61 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
 
 
     useEffect(() => {
+        console.log(1)
         const messageRef = collection(db, 'SingleRoom', currentRoom, 'Message')
         const messageQuery = query(messageRef, orderBy('createdAt', 'asc'))
 
-        setIsLoading(true)
-        const unsub = onSnapshot(messageQuery.withConverter(converter<Message>()), async (messagesSnap) => {
-            const newMessages = []
-            for (const message of messagesSnap.docs) {
-                const newMessage = message.data()
-                // populate reply
-                if (newMessage.replyMessage) {
-                    const replyMessage = (await getDoc(doc(messageRef, newMessage.replyMessage as string).withConverter(converter<Message>()))).data()!
-                    replyMessage.sender = (await getDoc(doc(db, 'User', replyMessage.sender as string).withConverter(converter<User>()))).data()!
+        const fetchMessageData = async () => {
+           
+            // await fetchUserData().catch(console.error)
+            let userDatas = []
+            const q = query(collection(db, "User"), or(where(documentId(), '==', room.user1), where(documentId(), '==', room.user2)));
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) => {
+                userDatas.push({
+                    id: doc.id,
+                    ...doc.data()
+                })
+            })
+            setUsers(userDatas)
 
-                    newMessage.replyMessage = replyMessage;
+            const unsub = onSnapshot(messageQuery.withConverter(converter<Message>()), async (messagesSnap) => {
+                const newMessages = []
+                for (const message of messagesSnap.docs) {
+                    const newMessage = message.data()
+                    // populate reply
+                    if (newMessage.replyMessage) {
+                        const replyMessage = (await getDoc(doc(messageRef, newMessage.replyMessage as string).withConverter(converter<Message>()))).data()!
+                        // replyMessage.sender = (await getDoc(doc(db, 'User', replyMessage.sender as string).withConverter(converter<User>()))).data()!
+                        const reply = userDatas.find((u) => u.id == replyMessage.sender)
+                        replyMessage.sender = {
+                            id: reply.id ,
+                            avatar: reply.avatar,
+                            name: reply.name
+                        }
+
+                        newMessage.replyMessage = replyMessage;
+                    }
+                    // // populate user
+                    // newMessage.sender = (await getDoc(doc(db, 'User', newMessage.sender as string).withConverter(converter<User>()))).data()!
+                    const sender = userDatas.find((u) => u.id == newMessage.sender)
+                    newMessage.sender = {
+                        id: sender.id ?? "",
+                        avatar: sender.avatar,
+                        name: sender.name
+                    }
+                    console.log("sender", newMessage.sender)
+                    newMessages.push(newMessage)
                 }
-                // populate user
-                newMessage.sender = (await getDoc(doc(db, 'User', newMessage.sender as string).withConverter(converter<User>()))).data()!
-                newMessages.push(newMessage)
-            }
-            console.log(messages)
-            setMessages(newMessages)
-            setIsLoading(false)
-        });
+                console.log(0)
+                console.log(messages)
+                setMessages(newMessages)
+                setIsLoading(false)
+            });
+        }
 
+        fetchMessageData().catch(console.error)
+        setIsLoading(true)
         return () => unsub()
     }, []);
 

@@ -23,7 +23,7 @@ const rightSwipeActions = () => {
     );
 };
 
-export const ListItem = (item: { userId1: string, userId2: string, reads: string[], messages: string[], onPress?: () => void }) => {
+export const ListItem = (item: { user1: string, user2: string, reads: string[], messages: string[], onPress?: () => void }) => {
     const [imgUrl, setImg] = useState("");
     const [name, setName] = useState("");
     const [lastMessage, setLastMessage] = useState("");
@@ -65,16 +65,16 @@ export const ListItem = (item: { userId1: string, userId2: string, reads: string
 
     useEffect(() => {
         var otherUserId: string;
-        if (item.userId1 == currentUserId) {
-            otherUserId = item.userId2;
+        if (item.user1 == currentUserId) {
+            otherUserId = item.user2;
         } else {
-            otherUserId = item.userId1;
+            otherUserId = item.user1;
         }
 
         const fetchUserData = async () => {
             var otherUser;
 
-            const userQuery = doc(db, "user", otherUserId);
+            const userQuery = doc(db, "User", otherUserId);
 
             const textedUserSnapshot = await getDoc(userQuery);
             otherUser = textedUserSnapshot.data();
