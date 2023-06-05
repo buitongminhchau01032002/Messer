@@ -36,7 +36,7 @@ import { AppTabsStackScreenProps, RootStackScreenProps } from 'types';
 import { MessageItem } from '../components/MessageItem';
 import { Message, SendType, User } from '../type';
 import { addDoc, collection, getDoc, onSnapshot, query, doc, getDocs, where, or, documentId, orderBy, Timestamp, updateDoc, arrayUnion, FieldPath, DocumentData, QueryDocumentSnapshot, SnapshotOptions, WithFieldValue, serverTimestamp } from 'firebase/firestore';
-import { converter, db } from 'config/firebase';
+import { auth, converter, db } from 'config/firebase';
 
 export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.MessageDetail>) => {
     //navigate
@@ -54,8 +54,12 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
     const [messages, setMessages] = useState<Message[]>([]); // Initial empty array of users
     const [users, setUsers] = useState([])
 
-    const curentUser = 'CPYyJYf2Rj2kUd8rCvff'
-    const currentRoom = "3T7VtjOcHbbi2oTVa5gX"
+    // const curentUser = 'CPYyJYf2Rj2kUd8rCvff'
+    const currentUser = auth.currentUser?.uid
+    // const currentRoom = "3T7VtjOcHbbi2oTVa5gX"
+    const currentRoom = room.id
+
+    // console.log()
 
 
     useEffect(() => {
@@ -103,7 +107,6 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                     // populate reply
                     if (newMessage.replyMessage) {
                         const replyMessage = (await getDoc(doc(messageRef, newMessage.replyMessage as string).withConverter(converter<Message>()))).data()!
-                        // replyMessage.sender = (await getDoc(doc(db, 'User', replyMessage.sender as string).withConverter(converter<User>()))).data()!
                         const reply = userDatas.find((u) => u.id == replyMessage.sender)
                         replyMessage.sender = {
                             id: reply.id ,
@@ -114,7 +117,6 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                         newMessage.replyMessage = replyMessage;
                     }
                     // // populate user
-                    // newMessage.sender = (await getDoc(doc(db, 'User', newMessage.sender as string).withConverter(converter<User>()))).data()!
                     const sender = userDatas.find((u) => u.id == newMessage.sender)
                     newMessage.sender = {
                         id: sender.id ?? "",
@@ -133,7 +135,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
 
         fetchMessageData().catch(console.error)
         setIsLoading(true)
-        return () => unsub()
+        // return () => unsub()
     }, []);
 
     const handleSendMessage = (content: string) => {
@@ -144,7 +146,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
         setIsSending(true)
         const newMessage: Message = {
             content,
-            sender: curentUser,
+            sender: currentUser,
             type: 'text',
             createdAt: serverTimestamp(),
         }
@@ -173,7 +175,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                                 <MessageItem
                                     key={message.id}
                                     message={message}
-                                    sendType={curentUser === (message.sender as User).id ? SendType.Send : SendType.Receive}
+                                    sendType={currentUser === (message.sender as User).id ? SendType.Send : SendType.Receive}
                                     onLongPress={() => {
                                         setQuoteMessage(message);
                                     }}

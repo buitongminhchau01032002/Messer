@@ -1,7 +1,7 @@
 import { APP_PADDING } from 'app/constants/Layout';
 import { SearchIcon } from 'components/Icons/Light/Search';
-import { db } from 'config/firebase';
-import { query, collection, where, onSnapshot, or, getDocs } from 'firebase/firestore';
+import { auth, db } from 'config/firebase';
+import { query, collection, where, onSnapshot, or, getDocs, addDoc } from 'firebase/firestore';
 import { ScrollView, View, Text, HStack, useTheme, TextField, Input, Box, VStack, Image, Divider } from 'native-base';
 import { RootNavigatekey } from 'navigation/navigationKey';
 import React, { useState } from 'react';
@@ -10,7 +10,10 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { RootStackScreenProps } from 'types';
 import { ListItem } from './component/ListItem';
 
+
+
 export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>) => {
+
     const { navigation } = props;
     const { colors } = useTheme();
     const [searchText, setSearchText] = useState("");
@@ -20,19 +23,19 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
 
     const fetchUserData = async () => {
         const searchUser = []
-        const q = query(collection(db, "user"), where('name', '>=', searchText), where('name', '<=', searchText+ '\uf8ff'));
+        const q = query(collection(db, "User"), where('name', '>=', searchText), where('name', '<=', searchText + '\uf8ff'));
         const searchUserSnapshot = await getDocs(q);
         searchUserSnapshot.forEach((u) => {
-            searchUser.push(u.data());
+            searchUser.push(
+                {
+                    id: u.id,
+                    ...u.data()
+                }
+            );
         });
         setSearchingUser(searchUser);
     }
 
-    // useEffect(() => {
-
-
-    //     fetchUserData().catch(console.error)
-    // }, [searchText]);
 
     useEffect(() => {
         props.navigation.setOptions({
@@ -79,7 +82,20 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
                         <ListItem
                             {...item}
                             key={idx}
-                            onPress={() => navigation.navigate(RootNavigatekey.MessageDetail)}
+                            onPress={
+                                 async () => {
+                                    // console.log("search", "hello")
+                                    // navigation.navigate(RootNavigatekey.MessageDetail)
+                                    try {
+                                        const room = await addDoc(collection(db, "SingleRoom"), {
+                                            user1: auth.currentUser?.uid,
+                                            user2: item.id,
+                                        });
+                                    } catch (e) {
+                                        console.error("Error adding document: ", e);
+                                    }
+                                }
+                            }
                         />
 
                     ))}

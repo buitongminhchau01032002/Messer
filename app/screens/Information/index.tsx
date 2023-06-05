@@ -94,7 +94,7 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
                 .then((userCredential) => {
                     console.log(userCredential.user.uid)
                     setDoc(doc(db, "User", userCredential.user.uid), {
-                        avartar: "",
+                        avatar: "",
                         email: email,
                         name: values.fullName,
                         gender: values.gender,
