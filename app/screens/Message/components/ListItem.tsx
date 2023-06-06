@@ -1,8 +1,10 @@
 import { BellOffIcon, EllipsisIcon, LinkIcon, LogoutIcon, TrashIcon } from "components/Icons/Light";
 import { auth, db } from "config/firebase";
-import { query, collection, where, documentId, getDocs, onSnapshot, Timestamp, getDoc, doc } from "firebase/firestore";
+// import { timeAgo } from "config/timeAgo";
+import { query, collection, where, documentId, getDocs, onSnapshot, Timestamp, getDoc, doc, serverTimestamp } from "firebase/firestore";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
+import { now } from "moment";
 import { HStack, VStack, Box, Text, Image, IconButton, } from "native-base";
 import React from "react";
 import { useState, useEffect } from "react";
@@ -23,7 +25,7 @@ const rightSwipeActions = () => {
     );
 };
 
-export const ListItem = (item: { user1: string, user2: string, reads: string[], messages: string[], onPress?: () => void }) => {
+export const ListItem = (item: { id: string, user1: string, user2: string, reads: string[], lastMessage: string, onPress?: () => void }) => {
     const currentUserId = auth.currentUser?.uid;
     const [imgUrl, setImg] = useState("");
     const [name, setName] = useState("");
@@ -31,7 +33,7 @@ export const ListItem = (item: { user1: string, user2: string, reads: string[], 
     const [time, setTime] = useState("")
     const [read, setRead] = useState(false)
 
-    
+
     useEffect(() => {
         const reads = item.reads ?? []
         setRead(reads.includes(currentUserId));
@@ -39,26 +41,25 @@ export const ListItem = (item: { user1: string, user2: string, reads: string[], 
 
     useEffect(() => {
         const fetchMessageData = async () => {
+            const lastMessageRef = onSnapshot((doc(db, "SingleRoom", item.id)), (doc) => {
+                try {
+                    setLastMessage(doc.data().lastMessage.content ?? "")
+                    const timeAgo = new TimeAgo('en-US');
+                    console.log(doc.data().lastMessage.createdAt)
+                    // let time = Date.now()
+                    // if(doc.data().lastMessage.createdAt  != null){
+                    setTime(timeAgo.format(doc.data().lastMessageTimestamp.toDate()))
+                    // }
 
-            const messagesQuery = query(collection(db, "Message"), where(documentId(), 'in', item.messages));
-            const hm = onSnapshot(messagesQuery, (querySnapshot) => {
-                // let messages = [];
-                querySnapshot.forEach((doc) => {
-                    // const data = doc.data();
-                    // messages.push(data);
-                    setLastMessage(doc.data().content)
-                });
+                    // console.log("check", doc.data().lastMessageTimestamp.toDate())
+                }
+                catch {
+                    console.log("er")
 
-                // messages.sort((a, b) => { return (a.createAt as Timestamp).toMillis() - (b.createAt as Timestamp).toMillis() })
-                // setLastMessage(messages[messages.length - 1].content)
+                }
 
-                TimeAgo.addDefaultLocale(en)
-                const timeAgo = new TimeAgo('en-US')
+            });
 
-                console.log(timeAgo.format(messages[messages.length - 1].createAt.toDate()))
-                setTime(timeAgo.format(messages[messages.length - 1].createAt.toDate()))
-
-            })
         }
 
         fetchMessageData().catch(console.error)

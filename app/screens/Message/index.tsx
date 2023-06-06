@@ -126,7 +126,11 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
     useEffect(() => {
 
         const fetchRoomData = async () => {
-            const q = query(collection(db, "SingleRoom"), or(where('user1', '==', currentUserId), where('user2', '==', currentUserId)));
+
+            // const messageRef = collection(db, 'SingleRoom', currentRoom, 'Message')
+            // const messageQuery = query(messageRef, orderBy('createdAt', 'asc'))
+            
+            const q = query(collection(db, "SingleRoom"), or(where('user1', '==', currentUserId), where('user2', '==', currentUserId)), orderBy('lastMessageTimestamp', 'desc'));
             const unsubscribe = onSnapshot(q, (querySnapshot) => {
                 const messes = [];
                 querySnapshot.forEach((doc) => {

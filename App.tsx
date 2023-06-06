@@ -10,6 +10,8 @@ import { store } from "app/store";
 import { useCustomNativeBaseColor } from "hooks/index";
 import messaging from '@react-native-firebase/messaging';
 import { Alert, PermissionsAndroid } from "react-native";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en.json";
 
 export default function App() {
 
@@ -33,12 +35,13 @@ export default function App() {
   const customTheme = useCustomNativeBaseColor();
 
   useEffect(() => {
+    TimeAgo.addDefaultLocale(en);
     requestUserPermission()
   })
 
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async remoteMessage => {
-      Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+      Alert.alert(remoteMessage.notification?.title ?? "", remoteMessage.notification?.body ?? "");
     });
 
     return unsubscribe;

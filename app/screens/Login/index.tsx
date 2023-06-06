@@ -8,8 +8,10 @@ import { Formik } from "formik";
 import { UserType } from "models/User";
 import { Platform, Pressable } from "react-native";
 import * as Yup from "yup";
-import { auth } from "config/firebase";
+import { auth, db } from "config/firebase";
 import { signInWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
+import messaging from '@react-native-firebase/messaging';
 
 
 export const LoginScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignIn>) => {
@@ -25,9 +27,14 @@ export const LoginScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignIn
 
         // navigation.navigate(RootNavigatekey.Information)
         await signInWithEmailAndPassword(auth, values.email, values.password)
-            .then((userCredential) => {
+            .then(async (userCredential) => {
                 // Signed in 
                 const user = userCredential.user;
+                const deviceToken = await messaging().getToken()
+                await updateDoc(doc(db, "User", userCredential.user.uid), {
+                    deviceToken : deviceToken
+                  });
+                  
                 // ...
             })
             .catch((error) => {

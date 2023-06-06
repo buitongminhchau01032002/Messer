@@ -35,7 +35,7 @@ import { ActivityIndicator, Platform, ScrollView } from 'react-native';
 import { AppTabsStackScreenProps, RootStackScreenProps } from 'types';
 import { MessageItem } from '../components/MessageItem';
 import { Message, SendType, User } from '../type';
-import { addDoc, collection, getDoc, onSnapshot, query, doc, getDocs, where, or, documentId, orderBy, Timestamp, updateDoc, arrayUnion, FieldPath, DocumentData, QueryDocumentSnapshot, SnapshotOptions, WithFieldValue, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, getDoc, onSnapshot, query, doc, getDocs, where, or, documentId, orderBy, Timestamp, updateDoc, arrayUnion, FieldPath, DocumentData, QueryDocumentSnapshot, SnapshotOptions, WithFieldValue, serverTimestamp, setDoc } from 'firebase/firestore';
 import { auth, converter, db } from 'config/firebase';
 
 export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.MessageDetail>) => {
@@ -55,9 +55,9 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
     const [users, setUsers] = useState([])
 
     // const curentUser = 'CPYyJYf2Rj2kUd8rCvff'
-    const currentUser = auth.currentUser?.uid
+    const currentUser = auth.currentUser?.uid ?? ""
     // const currentRoom = "3T7VtjOcHbbi2oTVa5gX"
-    const currentRoom = room.id
+    const currentRoom = room.id ?? ""
 
     // console.log()
 
@@ -87,7 +87,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
         const messageQuery = query(messageRef, orderBy('createdAt', 'asc'))
 
         const fetchMessageData = async () => {
-           
+
             // await fetchUserData().catch(console.error)
             let userDatas = []
             const q = query(collection(db, "User"), or(where(documentId(), '==', room.user1), where(documentId(), '==', room.user2)));
@@ -109,7 +109,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                         const replyMessage = (await getDoc(doc(messageRef, newMessage.replyMessage as string).withConverter(converter<Message>()))).data()!
                         const reply = userDatas.find((u) => u.id == replyMessage.sender)
                         replyMessage.sender = {
-                            id: reply.id ,
+                            id: reply.id,
                             avatar: reply.avatar,
                             name: reply.name
                         }
@@ -154,8 +154,39 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
             newMessage.replyMessage = quoteMessage.id
         }
 
-        addDoc(collection(db, 'SingleRoom', currentRoom, 'Message'), newMessage).then(values => {
+        addDoc(collection(db, 'SingleRoom', currentRoom, 'Message'), newMessage).then(async values => {
             setIsSending(false)
+            // send notification
+
+            const receiver = users.find((u) => u.id != newMessage.sender)
+            const sender = users.find((u) => u.id == newMessage.sender)
+
+            await updateDoc(doc(db, "SingleRoom", room.id ?? ""), {
+                lastMessage: newMessage,
+                lastMessageTimestamp: newMessage.createdAt
+            });
+
+
+
+            fetch('https://fcm.googleapis.com/fcm/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'key=AAAAu3T5eSI:APA91bFfynL6hecTGjN4jGBUULhccdSWIBKjG0oBWefs3D5KvDu5IWHUJSJD9F3uMjhmuZbXqsUSj6GBsqRYkQgt2d2If4FUaYHy3bZ-E8NpBhqHYjsyfB9D1Nk-hxVKelYn165SqRdL',
+
+                },
+                body: JSON.stringify({
+                    "to": receiver.deviceToken,
+                    "notification": {
+                        "body": newMessage.content,
+                        "OrganizationId": "2",
+                        "content_available": true,
+                        "priority": "high",
+                        "subtitle": "PhotoMe",
+                        "title": sender.name.concat(" texted you")
+                    }
+                }),
+            });
         })
         setContent('')
         setQuoteMessage(undefined)

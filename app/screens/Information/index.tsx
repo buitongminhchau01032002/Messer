@@ -44,6 +44,7 @@ import { auth, db, storage } from 'config/firebase';
 import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
 import { getToken } from 'firebase/messaging';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import messaging from '@react-native-firebase/messaging';
 
 type MenuItem = {
     title: string;
@@ -97,6 +98,7 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
             const blob = await imgResponse.blob()
             const name = imageUrl.substring(imageUrl.lastIndexOf('/') + 1)
             const storageRef = ref(storage, "images/".concat(name));
+            const deviceToken = await messaging().getToken()
 
             uploadBytes(storageRef, blob).then((snapshot) => {
                 // console.log(snapshot.ref);
@@ -113,7 +115,7 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
                             name: values.fullName,
                             gender: values.gender,
                             phone: phone,
-                            deviceToken: "deviceToken"
+                            deviceToken: deviceToken
                         });
                     })
                     .catch((error) => {
