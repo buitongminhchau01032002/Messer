@@ -26,10 +26,14 @@
         "foregroundImage": "./app/assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anbui.messer"
+      "package": "com.anbui.messer",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./app/assets/images/favicon.png"
-    }
+    },
+    "plugins": [
+      "@react-native-firebase/app"
+    ]
   }
 }
