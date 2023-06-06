@@ -163,7 +163,8 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
 
             await updateDoc(doc(db, "SingleRoom", room.id ?? ""), {
                 lastMessage: newMessage,
-                lastMessageTimestamp: newMessage.createdAt
+                lastMessageTimestamp: newMessage.createdAt,
+                reads: [currentUser]
             });
 
 
