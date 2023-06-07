@@ -129,6 +129,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                 console.log(0)
                 console.log(messages)
                 setMessages(newMessages)
+
                 setIsLoading(false)
             });
         }
@@ -137,6 +138,10 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
         setIsLoading(true)
         // return () => unsub()
     }, []);
+
+    useEffect(() => {
+        scrollRef.current?.scrollToEnd()
+    }, [messages])
 
     const handleSendMessage = (content: string) => {
         if (!content) {

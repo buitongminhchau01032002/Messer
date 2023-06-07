@@ -33,6 +33,7 @@ import { InformationScreen } from "screens/Information";
 import { InformationScreenQR } from "screens/InformationQR";
 import { auth } from 'config/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { StoryScreen } from 'screens/Story';
 
 export default function Navigation() {
     // hooks
@@ -134,6 +135,11 @@ function RootNavigator() {
                 <Stack.Screen
                     name={RootNavigatekey.Search}
                     component={SearchScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+                <Stack.Screen
+                    name={RootNavigatekey.Story}
+                    component={StoryScreen}
                     options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
                 />
             </Stack.Group>
