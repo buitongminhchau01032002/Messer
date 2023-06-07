@@ -165,7 +165,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     <TouchableOpacity onPress={() => navigation.navigate(RootNavigatekey.Search)}>
                         <SearchIcon size="md" color="primary.900" />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => { }}>
+                    <TouchableOpacity onPress={() => { navigation.navigate(RootNavigatekey.NewStory)}}>
                         <PlusIcon size="md" color="primary.900" />
                     </TouchableOpacity>
                 </HStack>

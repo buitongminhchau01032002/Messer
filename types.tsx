@@ -47,6 +47,7 @@ export type RootStackParamList = {
     [RootNavigatekey.CallWaiting]: undefined;
     [RootNavigatekey.Search]: undefined;
     [RootNavigatekey.Story]: undefined;
+    [RootNavigatekey.NewStory]: undefined;
 };
 // props type
 export type AppTabsStackScreenProps<Screen extends keyof AppTabsStackParamList> = CompositeScreenProps<
