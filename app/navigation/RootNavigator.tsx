@@ -31,6 +31,7 @@ import { CallWaitingScreen } from 'screens/CallWaiting';
 import { SearchScreen } from 'screens/Search';
 import { InformationScreen } from "screens/Information";
 import { InformationScreenQR } from "screens/InformationQR";
+import { useAuth } from 'hooks/useAuth';
 
 export default function Navigation() {
     // hooks

@@ -10,8 +10,20 @@ import { Platform, Pressable } from "react-native";
 import * as Yup from "yup";
 import { RootNavigatekey } from "navigation/navigationKey";
 import { useAppDispatch } from "hooks/index";
-import { reLogin } from "slice/auth";
-
+import { login } from "slice/auth";
+import {
+    auth,
+    createUserWithEmailAndPassword,
+    updateProfile,
+    signInWithEmailAndPassword,
+  } from '../../config/firebase';
+  import { useDispatch } from 'react-redux';
+ 
+type userAuth = {
+    phoneNumber: string,
+    email: string,
+    password: string,
+}
 
 export const SignUpScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignUp>) => {
 
@@ -21,12 +33,40 @@ export const SignUpScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignU
     const { navigation, route } = props
     const [isValidateOnChange, setIsValidateOnChange] = useState(false)
 
-
-    function handleSubmitForm(values : object) {
+    //register
+    function handleSubmitForm(values : userAuth) {
         // call api login => success 
         // dispatch(reLogin({token: ''}));
 
-        navigation.navigate(RootNavigatekey.Information)
+           // Create a new user with Firebase
+    createUserWithEmailAndPassword(auth, values.email, values.password)
+    .then((userAuth) => {
+    // Update the newly created user with a display name and a picture
+      updateProfile(userAuth.user, {
+        displayName: 'test name',
+        photoURL: 'test url',
+      })
+        .then(
+          // Dispatch the user information for persistence in the redux state
+          login({
+            email: userAuth.user.email,
+            uid: userAuth.user.uid,
+            displayName: userAuth.user.displayName,
+            photoUrl: userAuth.user.photoURL,
+          })
+        )
+        .catch((error) => {
+          console.log('user not updated');
+        });
+    })
+    .catch((err) => {
+      alert(err);
+    });
+       // navigation.navigate(RootNavigatekey.Information)
+
+       
+        navigation.replace(AuthNavigationKey.SignIn)
+        
     }
     
 
@@ -47,7 +87,7 @@ export const SignUpScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignU
         phoneNumber: "",
         email: "",
         password: "",
-        platform: Platform.OS,
+       // platform: Platform.OS,
     };
     // schema validation
     const phoneRegExp = /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/
@@ -73,8 +113,6 @@ export const SignUpScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignU
                     Sign Up
                 </Heading>
               
-
-
                 <Formik
                     initialValues={initFormValue}
                     validationSchema={SignInSchema}
@@ -156,8 +194,6 @@ export const SignUpScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignU
 
                     )}
                 </Formik>
-
-
             </Box>
         </Box>
     )
