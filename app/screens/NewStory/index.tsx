@@ -5,12 +5,25 @@ import { RootStackScreenProps } from "types";
 import * as ImagePicker from 'expo-image-picker';
 import { ImageIcon, PhoneIcon, VideoIcon } from "components/Icons/Light";
 import colors from "native-base/lib/typescript/theme/base/colors";
-import { TouchableOpacity } from "react-native";
+import { ActivityIndicator, TouchableOpacity } from "react-native";
+import { Timestamp, addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { auth, db, storage } from "config/firebase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+
+export type Storys = {
+    id?: string,
+    imageUrl: string,
+    createdAt: Timestamp,
+    seenUser: [],
+    likedUser: []
+}
 
 export const NewStoryScreen = (props: RootStackScreenProps<RootNavigatekey.NewStory>) => {
+    const currentUser = auth.currentUser?.uid!
     const { navigation, route } = props;
     const [imageUrl, setImageUrl] = useState('')
     const { colors } = useTheme()
+    const [isLoading, setLoading] = useState(false)
 
 
     useEffect(() => {
@@ -39,6 +52,32 @@ export const NewStoryScreen = (props: RootStackScreenProps<RootNavigatekey.NewSt
             setImageUrl(result.assets[0].uri);
         }
     };
+    const handleSubmit = async () => {
+        if (!imageUrl) return
+
+        setLoading(true)
+        const imgResponse = await fetch(imageUrl)
+        const blob = await imgResponse.blob()
+        const name = imageUrl.substring(imageUrl.lastIndexOf('/') + 1)
+        const storageRef = ref(storage, "images/".concat(name));
+
+        await uploadBytes(storageRef, blob).then((snapshot) => {
+            getDownloadURL(storageRef).then((url) => {
+                const newStory = {
+                    imageUrl: url,
+                    createdAt: serverTimestamp(),
+                    seenUser: [],
+                    likedUser: []
+                }
+
+                addDoc(collection(db, 'User', currentUser, 'Story'), newStory).then(async values => {
+                    console.log(values.id)
+                })
+            })
+        });
+        setLoading(false)
+    }
+
     return (
         <View flex={1} alignItems={'center'} justifyContent={'center'}>
 
@@ -57,7 +96,16 @@ export const NewStoryScreen = (props: RootStackScreenProps<RootNavigatekey.NewSt
                         alt=""
                     />
             }
-            <Button color={'primary.900'} position={'absolute'} right={2} bottom={2} w={150} h={20}>
+            {isLoading ? <ActivityIndicator size={84} color={colors.primary[900]} style={{
+                // height : "full",
+                // width : "full",
+                // height : '60px',
+                position: 'absolute'
+
+            }} /> : <></>}
+
+
+            <Button color={'primary.900'} position={'absolute'} right={2} bottom={2} w={150} h={20} disabled={imageUrl ? false : true} onPress={() => handleSubmit()}>
                 Share
             </Button>
 
