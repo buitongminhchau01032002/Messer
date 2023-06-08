@@ -1,9 +1,9 @@
-import { HStack, View, Image, Text } from "native-base";
+import { HStack, View, Image, Text, Pressable } from "native-base";
 import React from "react";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
-export const ListItem = (item: { avatar: string; name: string; onPress?: () => void }) => (
-    <TouchableOpacity onPress={() => {}}>
+export const ListItem = (item: { avatar: string, name: string, onPress?: () => void }) => (
+    <Pressable onPress={item.onPress}>
         <View>
             <HStack space={6} alignItems={'center'} my = {2}>
                 <Image
@@ -18,6 +18,6 @@ export const ListItem = (item: { avatar: string; name: string; onPress?: () => v
             </HStack>
             {/* <Divider/> */}
         </View>
-    </TouchableOpacity>
+    </Pressable>
     
 );

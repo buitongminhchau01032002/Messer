@@ -10,20 +10,10 @@ import { Platform, Pressable } from "react-native";
 import * as Yup from "yup";
 import { RootNavigatekey } from "navigation/navigationKey";
 import { useAppDispatch } from "hooks/index";
-import { login } from "slice/auth";
-import {
-    auth,
-    createUserWithEmailAndPassword,
-    updateProfile,
-    signInWithEmailAndPassword,
-  } from '../../config/firebase';
-  import { useDispatch } from 'react-redux';
- 
-type userAuth = {
-    phoneNumber: string,
-    email: string,
-    password: string,
-}
+import { reLogin } from "slice/auth";
+import { auth } from "config/firebase";
+import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
+
 
 export const SignUpScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignUp>) => {
 
@@ -33,42 +23,11 @@ export const SignUpScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignU
     const { navigation, route } = props
     const [isValidateOnChange, setIsValidateOnChange] = useState(false)
 
-    //register
-    function handleSubmitForm(values : userAuth) {
-        // call api login => success 
-        // dispatch(reLogin({token: ''}));
 
-           // Create a new user with Firebase
-    createUserWithEmailAndPassword(auth, values.email, values.password)
-    .then((userAuth) => {
-    // Update the newly created user with a display name and a picture
-      updateProfile(userAuth.user, {
-        displayName: 'test name',
-        photoURL: 'test url',
-      })
-        .then(
-          // Dispatch the user information for persistence in the redux state
-          login({
-            email: userAuth.user.email,
-            uid: userAuth.user.uid,
-            displayName: userAuth.user.displayName,
-            photoUrl: userAuth.user.photoURL,
-          })
-        )
-        .catch((error) => {
-          console.log('user not updated');
-        });
-    })
-    .catch((err) => {
-      alert(err);
-    });
-       // navigation.navigate(RootNavigatekey.Information)
-
-       
-        navigation.replace(AuthNavigationKey.SignIn)
-        
+    function handleSignUp(values) {
+        navigation.navigate(RootNavigatekey.Information, { email: values.email, password: values.password, phone: values.phoneNumber })
     }
-    
+
 
     useEffect(() => {
         navigation.setOptions({
@@ -104,26 +63,29 @@ export const SignUpScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignU
             .min(6, "Minimum 6 characters")
             .required("Password cannot be empty!"),
     });
+
     return (
-      <Box flex={1} w="100%" bg="white" alignItems="center">
+        <Box flex={1} w="100%" bg="white" alignItems="center">
             <Box safeArea p="2" w="90%" maxW="290">
                 <Heading size="xl" fontWeight="bold" color="blue.900" _dark={{
                     color: "warmGray.50"
                 }}>
                     Sign Up
                 </Heading>
-              
+
+
+
                 <Formik
                     initialValues={initFormValue}
                     validationSchema={SignInSchema}
-                    onSubmit={values => handleSubmitForm(values)}
+                    onSubmit={values => handleSignUp(values)}
                     validateOnChange={isValidateOnChange}
                 >
                     {({ handleSubmit, errors, values, validateForm, setFieldValue }) => (
                         <VStack h={400}>
 
                             <VStack space={4} mt="5" flex={1}>
-                            <FormControl isInvalid={Boolean(errors.phoneNumber)} h={90}>
+                                <FormControl isInvalid={Boolean(errors.phoneNumber)} h={90}>
                                     <FormControl.Label>Phone Number</FormControl.Label>
                                     <Input
                                         autoCapitalize="none"
@@ -186,7 +148,9 @@ export const SignUpScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignU
                             </VStack>
                             <CButton onPress={() => {
                                 setIsValidateOnChange(true)
-                                validateForm().then(() =>  handleSubmit() )
+                                validateForm().then(() => {
+                                    handleSubmit()
+                                })
                             }}>
                                 Sign up
                             </CButton>

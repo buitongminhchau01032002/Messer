@@ -26,11 +26,12 @@ import { EvilIcons, FontAwesome, FontAwesome5, Ionicons, Entypo, MaterialCommuni
 import { Animated, TouchableHighlight, StyleSheet, TouchableOpacity } from 'react-native';
 import { FlatList, GestureHandlerRootView, RectButton } from 'react-native-gesture-handler';
 import { addDoc, collection, getDoc, onSnapshot, query, doc, getDocs, where, or, documentId, orderBy, Timestamp, updateDoc, arrayUnion } from 'firebase/firestore';
-import { db } from 'config/firebase';
+import { auth, db } from 'config/firebase';
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 
-const currentUserId = "vSiv500SKpWqxPLOjYVY";
+// const currentUserId = "CPYyJYf2Rj2kUd8rCvff";
+
 
 
 const userList = [
@@ -119,11 +120,17 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
     const { navigation } = props;
     const { colors } = useTheme();
     const [messes, setMesses] = useState([])
+    const currentUserId = auth.currentUser?.uid
+    console.log(currentUserId)
 
     useEffect(() => {
 
         const fetchRoomData = async () => {
-            const q = query(collection(db, "SingleRoom"), or(where('userId1', '==', currentUserId), where('userId2', '==', currentUserId)));
+
+            // const messageRef = collection(db, 'SingleRoom', currentRoom, 'Message')
+            // const messageQuery = query(messageRef, orderBy('createdAt', 'asc'))
+            
+            const q = query(collection(db, "SingleRoom"), or(where('user1', '==', currentUserId), where('user2', '==', currentUserId)), orderBy('lastMessageTimestamp', 'desc'));
             const unsubscribe = onSnapshot(q, (querySnapshot) => {
                 const messes = [];
                 querySnapshot.forEach((doc) => {
@@ -158,7 +165,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     <TouchableOpacity onPress={() => navigation.navigate(RootNavigatekey.Search)}>
                         <SearchIcon size="md" color="primary.900" />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => { }}>
+                    <TouchableOpacity onPress={() => { navigation.navigate(RootNavigatekey.NewStory)}}>
                         <PlusIcon size="md" color="primary.900" />
                     </TouchableOpacity>
                 </HStack>
@@ -167,6 +174,8 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         });
     }, [props.navigation]);
 
+
+
     return (
         <View backgroundColor={'white'} flex={1}>
             <ScrollView flex={1} showsVerticalScrollIndicator={false}>
@@ -174,32 +183,8 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                         <HStack space={4}>
                             {userList.map((item, idx) => (
-                                <TouchableOpacity onPress={async () => {
-                                    try {
-                                        const room = await addDoc(collection(db, "SingleRoom"), {
-                                            userId1: "1",
-                                            userId2: "2",
-                                            pinMessage: [],
-                                            unnotification: [],
-                                            messages: [],
-                                            imageStore: [],
-                                            linkStore: [],
-                                            lastMessage: "3"
-                                        });
-                                        console.log("Document written with ID: ", room.id);
+                                <TouchableOpacity onPress={() => {
 
-                                        const message = await addDoc(collection(db, "Message"), {
-                                            type: "text",
-                                            content: "2",
-                                            files: [],
-                                            sender: "1"
-                                        });
-                                        console.log("Document written with ID: ", message.id);
-
-
-                                    } catch (e) {
-                                        console.error("Error adding document: ", e);
-                                    }
                                 }}>
                                     <VStack width={16} space={1} alignItems="center" ml={idx === 0 ? 4 : 0}>
                                         <Center width={16} height={16} position="relative">
@@ -237,9 +222,11 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                                 {...item}
                                 key={item.id}
                                 onPress={async () => {
-                                    navigation.navigate(RootNavigatekey.MessageDetail);
-                                    const roomRef = doc(db, "SingleRoom", item.id);
-                                    await updateDoc(roomRef, {
+                                    navigation.navigate(RootNavigatekey.MessageDetail, { type: "single", room: item });
+                                    // const roomCol = collection(db, "SingleRoom", item.id, "ReadUser");
+                                    // addDoc(roomCol, { user: currentUserId })
+
+                                    await updateDoc(doc(db, "SingleRoom", item.id), {
                                         reads: arrayUnion(currentUserId)
                                     });
 

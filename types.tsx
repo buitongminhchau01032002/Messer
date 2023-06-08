@@ -11,6 +11,7 @@ import {
     AppTabsNavigationKey,
     AuthNavigationKey,
 } from 'navigation/navigationKey';
+import { Room, SingleRoom } from 'screens/Message/type';
 
 declare global {
     namespace ReactNavigation {
@@ -35,9 +36,9 @@ export type RootStackParamList = {
     [RootNavigatekey.AppTabs]: NavigatorScreenParams<AppTabsStackParamList> | undefined;
     [RootNavigatekey.Auth]: NavigatorScreenParams<AuthStackParamList> | undefined;
     [RootNavigatekey.Wallet]: undefined;
-    [RootNavigatekey.Information]: undefined;
+    [RootNavigatekey.Information]: {email: string , password: string, phone: string};
     [RootNavigatekey.InformationQR]: undefined;
-    [RootNavigatekey.MessageDetail]: undefined;
+    [RootNavigatekey.MessageDetail]: {type: "single"|"multi" , room: SingleRoom};
     [RootNavigatekey.NotFound]: undefined;
     [RootNavigatekey.Intro]: undefined;
     [RootNavigatekey.Modal]: undefined;
@@ -45,6 +46,8 @@ export type RootStackParamList = {
     [RootNavigatekey.Calling]: undefined;
     [RootNavigatekey.CallWaiting]: undefined;
     [RootNavigatekey.Search]: undefined;
+    [RootNavigatekey.Story]: undefined;
+    [RootNavigatekey.NewStory]: undefined;
 };
 // props type
 export type AppTabsStackScreenProps<Screen extends keyof AppTabsStackParamList> = CompositeScreenProps<

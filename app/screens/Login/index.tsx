@@ -8,6 +8,10 @@ import { Formik } from "formik";
 import { UserType } from "models/User";
 import { Platform, Pressable } from "react-native";
 import * as Yup from "yup";
+import { auth, db } from "config/firebase";
+import { signInWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
+import messaging from '@react-native-firebase/messaging';
 
 
 export const LoginScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignIn>) => {
@@ -17,15 +21,43 @@ export const LoginScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignIn
     const [isValidateOnChange, setIsValidateOnChange] = useState(false)
 
 
+    async function handleLogin(values) {
+        // call api login => success 
+        // dispatch(reLogin({token: ''}));
+
+        // navigation.navigate(RootNavigatekey.Information)
+        await signInWithEmailAndPassword(auth, values.email, values.password)
+            .then(async (userCredential) => {
+                // Signed in 
+                const user = userCredential.user;
+                const deviceToken = await messaging().getToken()
+                await updateDoc(doc(db, "User", userCredential.user.uid), {
+                    deviceToken : deviceToken
+                  });
+                  
+                // ...
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+            });
+
+
+        // console.log("sd")
+        console.log(auth.currentUser?.displayName)
+
+        // console.log(await auth.currentUser?.getIdToken)
+    }
+
+
+
     useEffect(() => {
         navigation.setOptions({
             headerRight: (props) =>
                 <Text color="blue.900"
-                     onPress={() => navigation.navigate(AuthNavigationKey.SignUp)}
-                   // onPress={() => navigation.replace(RootNavigatekey.Information)}
-                    >
-
-                    
+                    onPress={() => navigation.navigate(AuthNavigationKey.SignUp)}
+                // onPress={() => navigation.replace(RootNavigatekey.Information)}
+                >
                     Sign up
                 </Text>,
             title: '',
@@ -47,7 +79,7 @@ export const LoginScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignIn
             .required("Email cannot be empty!"),
 
         password: Yup.string()
-            .equals(['123456'], "Incorrect password")
+            .min(6, "Minimum 6 characters")
             .required("Password cannot be empty!"),
     });
     return (
@@ -68,7 +100,7 @@ export const LoginScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignIn
                 <Formik
                     initialValues={initFormValue}
                     validationSchema={SignInSchema}
-                    onSubmit={values => console.log(values)}
+                    onSubmit={values => handleLogin(values)}
                     validateOnChange={isValidateOnChange}
                 >
                     {({ handleSubmit, errors, values, validateForm, setFieldValue }) => (
@@ -126,7 +158,9 @@ export const LoginScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignIn
                             </VStack>
                             <CButton onPress={() => {
                                 setIsValidateOnChange(true)
-                                validateForm().then(() => { })
+                                validateForm().then(() => {
+                                    handleSubmit()
+                                })
                             }}>
                                 Sign in
                             </CButton>

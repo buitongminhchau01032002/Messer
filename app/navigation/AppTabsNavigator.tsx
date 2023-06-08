@@ -34,7 +34,7 @@ export default function AppTabsNavigator() {
                 component={HomeScreen}
                 options={{
                     title: AppTabsNavigationKey.Home,
-                    tabBarIcon: () => <MicIcon size="md" color="primary.900" />,
+                    tabBarIcon: () => <MicIcon size='md' color='primary.900' />,
                 }}
             />
             <BottomTab.Screen
@@ -42,7 +42,7 @@ export default function AppTabsNavigator() {
                 component={MessageScreen}
                 options={{
                     title: 'Channels',
-                    tabBarIcon: () => <MessageCircleIcon size="md" color="primary.900" />,
+                    tabBarIcon: () => <MessageCircleIcon size='md' color='primary.900' />,
                 }}
             />
             <BottomTab.Screen
@@ -50,7 +50,7 @@ export default function AppTabsNavigator() {
                 component={BudgetScreen}
                 options={{
                     title: AppTabsNavigationKey.Budget,
-                    tabBarIcon: () => <BellIcon size="md" color="primary.900" />,
+                    tabBarIcon: () => <BellIcon size='md' color='primary.900' />,
                 }}
             />
             <BottomTab.Screen
@@ -58,7 +58,7 @@ export default function AppTabsNavigator() {
                 component={AccountScreen}
                 options={{
                     title: 'Account',
-                    tabBarIcon: () => <UserIcon size="md" color="primary.900" />,
+                    tabBarIcon: () => <UserIcon size='md' color='primary.900' />,
                 }}
             />
         </BottomTab.Navigator>
