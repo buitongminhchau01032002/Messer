@@ -1,6 +1,7 @@
 export enum AuthNavigationKey {
     SignIn = 'SignIn',
     SignUp = 'SignUp',
+    OTP = 'OTP',
 }
 
 export enum AppTabsNavigationKey {
@@ -18,8 +19,11 @@ export enum RootNavigatekey {
     Wallet = 'Wallet',
     MessageDetail = 'MessageDetail',
     Modal = 'Modal',
+    Information = 'Information',
+    InformationQR = 'InformationQR',
     NotFound = 'NotFound',
     ComingCall = 'ComingCall',
     Calling = 'Calling',
     CallWaiting = 'CallWaiting',
+    Search = 'Search'
 }

@@ -28,12 +28,15 @@ export type AppTabsStackParamList = {
 export type AuthStackParamList = {
     [AuthNavigationKey.SignIn]: undefined;
     [AuthNavigationKey.SignUp]: undefined;
+    [AuthNavigationKey.OTP]: undefined;
 };
 
 export type RootStackParamList = {
     [RootNavigatekey.AppTabs]: NavigatorScreenParams<AppTabsStackParamList> | undefined;
     [RootNavigatekey.Auth]: NavigatorScreenParams<AuthStackParamList> | undefined;
     [RootNavigatekey.Wallet]: undefined;
+    [RootNavigatekey.Information]: undefined;
+    [RootNavigatekey.InformationQR]: undefined;
     [RootNavigatekey.MessageDetail]: undefined;
     [RootNavigatekey.NotFound]: undefined;
     [RootNavigatekey.Intro]: undefined;
@@ -41,13 +44,17 @@ export type RootStackParamList = {
     [RootNavigatekey.ComingCall]: undefined;
     [RootNavigatekey.Calling]: undefined;
     [RootNavigatekey.CallWaiting]: undefined;
+    [RootNavigatekey.Search]: undefined;
 };
 // props type
 export type AppTabsStackScreenProps<Screen extends keyof AppTabsStackParamList> = CompositeScreenProps<
     BottomTabScreenProps<AppTabsStackParamList, Screen>,
     NativeStackScreenProps<RootStackParamList>>;
 
-export type AuthStackScreenProps<T extends keyof AuthStackParamList> = NativeStackScreenProps<AuthStackParamList, T>;
+// export type AuthStackScreenProps<T extends keyof AuthStackParamList> = NativeStackScreenProps<AuthStackParamList, T>;
+export type AuthStackScreenProps<T extends keyof AuthStackParamList> = CompositeScreenProps<
+NativeStackScreenProps<AuthStackParamList, T>,
+NativeStackScreenProps<RootStackParamList>>;
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<
     RootStackParamList,

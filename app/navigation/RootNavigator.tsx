@@ -28,6 +28,9 @@ import { Box } from 'native-base';
 import { ComingCallScreen } from 'screens/ComingCall';
 import { CallingScreen } from 'screens/Calling';
 import { CallWaitingScreen } from 'screens/CallWaiting';
+import { SearchScreen } from 'screens/Search';
+import { InformationScreen } from "screens/Information";
+import { InformationScreenQR } from "screens/InformationQR";
 
 export default function Navigation() {
     // hooks
@@ -48,7 +51,8 @@ export default function Navigation() {
         await loadingI18nSource();
         // rehydrate
         const token = (await storage.get('token')) ?? '';
-        dispatch(reLogin({ token: token }));
+        // dispatch(reLogin({ token: token }));
+
         dispatch(
             changeApplicationState({
                 isAppReady: true,
@@ -78,9 +82,10 @@ function RootNavigator() {
 
     console.log('call state: ', callState);
 
+    console.log(isLogin)
     return (
         <Stack.Navigator>
-            {!isLogin ? (
+            {isLogin ? (
                 <Stack.Screen name={RootNavigatekey.Auth} component={AuthNavigator} options={{ headerShown: false }} />
             ) : (
                 <>
@@ -90,10 +95,17 @@ function RootNavigator() {
                         options={{ headerShown: false }}
                     />
                     <Stack.Screen name={RootNavigatekey.Wallet} component={WalletScreen} />
+                    <Stack.Screen name={RootNavigatekey.InformationQR} component={InformationScreenQR} />
                 </>
             )}
             <Stack.Group navigationKey={isLogin ? 'user' : 'guest'} screenOptions={{ presentation: 'modal' }}>
                 <Stack.Screen name={RootNavigatekey.MessageDetail} component={MessageDetailScreen} />
+                <Stack.Screen name={RootNavigatekey.Information} component={InformationScreen} />
+                <Stack.Screen
+                    name={RootNavigatekey.MessageDetail}
+                    component={MessageDetailScreen}
+                    options={{ headerShadowVisible: false }}
+                />
                 <Stack.Screen name={RootNavigatekey.Intro} component={IntroScreen} options={{ headerShown: false }} />
                 <Stack.Screen name={RootNavigatekey.NotFound} component={NotFoundScreen} options={{ title: 'Oops!' }} />
                 <Stack.Screen name={RootNavigatekey.Modal} component={ModalScreen} />
@@ -110,6 +122,11 @@ function RootNavigator() {
                 <Stack.Screen
                     name={RootNavigatekey.CallWaiting}
                     component={CallWaitingScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+                <Stack.Screen
+                    name={RootNavigatekey.Search}
+                    component={SearchScreen}
                     options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
                 />
             </Stack.Group>
