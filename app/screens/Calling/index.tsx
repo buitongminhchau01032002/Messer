@@ -22,6 +22,10 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         setIsOnMic(!isOnMic);
     }
 
+    function handleHangup() {
+        props.navigation.navigate(RootNavigatekey.AppTabs);
+    }
+
     return (
         <Box position="relative" flex={1}>
             <Box position="absolute" top="0" left="0" right="0" bottom="0">
@@ -52,14 +56,14 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
                         icon={isOnMic ? <MicIcon size="lg" color="white" /> : <MicOffIcon size="lg" color="white" />}
                     />
                     {/* HANGUP */}
-                    <Pressable>
+                    
                         <IconButton
+                            onPress={handleHangup}
                             size="20"
                             rounded="full"
                             bg="primary.900"
                             icon={<PhoneIcon size="xl" color="white" />}
                         />
-                    </Pressable>
                     {/* VOLUME */}
                     <IconButton
                         size={12}

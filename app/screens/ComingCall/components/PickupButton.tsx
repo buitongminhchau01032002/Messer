@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import Animated, {
     runOnJS,
@@ -21,9 +21,10 @@ type PickupButtonPropsType = {
     onDragStart: Function;
     onDragEnd: Function;
     isVisible: boolean;
+    onPickup: () => void;
 };
 
-export function PickupButton({ onDragStart, onDragEnd, isVisible }: PickupButtonPropsType) {
+export function PickupButton({ onDragStart, onDragEnd, isVisible, onPickup }: PickupButtonPropsType) {
     const { colors } = useTheme();
 
     const translateX = useSharedValue(0);
@@ -40,6 +41,7 @@ export function PickupButton({ onDragStart, onDragEnd, isVisible }: PickupButton
             }
             if (translateX.value > 260) {
                 translateX.value = 260;
+                onPickup();
             }
         },
         onEnd: () => {
