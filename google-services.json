@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "805121390882",
+    "project_id": "messer-4c81b",
+    "storage_bucket": "messer-4c81b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:805121390882:android:06def83177a9d05eb04d7b",
+        "android_client_info": {
+          "package_name": "com.anbui.messer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "805121390882-urequu2sca69c16rg3h4btc6j5kf17nt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAw2CPFmZfmVk93-uIAWfa0LTnyinl_0qs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "805121390882-urequu2sca69c16rg3h4btc6j5kf17nt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:805121390882:android:3cb9da2297efd757b04d7b",
+        "android_client_info": {
+          "package_name": "com.mc.testvideocall"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "805121390882-urequu2sca69c16rg3h4btc6j5kf17nt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAw2CPFmZfmVk93-uIAWfa0LTnyinl_0qs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "805121390882-urequu2sca69c16rg3h4btc6j5kf17nt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

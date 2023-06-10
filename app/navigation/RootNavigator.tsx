@@ -36,7 +36,7 @@ export default function Navigation() {
     const loadingFont = async () => {
         await Font.loadAsync({
             ...FontAwesome.font,
-            'Poppins': require('../assets/fonts/Poppins-Regular.ttf'),
+            Poppins: require('../assets/fonts/Poppins-Regular.ttf'),
         });
     };
     const loadingI18nSource = async () => {
@@ -69,11 +69,14 @@ function RootNavigator() {
     // hooks
     const isAppReady = useAppSelector((state) => state.application.isAppReady);
     const { isLogin } = useAppSelector((state) => state.auth);
+    const callState = useAppSelector((state) => state.call);
 
     // console.log(isAppReady);
     if (!isAppReady) {
         return <IntroScreen />;
     }
+
+    console.log('call state: ', callState);
 
     return (
         <Stack.Navigator>
@@ -90,16 +93,25 @@ function RootNavigator() {
                 </>
             )}
             <Stack.Group navigationKey={isLogin ? 'user' : 'guest'} screenOptions={{ presentation: 'modal' }}>
-                <Stack.Screen
-                    name={RootNavigatekey.MessageDetail}
-                    component={MessageDetailScreen}
-                />
+                <Stack.Screen name={RootNavigatekey.MessageDetail} component={MessageDetailScreen} />
                 <Stack.Screen name={RootNavigatekey.Intro} component={IntroScreen} options={{ headerShown: false }} />
                 <Stack.Screen name={RootNavigatekey.NotFound} component={NotFoundScreen} options={{ title: 'Oops!' }} />
                 <Stack.Screen name={RootNavigatekey.Modal} component={ModalScreen} />
-                <Stack.Screen name={RootNavigatekey.ComingCall} component={ComingCallScreen} options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: ''}} />
-                <Stack.Screen name={RootNavigatekey.Calling} component={CallingScreen} options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: ''}} />
-                <Stack.Screen name={RootNavigatekey.CallWaiting} component={CallWaitingScreen} options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: ''}} />
+                <Stack.Screen
+                    name={RootNavigatekey.ComingCall}
+                    component={ComingCallScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+                <Stack.Screen
+                    name={RootNavigatekey.Calling}
+                    component={CallingScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+                <Stack.Screen
+                    name={RootNavigatekey.CallWaiting}
+                    component={CallWaitingScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
             </Stack.Group>
         </Stack.Navigator>
     );
