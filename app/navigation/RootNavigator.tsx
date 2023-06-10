@@ -1,8 +1,15 @@
-import { NavigationContainer, NavigationContainerRef, CommonActions, StackActions } from '@react-navigation/native';
+import {
+    NavigationContainer,
+    NavigationContainerRef,
+    CommonActions,
+    StackActions,
+    useNavigation,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ColorSchemeName } from 'react-native';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 
 import ModalScreen from '../screens/ModalScreen';
 import NotFoundScreen from '../screens/NotFoundScreen';
@@ -22,6 +29,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { reLogin } from 'slice/auth';
+import { Alert } from 'react-native';
 import { MessageDetailScreen } from 'screens/Message/pages/MessagesDetail';
 import { WalletScreen } from 'screens/Wallet';
 import { Box } from 'native-base';
@@ -29,13 +37,19 @@ import { ComingCallScreen } from 'screens/ComingCall';
 import { CallingScreen } from 'screens/Calling';
 import { CallWaitingScreen } from 'screens/CallWaiting';
 import { SearchScreen } from 'screens/Search';
-import { InformationScreen } from "screens/Information";
-import { InformationScreenQR } from "screens/InformationQR";
+import { InformationScreen } from 'screens/Information';
+import { InformationScreenQR } from 'screens/InformationQR';
+import { PermissionsAndroid } from 'react-native';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from 'config/firebase';
+import { CallState, callActions } from 'slice/call';
+import sendMessage from 'utils/sendMessage';
 
 export default function Navigation() {
     // hooks
     const dispatch = useAppDispatch();
     // action
+    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
     const loadingFont = async () => {
         await Font.loadAsync({
             ...FontAwesome.font,
@@ -72,21 +86,88 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function RootNavigator() {
     // hooks
     const isAppReady = useAppSelector((state) => state.application.isAppReady);
+    const dispatch = useAppDispatch();
     const { isLogin } = useAppSelector((state) => state.auth);
     const callState = useAppSelector((state) => state.call);
+
+    useEffect(() => {
+        getToken();
+        const unsubscribe = messaging().onMessage(async (payload: FirebaseMessagingTypes.RemoteMessage) => {
+            // Vibration.vibrate([2000, 1000], true);
+            console.log('Message received. ', payload);
+            if (payload.data?.type === 'create') {
+                handleRecievedCall(payload.data.docId);
+            }
+            if (payload.data?.type === 'reject') {
+                // handleEndCall();
+            }
+            if (payload.data?.type === 'cancel') {
+                // handleRecievedCancelCall(payload.data);
+            }
+            if (payload.data?.type === 'hangup') {
+                // handleEndCall();
+            }
+        });
+        messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+            console.log('Message handled in the background!', remoteMessage);
+        });
+
+        messaging().onNotificationOpenedApp((remoteMessage) => {
+            console.log('Notification caused app to open from background state:', remoteMessage);
+        });
+
+        return unsubscribe;
+    }, []);
+    async function getToken() {
+        const fcmToken = await messaging().getToken();
+        if (fcmToken) {
+            console.log(fcmToken);
+        }
+    }
+
+    async function handleRecievedCall(docId: string) {
+        const docSnap = await getDoc(doc(db, 'calls', docId));
+        if (docSnap.exists()) {
+            if (callState.state !== CallState.NoCall) {
+                sendMessage(docSnap.data()?.fromUser?.device, {
+                    type: 'reject',
+                    docId: docSnap.id,
+                });
+                return;
+            }
+
+            // TODO: check toUser is correct current user
+            // if (docSnap.data()?.toUser?.id === user?.id) {
+            //     
+            // }
+            if (true) {
+                dispatch(callActions.changeCallInfor({ id: docSnap.id, ...docSnap.data() }));
+                dispatch(callActions.changeCallState(CallState.Coming));
+            }
+        }
+    }
+
+    // Log
+    useEffect(() => {
+        console.log('🍍 State call:', callState.state);
+        console.log('🍏 Call infor:', callState.infor && 'call infor');
+    }, [callState]);
 
     // console.log(isAppReady);
     if (!isAppReady) {
         return <IntroScreen />;
     }
 
-    console.log('call state: ', callState);
-
-    console.log(isLogin)
     return (
         <Stack.Navigator>
             {isLogin ? (
                 <Stack.Screen name={RootNavigatekey.Auth} component={AuthNavigator} options={{ headerShown: false }} />
+            ) : callState.state === CallState.Coming ? (
+                <Stack.Screen
+                    name={RootNavigatekey.ComingCall}
+                    component={ComingCallScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
             ) : (
                 <>
                     <Stack.Screen
@@ -99,7 +180,6 @@ function RootNavigator() {
                 </>
             )}
             <Stack.Group navigationKey={isLogin ? 'user' : 'guest'} screenOptions={{ presentation: 'modal' }}>
-                <Stack.Screen name={RootNavigatekey.MessageDetail} component={MessageDetailScreen} />
                 <Stack.Screen name={RootNavigatekey.Information} component={InformationScreen} />
                 <Stack.Screen
                     name={RootNavigatekey.MessageDetail}
@@ -109,11 +189,7 @@ function RootNavigator() {
                 <Stack.Screen name={RootNavigatekey.Intro} component={IntroScreen} options={{ headerShown: false }} />
                 <Stack.Screen name={RootNavigatekey.NotFound} component={NotFoundScreen} options={{ title: 'Oops!' }} />
                 <Stack.Screen name={RootNavigatekey.Modal} component={ModalScreen} />
-                <Stack.Screen
-                    name={RootNavigatekey.ComingCall}
-                    component={ComingCallScreen}
-                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
-                />
+
                 <Stack.Screen
                     name={RootNavigatekey.Calling}
                     component={CallingScreen}

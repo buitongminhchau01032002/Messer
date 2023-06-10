@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import storage from 'services/storage';
 
-enum CallState {
+export enum CallState {
     Create = 'Create',
     NoCall = 'NoCall',
     Calling = 'Calling',
@@ -33,7 +33,7 @@ type CallInfor = {
 
 type CallSliceType = {
     state: CallState;
-    infor: CallInfor | null;
+    infor: Object | null;
 };
 
 const initialState: CallSliceType = {
@@ -48,12 +48,12 @@ export const callSlice = createSlice({
         changeCallState: (state, { payload }: PayloadAction<CallState>) => {
             state.state = payload;
         },
-        changeCallInfor: (state, { payload }: PayloadAction<CallInfor>) => {
+        changeCallInfor: (state, { payload }: PayloadAction<Object>) => {
             state.infor = payload;
         },
     },
 });
 
-export const callSliceActions = callSlice.actions;
+export const callActions = callSlice.actions;
 
 export default callSlice.reducer;
