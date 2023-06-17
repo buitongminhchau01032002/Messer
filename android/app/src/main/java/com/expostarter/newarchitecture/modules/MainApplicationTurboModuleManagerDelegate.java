@@ -1,4 +1,4 @@
-package com.mc.testvideocall.newarchitecture.modules;
+package com.expostarter.newarchitecture.modules;
 
 import com.facebook.jni.HybridData;
 import com.facebook.react.ReactPackage;

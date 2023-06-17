@@ -1,4 +1,4 @@
-package com.mc.testvideocall.newarchitecture;
+package com.expostarter.newarchitecture;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -20,9 +20,9 @@ import com.facebook.react.fabric.EmptyReactNativeConfig;
 import com.facebook.react.fabric.FabricJSIModuleProvider;
 import com.facebook.react.fabric.ReactNativeConfig;
 import com.facebook.react.uimanager.ViewManagerRegistry;
-import com.mc.testvideocall.BuildConfig;
-import com.mc.testvideocall.newarchitecture.components.MainComponentsRegistry;
-import com.mc.testvideocall.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
+import com.expostarter.BuildConfig;
+import com.expostarter.newarchitecture.components.MainComponentsRegistry;
+import com.expostarter.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
 import java.util.ArrayList;
 import java.util.List;
 

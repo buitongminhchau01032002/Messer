@@ -1,4 +1,4 @@
-package com.mc.testvideocall;
+package com.expostarter;
 
 import android.os.Build;
 import android.os.Bundle;
