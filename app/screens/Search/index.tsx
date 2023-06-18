@@ -1,7 +1,7 @@
 import { APP_PADDING } from 'app/constants/Layout';
 import { SearchIcon } from 'components/Icons/Light/Search';
 import { auth, db } from 'config/firebase';
-import { query, collection, where, onSnapshot, or, getDocs, addDoc } from 'firebase/firestore';
+import { query, collection, where, onSnapshot, or, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ScrollView, View, Text, HStack, useTheme, TextField, Input, Box, VStack, Image, Divider } from 'native-base';
 import { RootNavigatekey } from 'navigation/navigationKey';
 import React, { useState } from 'react';
@@ -90,6 +90,7 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
                                         const room = await addDoc(collection(db, "SingleRoom"), {
                                             user1: auth.currentUser?.uid,
                                             user2: item.id,
+                                            lastMessageTimestamp: serverTimestamp()
                                         });
                                     } catch (e) {
                                         console.error("Error adding document: ", e);
