@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 rootProject.name = 'expostarter'
+=======
+rootProject.name = 'expo-starter'
+>>>>>>> merge-branch
 
 apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute(null, rootDir).text.trim(), "../scripts/autolinking.gradle");
 useExpoModules()

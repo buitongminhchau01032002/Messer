@@ -44,6 +44,10 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from 'config/firebase';
 import { CallState, callActions } from 'slice/call';
 import sendMessage from 'utils/sendMessage';
+import { auth } from 'config/firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { StoryScreen } from 'screens/Story';
+import { NewStoryScreen } from 'screens/NewStory';
 
 export default function Navigation() {
     // hooks
@@ -87,7 +91,8 @@ function RootNavigator() {
     // hooks
     const isAppReady = useAppSelector((state) => state.application.isAppReady);
     const dispatch = useAppDispatch();
-    const { isLogin } = useAppSelector((state) => state.auth);
+    // const { isLogin } = useAppSelector((state) => state.auth);
+    const [isLogin, setIsLogin] = useState(auth.currentUser ? true : false);
     const callState = useAppSelector((state) => state.call);
 
     useEffect(() => {
@@ -152,15 +157,25 @@ function RootNavigator() {
         console.log('🍍 State call:', callState.state);
         console.log('🍏 Call infor:', callState.infor && 'call infor');
     }, [callState]);
+    
 
-    // console.log(isAppReady);
+    // signOut(auth)
+    console.log(auth.currentUser?.email);
     if (!isAppReady) {
         return <IntroScreen />;
     }
 
+    onAuthStateChanged(auth, (user) => {
+        console.log("current user", user?.email)
+        if (user) {
+            setIsLogin(true)
+        } else {
+            setIsLogin(false)
+        }
+    });
     return (
         <Stack.Navigator>
-            {isLogin ? (
+            {!isLogin ? (
                 <Stack.Screen name={RootNavigatekey.Auth} component={AuthNavigator} options={{ headerShown: false }} />
             ) : callState.state === CallState.Coming ? (
                 <Stack.Screen
@@ -179,7 +194,7 @@ function RootNavigator() {
                     <Stack.Screen name={RootNavigatekey.InformationQR} component={InformationScreenQR} />
                 </>
             )}
-            <Stack.Group navigationKey={isLogin ? 'user' : 'guest'} screenOptions={{ presentation: 'modal' }}>
+            <Stack.Group navigationKey={isLogin ? 'user' : 'guest'}>
                 <Stack.Screen name={RootNavigatekey.Information} component={InformationScreen} />
                 <Stack.Screen
                     name={RootNavigatekey.MessageDetail}
@@ -203,6 +218,17 @@ function RootNavigator() {
                 <Stack.Screen
                     name={RootNavigatekey.Search}
                     component={SearchScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+                <Stack.Screen
+                    name={RootNavigatekey.Story}
+                    component={StoryScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+
+                <Stack.Screen
+                    name={RootNavigatekey.NewStory}
+                    component={NewStoryScreen}
                     options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
                 />
             </Stack.Group>

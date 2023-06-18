@@ -31,18 +31,36 @@ import {
 import { AppTabsNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, ScrollView } from 'react-native';
+import { ActivityIndicator, Platform, ScrollView } from 'react-native';
 import { AppTabsStackScreenProps, RootStackScreenProps } from 'types';
 import { MessageItem } from '../components/MessageItem';
-import { SendType } from '../type';
+import { Message, SendType, User } from '../type';
+import { addDoc, collection, getDoc, onSnapshot, query, doc, getDocs, where, or, documentId, orderBy, Timestamp, updateDoc, arrayUnion, FieldPath, DocumentData, QueryDocumentSnapshot, SnapshotOptions, WithFieldValue, serverTimestamp, setDoc } from 'firebase/firestore';
+import { auth, converter, db } from 'config/firebase';
 
 export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.MessageDetail>) => {
+    //navigate
     const { navigation, route } = props;
+    //navigate params
+    const { room } = route.params
     // hooks
     const { colors } = useTheme();
     // states
-    const [quoteMessage, setQuoteMessage] = useState('');
+    const [quoteMessage, setQuoteMessage] = useState<Message>();
+    const [content, setContent] = useState('');
     const scrollRef = useRef<ScrollView | null>(null);
+    const [isLoading, setIsLoading] = useState(true); // Set loading to true on component mount
+    const [isSending, setIsSending] = useState(false); // Set loading to true on component mount
+    const [messages, setMessages] = useState<Message[]>([]); // Initial empty array of users
+    const [users, setUsers] = useState([])
+
+    // const curentUser = 'CPYyJYf2Rj2kUd8rCvff'
+    const currentUser = auth.currentUser?.uid ?? ""
+    // const currentRoom = "3T7VtjOcHbbi2oTVa5gX"
+    const currentRoom = room.id ?? ""
+
+    // console.log()
+
 
     useEffect(() => {
         navigation.setOptions({
@@ -60,6 +78,126 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
             headerTitleStyle: { color: colors.blue[900] },
         });
     }, [navigation]);
+
+
+
+    useEffect(() => {
+        console.log(1)
+        const messageRef = collection(db, 'SingleRoom', currentRoom, 'Message')
+        const messageQuery = query(messageRef, orderBy('createdAt', 'asc'))
+
+        const fetchMessageData = async () => {
+
+            // await fetchUserData().catch(console.error)
+            let userDatas = []
+            const q = query(collection(db, "User"), or(where(documentId(), '==', room.user1), where(documentId(), '==', room.user2)));
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) => {
+                userDatas.push({
+                    id: doc.id,
+                    ...doc.data()
+                })
+            })
+            setUsers(userDatas)
+
+            const unsub = onSnapshot(messageQuery.withConverter(converter<Message>()), async (messagesSnap) => {
+                const newMessages = []
+                for (const message of messagesSnap.docs) {
+                    const newMessage = message.data()
+                    // populate reply
+                    if (newMessage.replyMessage) {
+                        const replyMessage = (await getDoc(doc(messageRef, newMessage.replyMessage as string).withConverter(converter<Message>()))).data()!
+                        const reply = userDatas.find((u) => u.id == replyMessage.sender)
+                        replyMessage.sender = {
+                            id: reply.id,
+                            avatar: reply.avatar,
+                            name: reply.name
+                        }
+
+                        newMessage.replyMessage = replyMessage;
+                    }
+                    // // populate user
+                    const sender = userDatas.find((u) => u.id == newMessage.sender)
+                    newMessage.sender = {
+                        id: sender.id ?? "",
+                        avatar: sender.avatar,
+                        name: sender.name
+                    }
+                    console.log("sender", newMessage.sender)
+                    newMessages.push(newMessage)
+                }
+                console.log(0)
+                console.log(messages)
+                setMessages(newMessages)
+
+                setIsLoading(false)
+            });
+        }
+
+        fetchMessageData().catch(console.error)
+        setIsLoading(true)
+        // return () => unsub()
+    }, []);
+
+    useEffect(() => {
+        scrollRef.current?.scrollToEnd()
+    }, [messages])
+
+    const handleSendMessage = (content: string) => {
+        if (!content) {
+            return
+        }
+
+        setIsSending(true)
+        const newMessage: Message = {
+            content,
+            sender: currentUser,
+            type: 'text',
+            createdAt: serverTimestamp(),
+        }
+        if (quoteMessage) {
+            newMessage.replyMessage = quoteMessage.id
+        }
+
+        addDoc(collection(db, 'SingleRoom', currentRoom, 'Message'), newMessage).then(async values => {
+            setIsSending(false)
+            // send notification
+
+            const receiver = users.find((u) => u.id != newMessage.sender)
+            const sender = users.find((u) => u.id == newMessage.sender)
+
+            await updateDoc(doc(db, "SingleRoom", room.id ?? ""), {
+                lastMessage: newMessage,
+                lastMessageTimestamp: newMessage.createdAt,
+                reads: [currentUser]
+            });
+
+
+
+            fetch('https://fcm.googleapis.com/fcm/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'key=AAAAu3T5eSI:APA91bFfynL6hecTGjN4jGBUULhccdSWIBKjG0oBWefs3D5KvDu5IWHUJSJD9F3uMjhmuZbXqsUSj6GBsqRYkQgt2d2If4FUaYHy3bZ-E8NpBhqHYjsyfB9D1Nk-hxVKelYn165SqRdL',
+
+                },
+                body: JSON.stringify({
+                    "to": receiver.deviceToken,
+                    "notification": {
+                        "body": newMessage.content,
+                        "OrganizationId": "2",
+                        "content_available": true,
+                        "priority": "high",
+                        "subtitle": "PhotoMe",
+                        "title": sender.name.concat(" texted you")
+                    }
+                }),
+            });
+        })
+        setContent('')
+        setQuoteMessage(undefined)
+    }
+
     return (
         <Box flex={1} bg="white">
             <KeyboardAvoidingView flex={1}>
@@ -70,45 +208,17 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                         showsVerticalScrollIndicator={false}
                     >
                         <VStack space={2}>
-                            <MessageItem
-                                content={
-                                    'NativeBase started out as an open source framework that enabled developers to build high-quality mobile apps using React Native. The first version included UITabBar on iOS and Drawer on Android. NativeBase v1 was very well-received by the dev community.'
-                                }
-                                quote="abcd"
-                                sendType={SendType.Receive}
-                                onLongPress={() => {
-                                    setQuoteMessage('abcd');
-                                }}
-                            />
-                            <MessageItem
-                                content={
-                                    'NativeBase started out as an open source framework that enabled developers to build high-quality mobile apps using React Native. The first version included UITabBar on iOS and Drawer on Android. NativeBase v1 was very well-received by the dev community.'
-                                }
-                                sendType={SendType.Send}
-                                onLongPress={() => {
-                                    setQuoteMessage('abcd');
-                                }}
-                            />
-                            <MessageItem
-                                content={
-                                    'NativeBase started out as an open source framework that enabled developers to build high-quality mobile apps using React Native. The first version included UITabBar on iOS and Drawer on Android. NativeBase v1 was very well-received by the dev community.'
-                                }
-                                quote="abcd"
-                                sendType={SendType.Send}
-                                onLongPress={() => {
-                                    setQuoteMessage('abcd');
-                                }}
-                            />
-                            <MessageItem
-                                content={
-                                    'NativeBase started out as an open source framework that enabled developers to build high-quality mobile apps using React Native. The first version included UITabBar on iOS and Drawer on Android. NativeBase v1 was very well-received by the dev community.'
-                                }
-                                quote="abcd"
-                                sendType={SendType.Receive}
-                                onLongPress={() => {
-                                    setQuoteMessage('abcd');
-                                }}
-                            />
+                            {messages.map(message =>
+                                <MessageItem
+                                    key={message.id}
+                                    message={message}
+                                    sendType={currentUser === (message.sender as User).id ? SendType.Send : SendType.Receive}
+                                    onLongPress={() => {
+                                        setQuoteMessage(message);
+                                    }}
+                                />
+                            )}
+                            {isLoading && <ActivityIndicator color={colors.primary[900]} />}
                         </VStack>
                     </ScrollView>
                 </Box>
@@ -125,17 +235,14 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                             <Divider orientation="vertical" thickness={2} bg="primary.900"></Divider>
                             <VStack flex={1} w="100%">
                                 <Text bold color="white">
-                                    Name
+                                    {(quoteMessage.sender as User).name}
                                 </Text>
                                 <Text numberOfLines={3}>
-                                    We provide a set of commonly used interface icons which you can directly use in your
-                                    project. All our icons are create using createIcon function from NativeBase. We
-                                    provide a set of commonly used interface icons which you can directly use in your
-                                    project. All our icons are create using createIcon function from NativeBase.
+                                    {quoteMessage.content}
                                 </Text>
                             </VStack>
                             <VStack justifyContent="center" h="full">
-                                <Pressable onPress={() => setQuoteMessage('')}>
+                                <Pressable onPress={() => setQuoteMessage(undefined)}>
                                     <CloseIcon />
                                 </Pressable>
                             </VStack>
@@ -149,6 +256,8 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                             <ImageIcon color="primary.900" size="md" />
                         </TouchableOpacity>
                         <Input
+                            value={content}
+                            onChangeText={(text) => setContent(text)}
                             flex={1}
                             placeholder="Message"
                             fontSize="md"
@@ -158,8 +267,8 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                             multiline
                             onFocus={() => scrollRef.current?.scrollToEnd({ animated: true })}
                         />
-                        <TouchableOpacity px={2} py={3}>
-                            <NavigationIcon color="primary.900" size="md" />
+                        <TouchableOpacity px={2} py={3} disabled={isSending} onPress={() => handleSendMessage(content)}>
+                            {isSending ? <ActivityIndicator color={colors.primary[900]} /> : <NavigationIcon color="primary.900" size="md" />}
                         </TouchableOpacity>
                     </HStack>
                 </Box>
@@ -167,3 +276,4 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
         </Box>
     );
 };
+

@@ -1,5 +1,10 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { initializeApp } from 'firebase/app';
+import { DocumentData, QueryDocumentSnapshot, SnapshotOptions, WithFieldValue, getFirestore } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { getMessaging } from "firebase/messaging";
+import { getStorage } from "firebase/storage";
+
+// PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
 
 const firebaseConfig = {
     apiKey: 'AIzaSyDvKaKvCacVSBONANqPjVA6cv7kNFwEq1k',
@@ -12,9 +17,21 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-
 // Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(app);
+//auth
+const auth = getAuth(app);
+//notification
+// const messaging = getMessaging(app);
 
+const storage = getStorage(app);
 
-export { db  };
+export const converter = <T>() => ({
+    toFirestore: (data: T) => data,
+    fromFirestore: (snap: QueryDocumentSnapshot, options: SnapshotOptions) => ({
+        id: snap.id,
+        ...snap.data(options),
+    } as T),
+});
+
+export { db, auth, storage };

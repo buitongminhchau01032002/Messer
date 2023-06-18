@@ -31,6 +31,8 @@ import { TouchableOpacity } from 'react-native';
 import { AppTabsStackScreenProps } from 'types';
 import { FontAwesome } from '@expo/vector-icons';
 import { NavigateScreen } from 'components/Navigate';
+import { auth } from 'config/firebase';
+import { signOut } from 'firebase/auth';
 type MenuItem = {
     title: string;
     icon: React.ReactNode;
@@ -87,8 +89,11 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
             title: 'Direct share',
             icon: <Icon as={<FontAwesome />} name="share" size="xl" color={"primary.900"}></Icon>,
             onPress: () => navigation.navigate(RootNavigatekey.NotFound),
-
-
+        }, 
+        {
+            title: 'Logout',
+            icon: <Icon as={<FontAwesome />} name="logout" size="xl" color={"primary.900"}></Icon>,
+            onPress: () => {signOut(auth)},
         },
     ];
 
