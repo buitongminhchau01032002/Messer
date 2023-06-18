@@ -138,7 +138,7 @@ function RootNavigator() {
 
             // TODO: check toUser is correct current user
             // if (docSnap.data()?.toUser?.id === user?.id) {
-            //
+            //     
             // }
             if (true) {
                 dispatch(callActions.changeCallInfor({ id: docSnap.id, ...docSnap.data() }));
@@ -177,13 +177,6 @@ function RootNavigator() {
                     />
                     <Stack.Screen name={RootNavigatekey.Wallet} component={WalletScreen} />
                     <Stack.Screen name={RootNavigatekey.InformationQR} component={InformationScreenQR} />
-
-                    {/* Just for test */}
-                    <Stack.Screen
-                        name={RootNavigatekey.ComingCall}
-                        component={ComingCallScreen}
-                        options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
-                    />
                 </>
             )}
             <Stack.Group navigationKey={isLogin ? 'user' : 'guest'} screenOptions={{ presentation: 'modal' }}>
