@@ -44,7 +44,8 @@
       "favicon": "./app/assets/images/favicon.png"
     },
     "plugins": [
-      "@react-native-firebase/app"
+      "@react-native-firebase/app",
+      "@config-plugins/react-native-webrtc"
     ]
   }
 }
