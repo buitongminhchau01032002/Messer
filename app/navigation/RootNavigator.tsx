@@ -43,7 +43,7 @@ import { PermissionsAndroid } from 'react-native';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from 'config/firebase';
 import { CallState, callActions } from 'slice/call';
-import sendMessage from 'utils/sendMessage';
+import sendCallMessage from 'utils/sendCallMessage';
 import { auth } from 'config/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { StoryScreen } from 'screens/Story';
@@ -64,7 +64,7 @@ export default function Navigation() {
         await i18n.use(initReactI18next).init(i18Config);
     };
     const prepare = async () => {
-        await waitAsyncAction(2000);
+        //await waitAsyncAction(2000);
         await loadingFont();
         await loadingI18nSource();
         // rehydrate
@@ -91,6 +91,7 @@ function RootNavigator() {
     // hooks
     const isAppReady = useAppSelector((state) => state.application.isAppReady);
     const dispatch = useAppDispatch();
+    const navigation = useNavigation();
     // const { isLogin } = useAppSelector((state) => state.auth);
     const [isLogin, setIsLogin] = useState(auth.currentUser ? true : false);
     const callState = useAppSelector((state) => state.call);
@@ -99,7 +100,6 @@ function RootNavigator() {
         getToken();
         const unsubscribe = messaging().onMessage(async (payload: FirebaseMessagingTypes.RemoteMessage) => {
             // Vibration.vibrate([2000, 1000], true);
-            console.log('Message received. ', payload);
             if (payload.data?.type === 'create') {
                 handleRecievedCall(payload.data.docId);
             }
@@ -112,6 +112,7 @@ function RootNavigator() {
             if (payload.data?.type === 'hangup') {
                 // handleEndCall();
             }
+            console.log('🍟 Recieved messgage: ', payload.data);
         });
         messaging().setBackgroundMessageHandler(async (remoteMessage) => {
             console.log('Message handled in the background!', remoteMessage);
@@ -134,7 +135,7 @@ function RootNavigator() {
         const docSnap = await getDoc(doc(db, 'calls', docId));
         if (docSnap.exists()) {
             if (callState.state !== CallState.NoCall) {
-                sendMessage(docSnap.data()?.fromUser?.device, {
+                sendCallMessage(docSnap.data()?.fromUser?.device, {
                     type: 'reject',
                     docId: docSnap.id,
                 });
@@ -143,9 +144,10 @@ function RootNavigator() {
 
             // TODO: check toUser is correct current user
             // if (docSnap.data()?.toUser?.id === user?.id) {
-            //     
+            //
             // }
             if (true) {
+                navigation.navigate(RootNavigatekey.ComingCall);
                 dispatch(callActions.changeCallInfor({ id: docSnap.id, ...docSnap.data() }));
                 dispatch(callActions.changeCallState(CallState.Coming));
             }
@@ -155,9 +157,8 @@ function RootNavigator() {
     // Log
     useEffect(() => {
         console.log('🍍 State call:', callState.state);
-        console.log('🍏 Call infor:', callState.infor && 'call infor');
+        console.log('🍏 Call infor:', callState.infor);
     }, [callState]);
-    
 
     // signOut(auth)
     console.log(auth.currentUser?.email);
@@ -166,23 +167,18 @@ function RootNavigator() {
     }
 
     onAuthStateChanged(auth, (user) => {
-        console.log("current user", user?.email)
+        console.log('current user', user?.email);
         if (user) {
-            setIsLogin(true)
+            setIsLogin(true);
         } else {
-            setIsLogin(false)
+            // setIsLogin(false);
+            setIsLogin(true);
         }
     });
     return (
         <Stack.Navigator>
             {!isLogin ? (
                 <Stack.Screen name={RootNavigatekey.Auth} component={AuthNavigator} options={{ headerShown: false }} />
-            ) : callState.state === CallState.Coming ? (
-                <Stack.Screen
-                    name={RootNavigatekey.ComingCall}
-                    component={ComingCallScreen}
-                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
-                />
             ) : (
                 <>
                     <Stack.Screen
@@ -213,6 +209,11 @@ function RootNavigator() {
                 <Stack.Screen
                     name={RootNavigatekey.CallWaiting}
                     component={CallWaitingScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+                <Stack.Screen
+                    name={RootNavigatekey.ComingCall}
+                    component={ComingCallScreen}
                     options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
                 />
                 <Stack.Screen

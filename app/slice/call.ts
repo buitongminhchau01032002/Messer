@@ -48,7 +48,7 @@ export const callSlice = createSlice({
         changeCallState: (state, { payload }: PayloadAction<CallState>) => {
             state.state = payload;
         },
-        changeCallInfor: (state, { payload }: PayloadAction<Object>) => {
+        changeCallInfor: (state, { payload }: PayloadAction<Object | null>) => {
             state.infor = payload;
         },
     },

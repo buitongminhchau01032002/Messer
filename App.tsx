@@ -15,37 +15,37 @@ import en from "javascript-time-ago/locale/en.json";
 
 export default function App() {
 
-  async function requestUserPermission() {
-    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
-    const authStatus = await messaging().requestPermission();
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  // async function requestUserPermission() {
+  //   PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+  //   const authStatus = await messaging().requestPermission();
+  //   const enabled =
+  //     authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+  //     authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-    if (enabled) {
-      console.log('Authorization status:', authStatus);
-    }
-    const token = await messaging().getToken()
-    console.log(token)
+  //   if (enabled) {
+  //     console.log('Authorization status:', authStatus);
+  //   }
+  //   const token = await messaging().getToken()
+  //   console.log(token)
 
-    messaging().setBackgroundMessageHandler(async remoteMessage => {
-      console.log('Message handled in the background!', remoteMessage);
-    });
-  }
+  //   messaging().setBackgroundMessageHandler(async remoteMessage => {
+  //     console.log('Message handled in the background!', remoteMessage);
+  //   });
+  // }
   const customTheme = useCustomNativeBaseColor();
 
-  useEffect(() => {
-    TimeAgo.addDefaultLocale(en);
-    requestUserPermission()
-  })
+  // useEffect(() => {
+  //   TimeAgo.addDefaultLocale(en);
+  //   requestUserPermission()
+  // })
 
-  useEffect(() => {
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      Alert.alert(remoteMessage.notification?.title ?? "", remoteMessage.notification?.body ?? "");
-    });
+  // useEffect(() => {
+  //   const unsubscribe = messaging().onMessage(async remoteMessage => {
+  //     Alert.alert(remoteMessage.notification?.title ?? "", remoteMessage.notification?.body ?? "");
+  //   });
 
-    return unsubscribe;
-  }, []);
+  //   return unsubscribe;
+  // }, []);
 
   return (
     <Provider store={store}>

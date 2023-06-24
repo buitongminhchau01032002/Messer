@@ -20,7 +20,7 @@ type ContextType = {
 
 type RemoteVideoPropsType = {};
 
-export function RemoteVideo({}: RemoteVideoPropsType) {
+export function LocalVideo({}: RemoteVideoPropsType) {
     const { colors } = useTheme();
 
     const translateX = useSharedValue(0);

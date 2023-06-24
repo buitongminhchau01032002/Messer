@@ -1222,12 +1222,12 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@config-plugins/react-native-webrtc@^6.0.0":
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/@config-plugins/react-native-webrtc/-/react-native-webrtc-6.0.0.tgz#bfa7dbd5c982143063db69389399198b0f2581ed"
-  integrity sha512-gZmP/uRBflwT4NJMP8UY1nVemrRPhMkzSKOveuIA325fYlnrNE2vM14Y3ONvJBOxYVOZ4D10gnbYrsofZJL4UQ==
+"@config-plugins/react-native-webrtc@^2.0.0":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@config-plugins/react-native-webrtc/-/react-native-webrtc-2.1.1.tgz#14203d4164848f64cada6cdbbc68509681706ee7"
+  integrity sha512-HPvH3EE0HXGyIWI8AAp7ax/JOAIJBekzFSuqFNTV6xmbP5B28naBiAp6eNNeYxOmGubQ4azLHLwE8PNQSQF3hg==
   dependencies:
-    expo-build-properties "~0.5.1"
+    "@expo/config-plugins" "^4.1.0"
 
 "@egjs/hammerjs@^2.0.17":
   version "2.0.17"
@@ -1341,6 +1341,32 @@
     slash "^3.0.0"
     xcode "^3.0.1"
     xml2js "0.4.23"
+
+"@expo/config-plugins@^4.1.0":
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/@expo/config-plugins/-/config-plugins-4.1.5.tgz#9d357d2cda9c095e511b51583ede8a3b76174068"
+  integrity sha512-RVvU40RtZt12HavuDAe+LDIq9lHj7sheOfMEHdmpJ/uTA8pgvkbc56XF6JHQD+yRr6+uhhb+JnAasGq49dsQbw==
+  dependencies:
+    "@expo/config-types" "^45.0.0"
+    "@expo/json-file" "8.2.36"
+    "@expo/plist" "0.0.18"
+    "@expo/sdk-runtime-versions" "^1.0.0"
+    "@react-native/normalize-color" "^2.0.0"
+    chalk "^4.1.2"
+    debug "^4.3.1"
+    find-up "~5.0.0"
+    getenv "^1.0.0"
+    glob "7.1.6"
+    resolve-from "^5.0.0"
+    semver "^7.3.5"
+    slash "^3.0.0"
+    xcode "^3.0.1"
+    xml2js "0.4.23"
+
+"@expo/config-types@^45.0.0":
+  version "45.0.0"
+  resolved "https://registry.yarnpkg.com/@expo/config-types/-/config-types-45.0.0.tgz#963c2fdce8fbcbd003758b92ed8a25375f437ef6"
+  integrity sha512-/QGhhLWyaGautgEyU50UJr5YqKJix5t77ePTwreOVAhmZH+ff3nrrtYTTnccx+qF08ZNQmfAyYMCD3rQfzpiJA==
 
 "@expo/config-types@^47.0.0":
   version "47.0.0"
@@ -4081,16 +4107,6 @@ ajv@^6.1.0, ajv@^6.10.2, ajv@^6.12.4, ajv@^6.12.5:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-ajv@^8.11.0:
-  version "8.12.0"
-  resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.12.0.tgz#d1a0527323e22f53562c567c00991577dfbe19d1"
-  integrity sha512-sRu1kpcO9yLtYxBKvqfTeh9KzZEwO3STyX1HT+4CaDzC6HpTGYhIhPIzj9XuKU7KYDwnaeh5hcOwjy1QuJzBPA==
-  dependencies:
-    fast-deep-equal "^3.1.1"
-    json-schema-traverse "^1.0.0"
-    require-from-string "^2.0.2"
-    uri-js "^4.2.2"
-
 alphanum-sort@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/alphanum-sort/-/alphanum-sort-1.0.2.tgz#97a1119649b211ad33691d9f9f486a8ec9fbe0a3"
@@ -5896,7 +5912,7 @@ debug@2.6.9, debug@^2.2.0, debug@^2.3.3, debug@^2.6.0:
   dependencies:
     ms "2.0.0"
 
-debug@4, debug@4.3.4, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3.2, debug@^4.3.4:
+debug@4, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3.2, debug@^4.3.4:
   version "4.3.4"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.4.tgz#1319f6579357f2338d3337d2cdd4914bb5dcc865"
   integrity sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==
@@ -6657,14 +6673,6 @@ expo-asset@~8.7.0:
     md5-file "^3.2.3"
     path-browserify "^1.0.0"
     url-parse "^1.5.9"
-
-expo-build-properties@~0.5.1:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/expo-build-properties/-/expo-build-properties-0.5.2.tgz#332bb033b9d1d76f4892d6a7862a7fe0b23da6f5"
-  integrity sha512-YLrXNzXLjcwgChO58j74CLexhsSUdY/voGYH8pA9tZ2rkOcjZuOI2IkIVZqYUtkwrO0H4n3QXYc5TyP/Y6ohmg==
-  dependencies:
-    ajv "^8.11.0"
-    semver "^7.3.5"
 
 expo-constants@~14.0.0, expo-constants@~14.0.2:
   version "14.0.2"
@@ -9266,11 +9274,6 @@ json-schema-traverse@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz#69f6a87d9513ab8bb8fe63bdb0979c448e684660"
   integrity sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==
-
-json-schema-traverse@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-1.0.0.tgz#ae7bcb3656ab77a73ba5c49bf654f38e6b6860e2"
-  integrity sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==
 
 json3@^3.3.2:
   version "3.3.3"
@@ -12108,14 +12111,13 @@ react-native-web@~0.18.9:
     postcss-value-parser "^4.2.0"
     styleq "^0.1.2"
 
-react-native-webrtc@^111.0.1:
-  version "111.0.1"
-  resolved "https://registry.yarnpkg.com/react-native-webrtc/-/react-native-webrtc-111.0.1.tgz#049a28e803e1259c07aca12f7e0b6bc69166d3ff"
-  integrity sha512-yMRmLFtKRDXaK5b/s92+ArsMElEEjZnGW2cE+GqTHxLka0Kj0qq/sgNS2sMTuJuZRhW4oT6ryMLwTYzIrGM1lQ==
+react-native-webrtc@^1.94.2:
+  version "1.106.1"
+  resolved "https://registry.yarnpkg.com/react-native-webrtc/-/react-native-webrtc-1.106.1.tgz#31b18e8780bb927934ebddb5e03a8168cc6edf3c"
+  integrity sha512-955gqWFdISARz9D4hmnPzKQwpaU+AGqUbU+vBjzLCozUseSJ69tTQg2cShyPCBH6A1rwJQE+mrdjcpkeGbx3pQ==
   dependencies:
     adm-zip "0.5.9"
     base64-js "1.5.1"
-    debug "4.3.4"
     event-target-shim "6.0.2"
     tar "6.1.11"
 
