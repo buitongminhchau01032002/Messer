@@ -137,9 +137,6 @@ def reactNativeArchitectures() {
 }
 
 android {
-    packagingOptions {
-     jniLibs.useLegacyPackaging = true
-}
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion

@@ -69,7 +69,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
             video: true,
             audio: true,
         });
-        // pc.current.addStream(local);
+        pc.current.addStream(local);
         setLocalStream(local);
         let remote = new MediaStream(undefined);
         setRemoteStream(remote);
@@ -81,13 +81,17 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
 
         // Push tracks from local stream to peer connection
         local.getTracks().forEach((track) => {
-            pc.current?.addTrack(track, local);
+            pc.current?.getLocalStreams()[0].addTrack(track);
         });
 
         // Pull tracks from remote stream, add to video stream
         pc.current.ontrack = (event: any) => {
-            remote.addTrack(event.track);
-            setRemoteStream(remote);
+            event.streams[0].getTracks().forEach((track: any) => {
+                remote.addTrack(track);
+            });
+        };
+        pc.current.onaddstream = (event: any) => {
+            setRemoteStream(event.stream);
         };
     }
 
@@ -128,7 +132,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         });
     }
 
-    function handleHangup() {
+    async function handleHangup() {
         localStream &&
             localStream.getTracks().forEach((track) => {
                 track.stop();
@@ -140,8 +144,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
             });
         pc.current && pc.current.close();
 
-        dispatch(callActions.changeCallState(CallState.NoCall));
-        dispatch(callActions.changeCallInfor(null));
+        
 
         // this is from user
         //if (callInfo.fromUser.id === user.id) {
@@ -153,10 +156,13 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
 
         // this is to user
         // if (callInfo.toUser.id === user.id) {
-        sendCallMessage(callState.infor?.fromUser?.device, {
+        const device = callState.infor?.fromUser?.device;
+        await sendCallMessage(device, {
             type: 'hangup',
             docId: callState.infor?.id,
         });
+        dispatch(callActions.changeCallState(CallState.NoCall));
+        dispatch(callActions.changeCallInfor(null));
         props.navigation.goBack();
         // }
     }
@@ -166,7 +172,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
             <Box position="absolute" top="0" left="0" right="0" bottom="0">
                 {/* VIDEO CALL */}
                 <RTCView
-                    streamURL={remoteStream?.toURL() || ''}
+                    streamURL={localStream?.toURL() || ''}
                     objectFit="cover"
                     style={{
                         height: '100%',
@@ -183,7 +189,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
                     alt=""
                 />
             </Box>
-            <LocalVideo />
+            <LocalVideo stream={remoteStream}/>
             <VStack px="7" pt="24" pb="20" justifyContent="space-between" h="full">
                 <Box>
                     <Text color="primary.900" fontWeight="bold" fontSize="32">
