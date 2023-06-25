@@ -60,6 +60,7 @@ export const HomeScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.H
                 <Button onPress={() => navigate.navigate(RootNavigatekey.Calling)}>To calling</Button>
                 <Button onPress={() => navigate.navigate(RootNavigatekey.CallWaiting)}>To call waiting</Button>
                 <Button onPress={() => navigate.navigate(RootNavigatekey.Story)}>To Story</Button>
+                <Button onPress={() => navigate.navigate(RootNavigatekey.NewStory)}>To New Story</Button>
             </Box>
         </Box >
     );

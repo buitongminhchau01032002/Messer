@@ -2,20 +2,33 @@ import { APP_PADDING } from 'app/constants/Layout';
 import { SearchIcon } from 'components/Icons/Light/Search';
 import { auth, db } from 'config/firebase';
 import { query, collection, where, onSnapshot, or, getDocs, addDoc, serverTimestamp, and } from 'firebase/firestore';
-import { ScrollView, View, Text, HStack, useTheme, TextField, Input, Box, VStack, Image, Divider } from 'native-base';
+import {
+    ScrollView,
+    View,
+    Text,
+    HStack,
+    useTheme,
+    TextField,
+    Input,
+    Box,
+    VStack,
+    Image,
+    Divider,
+    Pressable,
+} from 'native-base';
 import { RootNavigatekey } from 'navigation/navigationKey';
 import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { RootStackScreenProps } from 'types';
-import { ListItem } from './component/ListItem';
 
-export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>) => {
+export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey.AddToMulti>) => {
     const { navigation } = props;
     const { colors } = useTheme();
     const [searchText, setSearchText] = useState('');
     const [isInputFocused, setInputFocused] = useState(false);
     const [searchingUsers, setSearchingUser] = useState([]);
+    const [selectedUsers, setSeletectedUser] = useState([]);
     const currentUserId = auth.currentUser?.uid;
 
     const fetchUserData = async () => {
@@ -29,6 +42,7 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
         searchUserSnapshot.forEach((u) => {
             searchUser.push({
                 id: u.id,
+                selected: 'false',
                 ...u.data(),
             });
         });
@@ -45,43 +59,13 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
     }, [props.navigation]);
 
     const handleNavigate = async (otherUserId: string) => {
-        // const roomeRef = collection(db, 'SingleRoom');
-        const q = query(
-            collection(db, 'SingleRoom'),
-            or(
-                and(where('user1', '==', currentUserId), where('user2', '==', otherUserId)),
-                and(where('user2', '==', currentUserId), where('user1', '==', otherUserId)),
-            ),
-        );
-
-        const messes = [];
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            messes.push({
-                id: doc.id,
-                type: 'single',
-                ...data,
-            });
-        });
-
-        if (messes.length != 0) {
-            navigation.navigate(RootNavigatekey.MessageDetail, { type: 'single', room: messes[0] });
+        const idx = selectedUsers.indexOf(otherUserId);
+        if (idx > -1) {
+            selectedUsers.splice(idx, 1);
         } else {
-            const newRoomData = {
-                user1: auth.currentUser?.uid,
-                user2: otherUserId,
-            };
-            const newRoom = await addDoc(collection(db, 'SingleRoom'), newRoomData);
-
-            const roomData = {
-                id: newRoom.id,
-                ...newRoomData,
-                type: 'single',
-            };
-            // console.log(roomData);
-            navigation.navigate(RootNavigatekey.MessageDetail, { type: 'single', room: roomData });
+            selectedUsers.push(otherUserId);
         }
+        setSeletectedUser(selectedUsers);
     };
 
     return (
@@ -117,12 +101,11 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
                 </Text>
                 <VStack space={4}>
                     {searchingUsers.map((item, idx) => (
-                        <ListItem
+                        <UserItem
                             {...item}
                             key={idx}
+                            selected={selectedUsers.includes(item.id)}
                             onPress={async () => {
-                                // console.log("search", "hello")
-                                // navigation.navigate(RootNavigatekey.MessageDetail)
                                 try {
                                     handleNavigate(item.id);
                                 } catch (e) {
@@ -134,5 +117,25 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
                 </VStack>
             </ScrollView>
         </View>
+    );
+};
+
+const UserItem = (item: { avatar: string; name: string; selected: boolean; onPress?: () => void }) => {
+    useEffect(() => {
+        console.log('ha');
+    }, [item.selected]);
+    return (
+        <Pressable onPress={item.onPress}>
+            <View>
+                <HStack space={6} alignItems={'center'} my={2}>
+                    <Image alt="..." source={{ uri: item.avatar }} size={16} borderRadius={100}></Image>
+                    <Text bold fontSize="md">
+                        {item.name}
+                    </Text>
+                    {item.selected ? <Text>s</Text> : <></>}
+                </HStack>
+                {/* <Divider/> */}
+            </View>
+        </Pressable>
     );
 };

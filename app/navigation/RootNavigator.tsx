@@ -35,6 +35,8 @@ import { auth } from 'config/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { StoryScreen } from 'screens/Story';
 import { NewStoryScreen } from 'screens/NewStory';
+import { MultiRoomMessageDetailScreen } from 'screens/Message/pages/MultiRoomMessagesDetail';
+import { AddToMultiRoomScreen } from 'screens/Message/pages/AddToMultiRoom';
 
 export default function Navigation() {
     // hooks
@@ -115,6 +117,11 @@ function RootNavigator() {
                     component={MessageDetailScreen}
                     options={{ headerShadowVisible: false }}
                 />
+                 <Stack.Screen
+                    name={RootNavigatekey.MultiRoomMessageDetail}
+                    component={MultiRoomMessageDetailScreen}
+                    options={{ headerShadowVisible: false }}
+                />
                 <Stack.Screen name={RootNavigatekey.Intro} component={IntroScreen} options={{ headerShown: false }} />
                 <Stack.Screen name={RootNavigatekey.NotFound} component={NotFoundScreen} options={{ title: 'Oops!' }} />
                 <Stack.Screen name={RootNavigatekey.Modal} component={ModalScreen} />
@@ -136,6 +143,11 @@ function RootNavigator() {
                 <Stack.Screen
                     name={RootNavigatekey.Search}
                     component={SearchScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+                 <Stack.Screen
+                    name={RootNavigatekey.AddToMulti}
+                    component={AddToMultiRoomScreen}
                     options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
                 />
                 <Stack.Screen

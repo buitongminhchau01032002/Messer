@@ -25,14 +25,27 @@ import { MessageItem } from './components/MessageItem';
 import { EvilIcons, FontAwesome, FontAwesome5, Ionicons, Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Animated, TouchableHighlight, StyleSheet, TouchableOpacity } from 'react-native';
 import { FlatList, GestureHandlerRootView, RectButton } from 'react-native-gesture-handler';
-import { addDoc, collection, getDoc, onSnapshot, query, doc, getDocs, where, or, documentId, orderBy, Timestamp, updateDoc, arrayUnion } from 'firebase/firestore';
+import {
+    addDoc,
+    collection,
+    getDoc,
+    onSnapshot,
+    query,
+    doc,
+    getDocs,
+    where,
+    or,
+    documentId,
+    orderBy,
+    Timestamp,
+    updateDoc,
+    arrayUnion,
+} from 'firebase/firestore';
 import { auth, db } from 'config/firebase';
-import TimeAgo from 'javascript-time-ago'
-import en from 'javascript-time-ago/locale/en'
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en';
 
 // const currentUserId = "CPYyJYf2Rj2kUd8rCvff";
-
-
 
 const userList = [
     {
@@ -97,7 +110,6 @@ const userList = [
     },
 ];
 
-
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { APP_PADDING } from 'app/constants/Layout';
 import {
@@ -113,42 +125,84 @@ import {
 } from 'components/Icons/Light';
 import { ListItem } from './components/ListItem';
 
-
-
-
 export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.Message>) => {
     const { navigation } = props;
     const { colors } = useTheme();
-    const [messes, setMesses] = useState([])
-    const currentUserId = auth.currentUser?.uid
-    console.log(currentUserId)
+    const [singleRooms, setSingleRooms] = useState([]);
+    const [multiRooms, setMutiRooms] = useState([]);
+    const [rooms, setRooms] = useState([])
+    const currentUserId = auth.currentUser?.uid;
+   
 
     useEffect(() => {
-
-        const fetchRoomData = async () => {
-
-            // const messageRef = collection(db, 'SingleRoom', currentRoom, 'Message')
-            // const messageQuery = query(messageRef, orderBy('createdAt', 'asc'))
-            
-            const q = query(collection(db, "SingleRoom"), or(where('user1', '==', currentUserId), where('user2', '==', currentUserId)), orderBy('lastMessageTimestamp', 'desc'));
-            const unsubscribe = onSnapshot(q, (querySnapshot) => {
-                const messes = [];
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    messes.push({
-                        id: doc.id,
-                        ...data
-                    });
+        const q = query(
+            collection(db, 'SingleRoom'),
+            or(where('user1', '==', currentUserId), where('user2', '==', currentUserId)),
+            orderBy('lastMessageTimestamp', 'desc'),
+        );
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const rooms = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                rooms.push({
+                    id: doc.id,
+                    type: 'single',
+                    ...data,
                 });
-                setMesses(messes)
-                console.log("changeeeeeee")
             });
-        }
+            console.log("???what")
+            setSingleRooms(rooms);
+        });
 
-        fetchRoomData().catch(console.error)
+        const qm = query(
+            collection(db, 'MultiRoom'),
+            where('users', 'array-contains', currentUserId),
+            // orderBy('lastMessageTimestamp', 'desc'),
+        );
+        const unsubscribeMuti = onSnapshot(qm, (querySnapshot) => {
+            const messes = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                messes.push({
+                    id: doc.id,
+                    type: 'multi',
+                    ...data,
+                });
+                console.log(data)
+            });
+          
+            setMutiRooms(messes);
+        });
+        // const fetchRoomData = async () => {
+        //     // const messageRef = collection(db, 'SingleRoom', currentRoom, 'Message')
+        //     // const messageQuery = query(messageRef, orderBy('createdAt', 'asc'))
+
+        //     //singleRoom
+            
+
+        //     // multiple
+
+            
+
+        //     console.log("changee")
+        // };
+
+        // fetchRoomData().catch(console.error);
+
+        // return () => {
+        //     unsubscribe()
+        //     unsubscribeMuti()
+        // }
+        return () => unsubscribe()
     }, []);
 
+    useEffect(() => {
+        const roomCollect = [];
+        roomCollect.push(...singleRooms)
+        roomCollect.push(...multiRooms)
+        setRooms(roomCollect)
 
+    }, [singleRooms, multiRooms])
 
     useEffect(() => {
         props.navigation.setOptions({
@@ -165,7 +219,13 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     <TouchableOpacity onPress={() => navigation.navigate(RootNavigatekey.Search)}>
                         <SearchIcon size="md" color="primary.900" />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => { navigation.navigate(RootNavigatekey.NewStory)}}>
+                    <TouchableOpacity
+                        onPress={async () => {
+                            await addDoc(collection(db, 'MultiRoom'), {
+                                users: ['7uHdQMX9FpYkCUggTaKLXjfwAUm2'],
+                            });
+                        }}
+                    >
                         <PlusIcon size="md" color="primary.900" />
                     </TouchableOpacity>
                 </HStack>
@@ -174,8 +234,6 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         });
     }, [props.navigation]);
 
-
-
     return (
         <View backgroundColor={'white'} flex={1}>
             <ScrollView flex={1} showsVerticalScrollIndicator={false}>
@@ -183,9 +241,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                         <HStack space={4}>
                             {userList.map((item, idx) => (
-                                <TouchableOpacity onPress={() => {
-
-                                }}>
+                                <TouchableOpacity onPress={() => {}}>
                                     <VStack width={16} space={1} alignItems="center" ml={idx === 0 ? 4 : 0}>
                                         <Center width={16} height={16} position="relative">
                                             <Image
@@ -193,7 +249,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                                                 alt="..."
                                                 width="full"
                                                 height="full"
-                                                source={{ uri: item.avt }}
+                                                source={{ uri: item.avt?? "yes" }}
                                             ></Image>
                                             <Box
                                                 borderWidth={2}
@@ -212,24 +268,31 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                                         </Text>
                                     </VStack>
                                 </TouchableOpacity>
-
                             ))}
                         </HStack>
                     </ScrollView>
                     <VStack space={2}>
-                        {messes.map((item, idx) => (
+                        {rooms.map((item, idx) => (
                             <ListItem
                                 {...item}
                                 key={item.id}
                                 onPress={async () => {
-                                    navigation.navigate(RootNavigatekey.MessageDetail, { type: "single", room: item });
-                                    // const roomCol = collection(db, "SingleRoom", item.id, "ReadUser");
-                                    // addDoc(roomCol, { user: currentUserId })
-
-                                    await updateDoc(doc(db, "SingleRoom", item.id), {
-                                        reads: arrayUnion(currentUserId)
-                                    });
-
+                                    if(item.type == 'single') {
+                                        navigation.navigate(RootNavigatekey.MessageDetail, { type: item.type, room: item });
+                                        // const roomCol = collection(db, "SingleRoom", item.id, "ReadUser");
+                                        // addDoc(roomCol, { user: currentUserId })
+    
+                                        await updateDoc(doc(db, 'SingleRoom', item.id), {
+                                            reads: arrayUnion(currentUserId),
+                                        });
+                                    } else {
+                                        navigation.navigate(RootNavigatekey.MultiRoomMessageDetail, { type: item.type, room: item });
+    
+                                        await updateDoc(doc(db, 'MultiRoom', item.id), {
+                                            reads: arrayUnion(currentUserId),
+                                        });
+                                    }
+                                   
                                 }}
                             />
                         ))}
@@ -239,4 +302,3 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         </View>
     );
 };
-
