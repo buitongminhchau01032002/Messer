@@ -80,30 +80,50 @@ export const ContactScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         //         <Button onPress={() => navigate.navigate(RootNavigatekey.Story)}>To Story</Button>
         //     </Box>
         // </Box>
-        <ScrollView flex={1} p={APP_PADDING} bg="white">
-            <VStack space={2} flex={1} bg="white">
-                {contacts.map((contact, idx) => (
-                    <HStack
-                        justifyContent="space-between"
-                        key={idx}
-                        w="100%"
-                        bg="primary.100:alpha.40"
-                        p={APP_PADDING}
-                        borderRadius={APP_PADDING}
-                    >
-                        <VStack space={1}>
-                            <Text fontSize={'lg'} color={'primary.900'} bold>
-                                {contact.name}
-                            </Text>
-                            <Text bold>{contact.phoneNumbers?.[0]?.number}</Text>
-                        </VStack>
-                        <HStack space={2}>
-                            <IconButton icon={<MessageCircleIcon />}></IconButton>
-                            <IconButton icon={<PhoneIcon style={{ transform: [{ scaleX: -1 }] }} />}></IconButton>
-                        </HStack>
-                    </HStack>
-                ))}
-            </VStack>
-        </ScrollView>
+        // <ScrollView flex={1} p={APP_PADDING} bg="white">
+        //     <VStack space={2} flex={1} bg="white">
+        //         {contacts.map((contact, idx) => (
+        //             <HStack
+        //                 justifyContent="space-between"
+        //                 key={idx}
+        //                 w="100%"
+        //                 bg="primary.100:alpha.40"
+        //                 p={APP_PADDING}
+        //                 borderRadius={APP_PADDING}
+        //             >
+        //                 <VStack space={1}>
+        //                     <Text fontSize={'lg'} color={'primary.900'} bold>
+        //                         {contact.name}
+        //                     </Text>
+        //                     <Text bold>{contact.phoneNumbers?.[0]?.number}</Text>
+        //                 </VStack>
+        //                 <HStack space={2}>
+        //                     <IconButton icon={<MessageCircleIcon />}></IconButton>
+        //                     <IconButton icon={<PhoneIcon style={{ transform: [{ scaleX: -1 }] }} />}></IconButton>
+        //                 </HStack>
+        //             </HStack>
+        //         ))}
+        //     </VStack>
+        // </ScrollView>
+        <Box h="full">
+            
+            <Box p={APP_PADDING} w="full" flex={1}>
+                <Text>Welcome to Home</Text>
+                <Box h={20} bg='primary.100' style={{
+                    // shadowRadius: 2,
+                    // shadowOffset: {
+                    //     width: 0,
+                    //     height: -10,
+                    // },
+                    // shadowColor: '#000000',
+                    // elevation: 6,
+                }} shadow={9}></Box>
+                <Button onPress={() => navigate.navigate(RootNavigatekey.ComingCall)}>To coming call</Button>
+                <Button onPress={() => navigate.navigate(RootNavigatekey.Calling)}>To calling</Button>
+                <Button onPress={() => navigate.navigate(RootNavigatekey.CallWaiting)}>To call waiting</Button>
+                <Button onPress={() => navigate.navigate(RootNavigatekey.Story)}>To Story</Button>
+                <Button onPress={() => navigate.navigate(RootNavigatekey.NewStory)}>To New Story</Button>
+            </Box>
+        </Box >
     );
 };

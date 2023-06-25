@@ -1,7 +1,7 @@
 import { APP_PADDING } from 'app/constants/Layout';
 import { SearchIcon } from 'components/Icons/Light/Search';
 import { auth, db } from 'config/firebase';
-import { query, collection, where, onSnapshot, or, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { query, collection, where, onSnapshot, or, getDocs, addDoc, serverTimestamp, and } from 'firebase/firestore';
 import { ScrollView, View, Text, HStack, useTheme, TextField, Input, Box, VStack, Image, Divider } from 'native-base';
 import { RootNavigatekey } from 'navigation/navigationKey';
 import React, { useState } from 'react';
@@ -10,32 +10,30 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { RootStackScreenProps } from 'types';
 import { ListItem } from './component/ListItem';
 
-
-
 export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>) => {
-
     const { navigation } = props;
     const { colors } = useTheme();
-    const [searchText, setSearchText] = useState("");
+    const [searchText, setSearchText] = useState('');
     const [isInputFocused, setInputFocused] = useState(false);
     const [searchingUsers, setSearchingUser] = useState([]);
-
+    const currentUserId = auth.currentUser?.uid;
 
     const fetchUserData = async () => {
-        const searchUser = []
-        const q = query(collection(db, "User"), where('name', '>=', searchText), where('name', '<=', searchText + '\uf8ff'));
+        const searchUser = [];
+        const q = query(
+            collection(db, 'User'),
+            where('name', '>=', searchText),
+            where('name', '<=', searchText + '\uf8ff'),
+        );
         const searchUserSnapshot = await getDocs(q);
         searchUserSnapshot.forEach((u) => {
-            searchUser.push(
-                {
-                    id: u.id,
-                    ...u.data()
-                }
-            );
+            searchUser.push({
+                id: u.id,
+                ...u.data(),
+            });
         });
         setSearchingUser(searchUser);
-    }
-
+    };
 
     useEffect(() => {
         props.navigation.setOptions({
@@ -46,7 +44,45 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
         });
     }, [props.navigation]);
 
+    const handleNavigate = async (otherUserId: string) => {
+        // const roomeRef = collection(db, 'SingleRoom');
+        const q = query(
+            collection(db, 'SingleRoom'),
+            or(
+                and(where('user1', '==', currentUserId), where('user2', '==', otherUserId)),
+                and(where('user2', '==', currentUserId), where('user1', '==', otherUserId)),
+            ),
+        );
 
+        const messes = [];
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            messes.push({
+                id: doc.id,
+                type: 'single',
+                ...data,
+            });
+        });
+
+        if (messes.length != 0) {
+            navigation.navigate(RootNavigatekey.MessageDetail, { type: 'single', room: messes[0] });
+        } else {
+            const newRoomData = {
+                user1: auth.currentUser?.uid,
+                user2: otherUserId,
+            };
+            const newRoom = await addDoc(collection(db, 'SingleRoom'), newRoomData);
+
+            const roomData = {
+                id: newRoom.id,
+                ...newRoomData,
+                type: 'single',
+            };
+            // console.log(roomData);
+            navigation.navigate(RootNavigatekey.MessageDetail, { type: 'single', room: roomData });
+        }
+    };
 
     return (
         <View backgroundColor={'white'} flex={1} p={8}>
@@ -62,7 +98,9 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
                     borderColor={isInputFocused ? 'red.900' : 'black'}
                 >
                     <Input
-                        onChangeText={(text) => { setSearchText(text) }}
+                        onChangeText={(text) => {
+                            setSearchText(text);
+                        }}
                         flex={1}
                         placeholder="Input"
                         borderWidth={0}
@@ -82,23 +120,16 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
                         <ListItem
                             {...item}
                             key={idx}
-                            onPress={
-                                 async () => {
-                                    // console.log("search", "hello")
-                                    // navigation.navigate(RootNavigatekey.MessageDetail)
-                                    try {
-                                        const room = await addDoc(collection(db, "SingleRoom"), {
-                                            user1: auth.currentUser?.uid,
-                                            user2: item.id,
-                                            lastMessageTimestamp: serverTimestamp()
-                                        });
-                                    } catch (e) {
-                                        console.error("Error adding document: ", e);
-                                    }
+                            onPress={async () => {
+                                // console.log("search", "hello")
+                                // navigation.navigate(RootNavigatekey.MessageDetail)
+                                try {
+                                    handleNavigate(item.id);
+                                } catch (e) {
+                                    console.error('Error adding document: ', e);
                                 }
-                            }
+                            }}
                         />
-
                     ))}
                 </VStack>
             </ScrollView>

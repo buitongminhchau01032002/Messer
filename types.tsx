@@ -11,7 +11,7 @@ import {
     AppTabsNavigationKey,
     AuthNavigationKey,
 } from 'navigation/navigationKey';
-import { Room, SingleRoom } from 'screens/Message/type';
+import { MultiRoom, Room, SingleRoom } from 'screens/Message/type';
 
 declare global {
     namespace ReactNavigation {
@@ -39,7 +39,9 @@ export type RootStackParamList = {
     [RootNavigatekey.Information]: {email: string , password: string, phone: string};
     [RootNavigatekey.InformationQR]: undefined;
     [RootNavigatekey.MessageDetail]: {type: "single"|"multi" , room: SingleRoom};
+    [RootNavigatekey.MultiRoomMessageDetail]: {type: "single"|"multi" , room: MultiRoom};
     [RootNavigatekey.NotFound]: undefined;
+    [RootNavigatekey.AddToMulti]: {roomId?: string};
     [RootNavigatekey.Intro]: undefined;
     [RootNavigatekey.Modal]: undefined;
     [RootNavigatekey.ComingCall]: undefined;

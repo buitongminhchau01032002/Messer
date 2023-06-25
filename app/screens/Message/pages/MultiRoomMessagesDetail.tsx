@@ -12,6 +12,7 @@ import {
 } from 'components/Icons/Light';
 import { TouchableOpacity } from 'components/TouchableOpacity';
 import {
+    AddIcon,
     Box,
     Button,
     Center,
@@ -39,7 +40,7 @@ import { addDoc, collection, getDoc, onSnapshot, query, doc, getDocs, where, or,
 import { auth, converter, db } from 'config/firebase';
 import { useAppSelector } from 'hooks/index';
 
-export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.MessageDetail>) => {
+export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.MultiRoomMessageDetail>) => {
     //navigate
     const { navigation, route } = props;
     //navigate params
@@ -47,7 +48,6 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
     // hooks
     const { colors } = useTheme();
     // states
-    const currentUser = useAppSelector((state) => state.auth.user);
     const [quoteMessage, setQuoteMessage] = useState<Message>();
     const [content, setContent] = useState('');
     const scrollRef = useRef<ScrollView | null>(null);
@@ -55,13 +55,10 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
     const [isSending, setIsSending] = useState(false); // Set loading to true on component mount
     const [messages, setMessages] = useState<Message[]>([]); // Initial empty array of users
     const [users, setUsers] = useState([])
+    // const currentUser = auth.currentUser?.uid ?? ""
+    const currentUser = useAppSelector((state) => state.auth.user);
 
-    // const curentUser = 'CPYyJYf2Rj2kUd8rCvff'\
-    // const currentRoom = "3T7VtjOcHbbi2oTVa5gX"
     const currentRoom = room.id ?? ""
-
-    // console.log()
-
 
     useEffect(() => {
         navigation.setOptions({
@@ -70,40 +67,36 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                     <TouchableOpacity>
                         <PhoneIcon color="primary.900" size="md" />
                     </TouchableOpacity>
-                    <TouchableOpacity>
-                        <VideoIcon color="primary.900" size="md" />
+                    <TouchableOpacity onPress={() => {
+                        navigation.navigate(RootNavigatekey.AddToMulti,{roomId: currentRoom});
+                    }}>
+                        <AddIcon color="primary.900" size="md" ></AddIcon>
                     </TouchableOpacity>
                 </HStack>
             ),
-            headerTitle: "",
             headerTintColor: colors.primary[900],
             headerTitleStyle: { color: colors.blue[900] },
+            headerTitle: room.name
         });
     }, [navigation]);
 
 
 
     useEffect(() => {
-        console.log(1)
-        const messageRef = collection(db, 'SingleRoom', currentRoom, 'Message')
+        const messageRef = collection(db, 'MultiRoom', currentRoom, 'Message')
         const messageQuery = query(messageRef, orderBy('createdAt', 'asc'))
 
         const fetchMessageData = async () => {
 
             // await fetchUserData().catch(console.error)
             let userDatas = []
-            const q = query(collection(db, "User"), or(where(documentId(), '==', room.user1), where(documentId(), '==', room.user2)));
+            const q = query(collection(db, "User"), where(documentId(), 'in', room.users));
             const querySnapshot = await getDocs(q);
             querySnapshot.forEach((doc) => {
                 userDatas.push({
                     id: doc.id,
                     ...doc.data()
                 })
-                if(doc.id != currentUser.id){
-                    navigation.setOptions({
-                        headerTitle : doc.data().name
-                    })
-                }
             })
             setUsers(userDatas)
 
@@ -156,9 +149,10 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
         }
 
         setIsSending(true)
-        const newMessage: Message = {
+        const newMessage = {
             content,
-            sender: currentUser.id,
+            sender: currentUser?.id,
+            senderName: currentUser?.name,
             type: 'text',
             createdAt: serverTimestamp(),
         }
@@ -166,40 +160,42 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
             newMessage.replyMessage = quoteMessage.id
         }
 
-        addDoc(collection(db, 'SingleRoom', currentRoom, 'Message'), newMessage).then(async values => {
+        addDoc(collection(db, 'MultiRoom', currentRoom, 'Message'), newMessage).then(async values => {
             setIsSending(false)
             // send notification
 
-            const receiver = users.find((u) => u.id != newMessage.sender)
+            const receivers = users.filter((u) => u.id != newMessage.sender)
             const sender = users.find((u) => u.id == newMessage.sender)
 
-            await updateDoc(doc(db, "SingleRoom", room.id ?? ""), {
+            await updateDoc(doc(db, "MultiRoom", room.id ?? ""), {
                 lastMessage: newMessage,
                 lastMessageTimestamp: newMessage.createdAt,
-                reads: [currentUser.id]
+                reads: [currentUser?.id]
             });
 
 
-
-            fetch('https://fcm.googleapis.com/fcm/send', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'key=AAAAu3T5eSI:APA91bFfynL6hecTGjN4jGBUULhccdSWIBKjG0oBWefs3D5KvDu5IWHUJSJD9F3uMjhmuZbXqsUSj6GBsqRYkQgt2d2If4FUaYHy3bZ-E8NpBhqHYjsyfB9D1Nk-hxVKelYn165SqRdL',
-
-                },
-                body: JSON.stringify({
-                    "to": receiver.deviceToken,
-                    "notification": {
-                        "body": newMessage.content,
-                        "OrganizationId": "2",
-                        "content_available": true,
-                        "priority": "high",
-                        "subtitle": "PhotoMe",
-                        "title": sender.name.concat(" texted you")
-                    }
-                }),
-            });
+            receivers.forEach((receiver) => {
+                fetch('https://fcm.googleapis.com/fcm/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'key=AAAAu3T5eSI:APA91bFfynL6hecTGjN4jGBUULhccdSWIBKjG0oBWefs3D5KvDu5IWHUJSJD9F3uMjhmuZbXqsUSj6GBsqRYkQgt2d2If4FUaYHy3bZ-E8NpBhqHYjsyfB9D1Nk-hxVKelYn165SqRdL',
+    
+                    },
+                    body: JSON.stringify({
+                        "to": receiver.deviceToken,
+                        "notification": {
+                            "body": newMessage.content,
+                            "OrganizationId": "2",
+                            "content_available": true,
+                            "priority": "high",
+                            "subtitle": "PhotoMe",
+                            "title": sender.name.concat(" texted you")
+                        }
+                    }),
+                });
+            })
+            
         })
         setContent('')
         setQuoteMessage(undefined)
