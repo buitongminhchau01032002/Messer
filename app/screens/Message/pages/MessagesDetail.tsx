@@ -37,6 +37,7 @@ import { MessageItem } from '../components/MessageItem';
 import { Message, SendType, User } from '../type';
 import { addDoc, collection, getDoc, onSnapshot, query, doc, getDocs, where, or, documentId, orderBy, Timestamp, updateDoc, arrayUnion, FieldPath, DocumentData, QueryDocumentSnapshot, SnapshotOptions, WithFieldValue, serverTimestamp, setDoc } from 'firebase/firestore';
 import { auth, converter, db } from 'config/firebase';
+import { useAppSelector } from 'hooks/index';
 
 export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.MessageDetail>) => {
     //navigate
@@ -46,6 +47,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
     // hooks
     const { colors } = useTheme();
     // states
+    const currentUser = useAppSelector((state) => state.auth.user);
     const [quoteMessage, setQuoteMessage] = useState<Message>();
     const [content, setContent] = useState('');
     const scrollRef = useRef<ScrollView | null>(null);
@@ -54,8 +56,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
     const [messages, setMessages] = useState<Message[]>([]); // Initial empty array of users
     const [users, setUsers] = useState([])
 
-    // const curentUser = 'CPYyJYf2Rj2kUd8rCvff'
-    const currentUser = auth.currentUser?.uid ?? ""
+    // const curentUser = 'CPYyJYf2Rj2kUd8rCvff'\
     // const currentRoom = "3T7VtjOcHbbi2oTVa5gX"
     const currentRoom = room.id ?? ""
 
@@ -74,6 +75,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                     </TouchableOpacity>
                 </HStack>
             ),
+            headerTitle: "",
             headerTintColor: colors.primary[900],
             headerTitleStyle: { color: colors.blue[900] },
         });
@@ -97,6 +99,11 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                     id: doc.id,
                     ...doc.data()
                 })
+                if(doc.id != currentUser.id){
+                    navigation.setOptions({
+                        headerTitle : doc.data().name
+                    })
+                }
             })
             setUsers(userDatas)
 
@@ -151,7 +158,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
         setIsSending(true)
         const newMessage: Message = {
             content,
-            sender: currentUser,
+            sender: currentUser.id,
             type: 'text',
             createdAt: serverTimestamp(),
         }
@@ -169,7 +176,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
             await updateDoc(doc(db, "SingleRoom", room.id ?? ""), {
                 lastMessage: newMessage,
                 lastMessageTimestamp: newMessage.createdAt,
-                reads: [currentUser]
+                reads: [currentUser.id]
             });
 
 
@@ -212,7 +219,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                                 <MessageItem
                                     key={message.id}
                                     message={message}
-                                    sendType={currentUser === (message.sender as User).id ? SendType.Send : SendType.Receive}
+                                    sendType={currentUser.id === (message.sender as User).id ? SendType.Send : SendType.Receive}
                                     onLongPress={() => {
                                         setQuoteMessage(message);
                                     }}

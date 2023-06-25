@@ -193,10 +193,16 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
     }, []);
 
     useEffect(() => {
-        const roomCollect = [];
-        roomCollect.push(...singleRooms);
-        roomCollect.push(...multiRooms);
-        setRooms(roomCollect);
+        try {
+            const roomCollect = [];
+            roomCollect.push(...singleRooms);
+            roomCollect.push(...multiRooms);
+            roomCollect.sort(function(a, b){return +b.lastMessage.createdAt.toDate() - a.lastMessage.createdAt.toDate()})
+            setRooms(roomCollect);
+        } catch (e){
+
+        }
+       
     }, [singleRooms, multiRooms]);
 
     useEffect(() => {

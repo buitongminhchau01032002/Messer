@@ -76,6 +76,7 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
             ),
             headerTintColor: colors.primary[900],
             headerTitleStyle: { color: colors.blue[900] },
+            headerTitle: room.name
         });
     }, [navigation]);
 
