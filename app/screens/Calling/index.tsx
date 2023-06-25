@@ -54,14 +54,27 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     }, [isFocused]);
 
     async function initCall() {
-        await setUpWebcamAndMediaStream();
-        await joinCall(callState.infor?.id);
+        try {
+            await setUpWebcamAndMediaStream();
+            await joinCall(callState.infor?.id);
+        } catch (err) {
+            // props.navigation.goBack();
+        }
     }
 
     function handleToggleMic() {
-        console.log('sadfasdf');
+        if (isOnMic) {
+            if (localStream) {
+                localStream.getVideoTracks()[0]._switchCamera();
+            }
+        } else {
+            if (localStream) {
+                localStream.getVideoTracks()[0]._switchCamera();
+            }
+        }
         setIsOnMic(!isOnMic);
     }
+    
 
     async function setUpWebcamAndMediaStream() {
         pc.current = new RTCPeerConnection(servers);
@@ -100,7 +113,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         const offerCandidates = collection(db, 'calls', docId, 'offerCandidates');
         const answerCandidates = collection(db, 'calls', docId, 'answerCandidates');
 
-        pc.current.onicecandidate = async (event: any) => {
+        pc.current!.onicecandidate = async (event: any) => {
             if (event.candidate) {
                 await addDoc(answerCandidates, event.candidate.toJSON());
             }
@@ -111,9 +124,9 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
 
         const offerDescription = callData?.offer;
 
-        await pc.current?.setRemoteDescription(new RTCSessionDescription(offerDescription));
+        await pc.current!.setRemoteDescription(new RTCSessionDescription(offerDescription));
 
-        const answerDescription = await pc.current?.createAnswer();
+        const answerDescription = (await pc.current?.createAnswer()) as RTCSessionDescription ;
         await pc.current?.setLocalDescription(answerDescription);
 
         const answer = {

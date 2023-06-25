@@ -33,7 +33,7 @@ type CallInfor = {
 
 type CallSliceType = {
     state: CallState;
-    infor: Object | null;
+    infor: {[key: string]: any} | null;
 };
 
 const initialState: CallSliceType = {
@@ -48,7 +48,7 @@ export const callSlice = createSlice({
         changeCallState: (state, { payload }: PayloadAction<CallState>) => {
             state.state = payload;
         },
-        changeCallInfor: (state, { payload }: PayloadAction<Object | null>) => {
+        changeCallInfor: (state, { payload }: PayloadAction<{[key: string]: any} | null>) => {
             state.infor = payload;
         },
     },
