@@ -21,7 +21,7 @@ import storage from 'services/storage';
 import { FontAwesome } from '@expo/vector-icons';
 import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { reLogin } from 'slice/auth';
+import { reLogin, storeUserFromFirestore } from 'slice/auth';
 import { MessageDetailScreen } from 'screens/Message/pages/MessagesDetail';
 import { WalletScreen } from 'screens/Wallet';
 import { Box } from 'native-base';
@@ -29,8 +29,8 @@ import { ComingCallScreen } from 'screens/ComingCall';
 import { CallingScreen } from 'screens/Calling';
 import { CallWaitingScreen } from 'screens/CallWaiting';
 import { SearchScreen } from 'screens/Search';
-import { InformationScreen } from "screens/Information";
-import { InformationScreenQR } from "screens/InformationQR";
+import { InformationScreen } from 'screens/Information';
+import { InformationScreenQR } from 'screens/InformationQR';
 import { auth } from 'config/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { StoryScreen } from 'screens/Story';
@@ -75,9 +75,10 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
     // hooks
+    const dispatch = useAppDispatch();
     const isAppReady = useAppSelector((state) => state.application.isAppReady);
     // const { isLogin } = useAppSelector((state) => state.auth);
-    const [isLogin, setIsLogin] = useState(auth.currentUser ? true : false)
+    const [isLogin, setIsLogin] = useState(auth.currentUser ? true : false);
 
     // signOut(auth)
     console.log(auth.currentUser?.email);
@@ -86,11 +87,13 @@ function RootNavigator() {
     }
 
     onAuthStateChanged(auth, (user) => {
-        console.log("current user", user?.email)
+        console.log('current user', user);
+
         if (user) {
-            setIsLogin(true)
+            setIsLogin(true);
+            dispatch(storeUserFromFirestore(user));
         } else {
-            setIsLogin(false)
+            setIsLogin(false);
         }
     });
     return (
