@@ -5,7 +5,7 @@ import { DropDownSelect } from 'components/DropdownSelect';
 import { BallotIcon } from 'components/Icons/Solid/Ballot';
 import { RulerTriangleIcon } from 'components/Icons/Solid/RulerTriangle';
 import { WalletIcon } from 'components/Icons/Solid/Wallet';
-import { useAppDispatch } from 'hooks/index';
+import { useAppDispatch, useAppSelector } from 'hooks/index';
 import React, { useEffect, useState } from 'react';
 import {
     Avatar,
@@ -44,6 +44,7 @@ type MenuItem = {
 export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.Account>) => {
     // navigation
     const { navigation } = props;
+    const user = useAppSelector((state) => state.auth.user);
     // const currentUser  = auth.currentUser?.uid
     const [currentUser, setCurrentUser] = useState({
         avatar: '',
@@ -51,15 +52,20 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         email: '',
         phone: '',
     });
+ 
+
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            const userRef = doc(db, 'User', auth.currentUser?.uid ?? '');
-            const userSnap = await getDoc(userRef);
-            setCurrentUser(userSnap.data());
-            console.log(userSnap.data());
-        };
-        fetchUserData().catch(console.error);
+        // const fetchUserData = async () => {
+        //     const userRef = doc(db, 'User', auth.currentUser?.uid ?? '');
+        //     const userSnap = await getDoc(userRef);
+        //     setCurrentUser(userSnap.data());
+        //     console.log(userSnap.data());
+        // };
+        // fetchUserData().catch(console.error);
+        console.log(user)
+
+        setCurrentUser(user)
     }, []);
     // hooks
     useEffect(() => {

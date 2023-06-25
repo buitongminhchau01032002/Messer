@@ -130,9 +130,8 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
     const { colors } = useTheme();
     const [singleRooms, setSingleRooms] = useState([]);
     const [multiRooms, setMutiRooms] = useState([]);
-    const [rooms, setRooms] = useState([])
+    const [rooms, setRooms] = useState([]);
     const currentUserId = auth.currentUser?.uid;
-   
 
     useEffect(() => {
         const q = query(
@@ -150,7 +149,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     ...data,
                 });
             });
-            console.log("???what")
+            console.log('???what');
             setSingleRooms(rooms);
         });
 
@@ -168,9 +167,9 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     type: 'multi',
                     ...data,
                 });
-                console.log(data)
+                console.log(data);
             });
-          
+
             setMutiRooms(messes);
         });
         // const fetchRoomData = async () => {
@@ -178,11 +177,8 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         //     // const messageQuery = query(messageRef, orderBy('createdAt', 'asc'))
 
         //     //singleRoom
-            
 
         //     // multiple
-
-            
 
         //     console.log("changee")
         // };
@@ -193,16 +189,15 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         //     unsubscribe()
         //     unsubscribeMuti()
         // }
-        return () => unsubscribe()
+        return () => unsubscribe();
     }, []);
 
     useEffect(() => {
         const roomCollect = [];
-        roomCollect.push(...singleRooms)
-        roomCollect.push(...multiRooms)
-        setRooms(roomCollect)
-
-    }, [singleRooms, multiRooms])
+        roomCollect.push(...singleRooms);
+        roomCollect.push(...multiRooms);
+        setRooms(roomCollect);
+    }, [singleRooms, multiRooms]);
 
     useEffect(() => {
         props.navigation.setOptions({
@@ -221,9 +216,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={async () => {
-                            await addDoc(collection(db, 'MultiRoom'), {
-                                users: ['7uHdQMX9FpYkCUggTaKLXjfwAUm2'],
-                            });
+                            navigation.navigate(RootNavigatekey.AddToMulti, {roomId : undefined});
                         }}
                     >
                         <PlusIcon size="md" color="primary.900" />
@@ -249,7 +242,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                                                 alt="..."
                                                 width="full"
                                                 height="full"
-                                                source={{ uri: item.avt?? "yes" }}
+                                                source={{ uri: item.avt ?? 'yes' }}
                                             ></Image>
                                             <Box
                                                 borderWidth={2}
@@ -277,22 +270,27 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                                 {...item}
                                 key={item.id}
                                 onPress={async () => {
-                                    if(item.type == 'single') {
-                                        navigation.navigate(RootNavigatekey.MessageDetail, { type: item.type, room: item });
+                                    if (item.type == 'single') {
+                                        navigation.navigate(RootNavigatekey.MessageDetail, {
+                                            type: item.type,
+                                            room: item,
+                                        });
                                         // const roomCol = collection(db, "SingleRoom", item.id, "ReadUser");
                                         // addDoc(roomCol, { user: currentUserId })
-    
+
                                         await updateDoc(doc(db, 'SingleRoom', item.id), {
                                             reads: arrayUnion(currentUserId),
                                         });
                                     } else {
-                                        navigation.navigate(RootNavigatekey.MultiRoomMessageDetail, { type: item.type, room: item });
-    
+                                        navigation.navigate(RootNavigatekey.MultiRoomMessageDetail, {
+                                            type: item.type,
+                                            room: item,
+                                        });
+
                                         await updateDoc(doc(db, 'MultiRoom', item.id), {
                                             reads: arrayUnion(currentUserId),
                                         });
                                     }
-                                   
                                 }}
                             />
                         ))}

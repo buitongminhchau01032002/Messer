@@ -38,6 +38,7 @@ import { MessageItem } from '../components/MessageItem';
 import { Message, SendType, User } from '../type';
 import { addDoc, collection, getDoc, onSnapshot, query, doc, getDocs, where, or, documentId, orderBy, Timestamp, updateDoc, arrayUnion, FieldPath, DocumentData, QueryDocumentSnapshot, SnapshotOptions, WithFieldValue, serverTimestamp, setDoc } from 'firebase/firestore';
 import { auth, converter, db } from 'config/firebase';
+import { useAppSelector } from 'hooks/index';
 
 export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.MultiRoomMessageDetail>) => {
     //navigate
@@ -54,7 +55,9 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
     const [isSending, setIsSending] = useState(false); // Set loading to true on component mount
     const [messages, setMessages] = useState<Message[]>([]); // Initial empty array of users
     const [users, setUsers] = useState([])
-    const currentUser = auth.currentUser?.uid ?? ""
+    // const currentUser = auth.currentUser?.uid ?? ""
+    const currentUser = useAppSelector((state) => state.auth.user);
+
     const currentRoom = room.id ?? ""
 
     useEffect(() => {
@@ -65,7 +68,7 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
                         <PhoneIcon color="primary.900" size="md" />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => {
-                        navigation.navigate(RootNavigatekey.AddToMulti,);
+                        navigation.navigate(RootNavigatekey.AddToMulti,{roomId: currentRoom});
                     }}>
                         <AddIcon color="primary.900" size="md" ></AddIcon>
                     </TouchableOpacity>
@@ -145,9 +148,10 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
         }
 
         setIsSending(true)
-        const newMessage: Message = {
+        const newMessage = {
             content,
-            sender: currentUser,
+            sender: currentUser?.id,
+            senderName: currentUser?.name,
             type: 'text',
             createdAt: serverTimestamp(),
         }
@@ -165,7 +169,7 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
             await updateDoc(doc(db, "MultiRoom", room.id ?? ""), {
                 lastMessage: newMessage,
                 lastMessageTimestamp: newMessage.createdAt,
-                reads: [currentUser]
+                reads: [currentUser?.id]
             });
 
 
@@ -210,7 +214,7 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
                                 <MessageItem
                                     key={message.id}
                                     message={message}
-                                    sendType={currentUser === (message.sender as User).id ? SendType.Send : SendType.Receive}
+                                    sendType={currentUser.id === (message.sender as User).id ? SendType.Send : SendType.Receive}
                                     onLongPress={() => {
                                         setQuoteMessage(message);
                                     }}

@@ -22,20 +22,26 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { View, Pressable, Alert } from 'react-native';
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
+TimeAgo.addDefaultLocale(en);
 
 export const ListItem = (item: {
     id: string;
     user1: string | null;
     user2: string | null;
     reads: string[];
-    lastMessage: string;
+    lastMessage: any;
     type: 'single' | 'multi';
     name: string | null;
     users: [] | null;
     onPress?: () => void;
 }) => {
     const currentUserId = auth.currentUser?.uid;
-    const [imgUrl, setImg] = useState('https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Solid_white.svg/2048px-Solid_white.svg.png');
+    const [imgUrl, setImg] = useState(
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Solid_white.svg/2048px-Solid_white.svg.png',
+    );
+    const [imgUrl2, setImg2] = useState(
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Solid_white.svg/2048px-Solid_white.svg.png',
+    );
     const [name, setName] = useState('');
     const [lastMessage, setLastMessage] = useState('');
     const [time, setTime] = useState('');
@@ -58,7 +64,16 @@ export const ListItem = (item: {
                                 onPress: () => console.log('Cancel Pressed'),
                                 style: 'cancel',
                             },
-                            { text: 'OK', onPress: async () => await deleteDoc(doc(db, 'SingleRoom', item.id)) },
+                            {
+                                text: 'OK',
+                                onPress: async () => {
+                                    if (item.type == 'single') {
+                                        await deleteDoc(doc(db, 'SingleRoom', item.id));
+                                    } else {
+                                        await deleteDoc(doc(db, 'MultiRoom', item.id));
+                                    }
+                                },
+                            },
                         ]);
                     }}
                 />
@@ -73,36 +88,19 @@ export const ListItem = (item: {
     }, [item.reads]);
 
     useEffect(() => {
-        const fetchMessageData = async () => {
+        const timeAgo = new TimeAgo('en-US');
+        try {
             if (item.type == 'single') {
-                const lastMessageRef = onSnapshot(doc(db, 'SingleRoom', item.id), (doc) => {
-                    try {
-                        //
-                        setLastMessage(doc.data().lastMessage.content ?? '');
-                        const timeAgo = new TimeAgo('en-US');
-                        console.log(doc.data().lastMessage.createdAt);
-                        setTime(timeAgo.format(doc.data().lastMessageTimestamp.toDate()));
-                    } catch {
-                        console.log('er');
-                    }
-                });
+                setLastMessage(item.lastMessage.content);
+                setTime(timeAgo.format(item.lastMessage.createdAt.toDate()));
             } else {
-                const lastMessageRef = onSnapshot(doc(db, 'MultiRoom', item.id), (doc) => {
-                    try {
-                        //
-                        setLastMessage(doc.data().lastMessage.content ?? '');
-                        const timeAgo = new TimeAgo('en-US');
-                        console.log(doc.data().lastMessage.createdAt);
-                        setTime(timeAgo.format(doc.data().lastMessageTimestamp.toDate()));
-                    } catch {
-                        console.log('err');
-                    }
-                });
+                setLastMessage(item.lastMessage.senderName.concat(': ').concat(item.lastMessage.content));
+                setTime(timeAgo.format(item.lastMessage.createdAt.toDate()));
             }
-        };
-
-        fetchMessageData().catch(console.error);
-    }, [item.messages]);
+        } catch (e) {
+            console.log(e);
+        }
+    }, [item.lastMessage]);
 
     useEffect(() => {
         if (item.type == 'single') {
@@ -125,19 +123,19 @@ export const ListItem = (item: {
             };
             fetchUserData().catch(console.error);
         } else {
-            // const fetchUserData = async () => {
-            //     const qm = query(collection(db, 'User'), where(documentId(), 'in', item.users));
+            const fetchUserData = async () => {
+                setName(item.name);
 
-            //     const usersSnap = await getDocs(qm);
-
-            //     const userInRoom = [];
-            //     usersSnap.forEach((doc) => {
-            //         userInRoom.push(doc.data());
-            //     });
-            // };
-
-            // fetchUserData().catch(console.error);
-            setName(item.name);
+                const q = query(collection(db, 'User'), where(documentId(), 'in', item.users));
+                const userList = [];
+                const querySnapshot = await getDocs(q);
+                querySnapshot.forEach((doc) => {
+                    userList.push(doc.data());
+                });
+                setImg(userList[0].avatar);
+                setImg2(userList[1].avatar);
+            };
+            fetchUserData().catch(console.error);
         }
     }, []);
 
@@ -146,12 +144,37 @@ export const ListItem = (item: {
             <Swipeable renderRightActions={rightSwipeActions} renderLeftActions={() => <View />}>
                 <Pressable onPress={item.onPress}>
                     <HStack space={4} pl={4} bg="white">
-                        <Image
-                            alt="..."
-                            source={{ uri: imgUrl }}
-                            style={{ width: 64, height: 64 }}
-                            borderRadius={100}
-                        ></Image>
+                        {item.type == 'single' ? (
+                            <Image
+                                alt="..."
+                                source={{ uri: imgUrl }}
+                                style={{ width: 64, height: 64 }}
+                                borderRadius={100}
+                            ></Image>
+                        ) : (
+                            <Box position={'relative'} width={63} height={63}>
+                                <Image
+                                    position={'absolute'}
+                                    alt="..."
+                                    source={{ uri: imgUrl2 }}
+                                    style={{ width: 48, height: 48 }}
+                                    borderRadius={100}
+                                    right={0}
+                                    top={0}
+                                />
+                                <Image
+                                    position={'absolute'}
+                                    alt="..."
+                                    source={{ uri: imgUrl }}
+                                    left={0}
+                                    bottom={0}
+                                    style={{ width: 48, height: 48 }}
+                                    borderRadius={100}
+                                />
+                                
+                            </Box>
+                        )}
+
                         <VStack flex={1} space={0} justifyContent="center">
                             <HStack alignItems={'center'} space={2}>
                                 <Text bold={read ? false : true} fontSize="md" color={read ? 'gray.500' : 'black'}>
