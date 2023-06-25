@@ -1,40 +1,61 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Box, Center, HStack, Image, Text, VStack, useTheme } from 'native-base';
+import { Box, Center, HStack, IconButton, Image, Text, VStack, useTheme } from 'native-base';
 import { runOnJS } from 'react-native-reanimated';
 import { RootStackScreenProps } from 'types';
 import { RootNavigatekey } from 'navigation/navigationKey';
 import { PickupButton } from './components/PickupButton';
 import { HangupButton } from './components/HangupButton';
+import { PhoneIcon, PhoneOffIcon } from 'components/Icons/Light';
+import sendCallMessage from 'utils/sendCallMessage';
+import { useAppDispatch, useAppSelector } from 'hooks/index';
+import { CallState, callActions } from 'slice/call';
 
 export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.ComingCall>) => {
     const { colors } = useTheme();
-    const [pickupButtonDragging, setPickupButtonDragging] = useState(false);
-    const [hangupButtonDragging, setHangupButtonDragging] = useState(false);
+    const dispatch = useAppDispatch();
+    // const [pickupButtonDragging, setPickupButtonDragging] = useState(false);
+    // const [hangupButtonDragging, setHangupButtonDragging] = useState(false);
     useEffect(() => {
         props.navigation.setOptions({
             headerTintColor: colors.white,
         });
     }, [props.navigation]);
 
-    const handleOnPickupButtonDrag = useCallback(() => {
-        'worklet';
-        runOnJS(setPickupButtonDragging)(true);
-    }, []);
+    const callState = useAppSelector((state) => state.call);
 
-    const handleOnPickupButtonDragEnd = useCallback(() => {
-        'worklet';
-        runOnJS(setPickupButtonDragging)(false);
-    }, []);
+    // const handleOnPickupButtonDrag = useCallback(() => {
+    //     'worklet';
+    //     runOnJS(setPickupButtonDragging)(true);
+    // }, []);
 
-    const handleOnHangupButtonDrag = useCallback(() => {
-        'worklet';
-        runOnJS(setHangupButtonDragging)(true);
-    }, []);
+    // const handleOnPickupButtonDragEnd = useCallback(() => {
+    //     'worklet';
+    //     runOnJS(setPickupButtonDragging)(false);
+    // }, []);
 
-    const handleOnHangupButtonDragEnd = useCallback(() => {
-        'worklet';
-        runOnJS(setHangupButtonDragging)(false);
-    }, []);
+    // const handleOnHangupButtonDrag = useCallback(() => {
+    //     'worklet';
+    //     runOnJS(setHangupButtonDragging)(true);
+    // }, []);
+
+    // const handleOnHangupButtonDragEnd = useCallback(() => {
+    //     'worklet';
+    //     runOnJS(setHangupButtonDragging)(false);
+    // }, []);
+
+    function handleRejectCall() {
+        sendCallMessage(callState.infor?.fromUser?.device, {
+            type: 'reject',
+            docId: callState.infor?.id,
+        });
+        props.navigation.goBack();
+        dispatch(callActions.changeCallState(CallState.NoCall));
+        dispatch(callActions.changeCallInfor(null));
+    }
+
+    function handleAcceptCall() {
+        props.navigation.replace(RootNavigatekey.Calling);
+    }
 
     return (
         <Box position="relative" flex={1}>
@@ -64,7 +85,7 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
                         style={{ width: 320 }}
                         // bg={(pickupButtonDragging || hangupButtonDragging) ? 'gray.200' : 'transparent'}
                     >
-                        <PickupButton
+                        {/* <PickupButton
                             onDragStart={handleOnPickupButtonDrag}
                             onDragEnd={handleOnPickupButtonDragEnd}
                             isVisible={!hangupButtonDragging}
@@ -73,6 +94,20 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
                             onDragStart={handleOnHangupButtonDrag}
                             onDragEnd={handleOnHangupButtonDragEnd}
                             isVisible={!pickupButtonDragging}
+                        /> */}
+                        <IconButton
+                            size={60}
+                            bg="green.900"
+                            rounded="full"
+                            icon={<PhoneIcon size="lg" color="white" />}
+                            onPress={handleAcceptCall}
+                        />
+                        <IconButton
+                            size={60}
+                            bg="primary.900"
+                            rounded="full"
+                            icon={<PhoneOffIcon size="lg" color="white" />}
+                            onPress={handleRejectCall}
                         />
                     </HStack>
                 </Center>

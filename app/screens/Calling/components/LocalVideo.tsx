@@ -13,14 +13,17 @@ import { GestureHandlerRootView, PanGestureHandler, PanGestureHandlerGestureEven
 import { Box, Center, HStack, Image, Text, useTheme } from 'native-base';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { Dimensions } from 'react-native';
+import { RTCView, MediaStream } from 'react-native-webrtc';
 type ContextType = {
     translateX: number;
     translateY: number;
 };
 
-type RemoteVideoPropsType = {};
+type LocalVideoPropsType = {
+    stream: MediaStream | null;
+};
 
-export function RemoteVideo({}: RemoteVideoPropsType) {
+export function LocalVideo({ stream }: LocalVideoPropsType) {
     const { colors } = useTheme();
 
     const translateX = useSharedValue(0);
@@ -73,7 +76,7 @@ export function RemoteVideo({}: RemoteVideoPropsType) {
                 <Animated.View style={[rStyle]}>
                     <Box w={132} h={200} position="absolute" top="10" right="4">
                         {/* VIDEO CALL */}
-                        <Image
+                        {/* <Image
                             h="full"
                             w="full"
                             shadow="3"
@@ -82,6 +85,16 @@ export function RemoteVideo({}: RemoteVideoPropsType) {
                                 uri: 'https://images.unsplash.com/photo-1504199367641-aba8151af406?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80',
                             }}
                             alt=""
+                        /> */}
+                        <RTCView
+                            streamURL={stream?.toURL() || ''}
+                            objectFit="cover"
+                            style={{
+                                height: '100%',
+                                width: '100%',
+                                borderRadius: 8,
+                            }}
+                            mirror
                         />
                     </Box>
                 </Animated.View>
