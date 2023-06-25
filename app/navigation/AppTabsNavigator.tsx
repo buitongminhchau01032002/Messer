@@ -2,7 +2,7 @@ import React from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { AppTabsStackParamList, RootStackScreenProps } from '../../types';
-import { HomeScreen } from 'screens/Home';
+import { ContactScreen } from 'screens/Home';
 import { MessageScreen } from 'screens/Message';
 import { AppTabsNavigationKey, RootNavigatekey } from './navigationKey';
 import { Avatar, Box, Button, Icon, View, useTheme } from 'native-base';
@@ -23,17 +23,17 @@ export default function AppTabsNavigator() {
     const { colors } = useTheme();
     return (
         <BottomTab.Navigator
-            initialRouteName={AppTabsNavigationKey.Home}
+            initialRouteName={AppTabsNavigationKey.Contact}
             tabBar={(props) => <MyTabBar {...props} />}
             screenOptions={{
                 headerShadowVisible: false,
             }}
         >
             <BottomTab.Screen
-                name={AppTabsNavigationKey.Home}
-                component={HomeScreen}
+                name={AppTabsNavigationKey.Contact}
+                component={ContactScreen}
                 options={{
-                    title: AppTabsNavigationKey.Home,
+                    title: AppTabsNavigationKey.Contact,
                     tabBarIcon: () => <MicIcon size='md' color='primary.900' />,
                 }}
             />

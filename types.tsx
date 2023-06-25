@@ -20,7 +20,7 @@ declare global {
 }
 // params type
 export type AppTabsStackParamList = {
-    [AppTabsNavigationKey.Home]: undefined;
+    [AppTabsNavigationKey.Contact]: undefined;
     [AppTabsNavigationKey.Message]: undefined;
     [AppTabsNavigationKey.Budget]: undefined;
     [AppTabsNavigationKey.Account]: undefined;

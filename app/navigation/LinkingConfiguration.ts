@@ -26,7 +26,7 @@ const linking: LinkingOptions<RootStackParamList> = {
       },
       [RootNavigatekey.AppDrawer]: {
         screens: {
-          [AppTabsNavigationKey.Home]: "home",
+          [AppTabsNavigationKey.Contact]: "home",
           [AppTabsNavigationKey.Message]: "message",
         },
       },
