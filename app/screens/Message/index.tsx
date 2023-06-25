@@ -184,7 +184,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                         <HStack space={4}>
                             {userList.map((item, idx) => (
                                 <TouchableOpacity onPress={() => {
-
+                                    props.navigation.navigate(RootNavigatekey.CallWaiting)
                                 }}>
                                     <VStack width={16} space={1} alignItems="center" ml={idx === 0 ? 4 : 0}>
                                         <Center width={16} height={16} position="relative">

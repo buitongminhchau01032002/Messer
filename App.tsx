@@ -1,6 +1,6 @@
 import "react-native-gesture-handler"; // for reac-navigation/drawer
 import { StatusBar } from "expo-status-bar";
-import { NativeBaseProvider } from "native-base";
+import { NativeBaseProvider, Toast } from "native-base";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import useCachedResources from "./app/hooks/useCachedResources";
 import Navigation from "./app/navigation/RootNavigator";
@@ -46,6 +46,32 @@ export default function App() {
 
   //   return unsubscribe;
   // }, []);
+
+  useEffect(() => {
+    // Assume a message-notification contains a "type" property in the data payload of the screen to open
+
+    messaging().onNotificationOpenedApp(remoteMessage => {
+      console.log(
+        'Notification caused app to open from background state:',
+        remoteMessage.notification,
+      );
+      // navigation.navigate(remoteMessage.data.type);
+    });
+
+    // Check whether an initial notification is available
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage) {
+          console.log(
+            'Notification caused app to open from quit state:',
+            remoteMessage.notification,
+          );
+          // setInitialRoute(remoteMessage.data.type); // e.g. "Settings"/
+        }
+        // setLoading(false);
+      });
+  }, []);
 
   return (
     <Provider store={store}>
