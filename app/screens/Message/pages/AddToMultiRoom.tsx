@@ -96,7 +96,58 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
         const docRef = await addDoc(collection(db, 'MultiRoom'), {
             name: roomName,
             users: ids,
+            lastMessageTimestamp: serverTimestamp()
         });
+        // navigation.navigate(RootNavigatekey.MultiRoomMessageDetail, { type: 'multi', room: {id: ""}} );/
+        
+        const content = currentUser?.name.concat(" created Room")
+
+        const newMessage = {
+            content,
+            sender: "",
+            senderName: "",
+            type: 'text',
+            createdAt: serverTimestamp(),
+        };
+
+        addDoc(collection(db, 'MultiRoom', docRef.id, 'Message'), newMessage).then(async (values) => {
+            console.log("a")
+            const receivers = selectedUsers.filter((u) => u.id != newMessage.sender);
+            console.log("b")
+
+            await updateDoc(doc(db, 'MultiRoom', docRef.id ?? ''), {
+                lastMessage: newMessage,
+                lastMessageTimestamp: newMessage.createdAt,
+                reads: [],
+            });
+            console.log("c")
+
+
+            receivers.forEach((receiver) => {
+                fetch('https://fcm.googleapis.com/fcm/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization:
+                            'key=AAAAu3T5eSI:APA91bFfynL6hecTGjN4jGBUULhccdSWIBKjG0oBWefs3D5KvDu5IWHUJSJD9F3uMjhmuZbXqsUSj6GBsqRYkQgt2d2If4FUaYHy3bZ-E8NpBhqHYjsyfB9D1Nk-hxVKelYn165SqRdL',
+                    },
+                    body: JSON.stringify({
+                        to: receiver.deviceToken,
+                        notification: {
+                            body: newMessage.content,
+                            OrganizationId: '2',
+                            content_available: true,
+                            priority: 'high',
+                            subtitle: 'PhotoMe',
+                            title: roomName,
+                        },
+                    }),
+                });
+            });
+            console.log("d")
+
+        });
+        navigation.goBack()
     };
     useEffect(() => {
         props.navigation.setOptions({

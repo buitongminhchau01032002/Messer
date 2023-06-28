@@ -30,6 +30,6 @@ export enum RootNavigatekey {
     Search = 'Search',
     Story = 'Story',
     NewStory = 'NewStory',
-    AddToMulti = 'AddToMulti'
-
+    AddToMulti = 'AddToMulti',
+    MyStory = 'MyStory'
 }

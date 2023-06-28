@@ -50,6 +50,7 @@ import { StoryScreen } from 'screens/Story';
 import { NewStoryScreen } from 'screens/NewStory';
 import { MultiRoomMessageDetailScreen } from 'screens/Message/pages/MultiRoomMessagesDetail';
 import { AddToMultiRoomScreen } from 'screens/Message/pages/AddToMultiRoom';
+import { MyStoryScreen } from 'screens/MyStory';
 
 export default function Navigation() {
     // hooks
@@ -249,6 +250,12 @@ function RootNavigator() {
                 <Stack.Screen
                     name={RootNavigatekey.NewStory}
                     component={NewStoryScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+
+                <Stack.Screen
+                    name={RootNavigatekey.MyStory}
+                    component={MyStoryScreen}
                     options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
                 />
             </Stack.Group>

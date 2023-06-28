@@ -25,6 +25,7 @@ import {
     HStack,
     Image,
     ScrollView,
+    useTheme,
 } from 'native-base';
 import { AppTabsNavigationKey, AuthNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import { TouchableOpacity } from 'react-native';
@@ -33,7 +34,8 @@ import { FontAwesome } from '@expo/vector-icons';
 import { NavigateScreen } from 'components/Navigate';
 import { auth, db } from 'config/firebase';
 import { signOut } from 'firebase/auth';
-import { collection, doc, documentId, getDoc, query, where } from 'firebase/firestore';
+import { Timestamp, collection, doc, documentId, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { FlatList } from 'react-native-gesture-handler';
 type MenuItem = {
     title: string;
     icon: React.ReactNode;
@@ -44,6 +46,7 @@ type MenuItem = {
 export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.Account>) => {
     // navigation
     const { navigation } = props;
+    const { colors } = useTheme();
     const user = useAppSelector((state) => state.auth.user);
     // const currentUser  = auth.currentUser?.uid
     const [currentUser, setCurrentUser] = useState({
@@ -52,21 +55,28 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         email: '',
         phone: '',
     });
- 
-
+    const [stories, setStories] = useState([]);
 
     useEffect(() => {
-        // const fetchUserData = async () => {
-        //     const userRef = doc(db, 'User', auth.currentUser?.uid ?? '');
-        //     const userSnap = await getDoc(userRef);
-        //     setCurrentUser(userSnap.data());
-        //     console.log(userSnap.data());
-        // };
-        // fetchUserData().catch(console.error);
-        console.log(user)
-
-        setCurrentUser(user)
+        console.log(user);
+        setCurrentUser(user);
     }, []);
+
+    //story
+    useEffect(() => {
+        const getStory = async () => {
+            const storyRef = await getDocs(collection(db, 'User', user.id, 'Story'));
+            const storiesTemp = [];
+            storyRef.forEach((s) => {
+                storiesTemp.push(s.data());
+            });
+            setStories(storiesTemp);
+            console.log(storiesTemp);
+        };
+
+        getStory().catch(console.error);
+    }, []);
+
     // hooks
     useEffect(() => {
         props.navigation.setOptions({
@@ -145,6 +155,30 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                             </HStack>
                         </TouchableOpacity>
                     </VStack>
+                    <Text fontSize="sm" my={2}>
+                        Story
+                    </Text>
+
+                    <FlatList
+                        numColumns={3}
+                        data={stories}
+                        renderItem={({ item }) => (
+                            <Box height="150px" flex={1} margin={2} position={'relative'}>
+                                <Image
+                                    flex={1}
+                                    source={{
+                                        uri: item.imageUrl,
+                                    }}
+                                />
+                                <Text position={'absolute'} color={'white'}>
+                                    {(item.createdAt as Timestamp).toDate().toLocaleDateString()}
+                                </Text>
+                                <HStack position={'absolute'} right={0} bottom={0}>
+                                    <FontAwesome name="heart-o" size={24} color={colors.primary[900]} />
+                                </HStack>
+                            </Box>
+                        )}
+                    />
                     <Text fontSize="sm" my={2}>
                         Setting
                     </Text>

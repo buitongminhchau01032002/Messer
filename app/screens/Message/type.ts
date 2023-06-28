@@ -3,6 +3,7 @@ import { FieldValue, Timestamp } from 'firebase/firestore';
 export enum SendType {
     Send = 'Send',
     Receive = 'Receive',
+    Notice = 'Notice'
 }
 
 export type SingleRoom = {
