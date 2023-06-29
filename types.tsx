@@ -37,6 +37,7 @@ export type RootStackParamList = {
     [RootNavigatekey.Auth]: NavigatorScreenParams<AuthStackParamList> | undefined;
     [RootNavigatekey.Wallet]: undefined;
     [RootNavigatekey.Information]: {email: string , password: string, phone: string};
+    [RootNavigatekey.ChangeInfomation]: undefined;
     [RootNavigatekey.InformationQR]: undefined;
     [RootNavigatekey.MessageDetail]: {type: "single"|"multi" , room: SingleRoom};
     [RootNavigatekey.MultiRoomMessageDetail]: {type: "single"|"multi" , room: MultiRoom};

@@ -23,11 +23,10 @@ import { AppTabsStackScreenProps, RootStackScreenProps } from 'types';
 import { FontAwesome } from '@expo/vector-icons';
 import _ from 'lodash';
 import { query } from '@firebase/firestore';
-import { collection, collectionGroup, getDocs } from 'firebase/firestore';
+import { collection, collectionGroup, getDocs, where, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from 'config/firebase';
 
 const screenWidth = Dimensions.get('window').width;
-const haiz = [1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5];
 
 export const StoryScreen = (props: RootStackScreenProps<RootNavigatekey.Story>) => {
     const { colors } = useTheme();
@@ -37,23 +36,28 @@ export const StoryScreen = (props: RootStackScreenProps<RootNavigatekey.Story>) 
     const [stories, setStories] = useState([]);
     const progress = useRef(new Animated.Value(0)).current;
 
-
-
     const fetchUserData = async () => {
-        const searchUser = []
-        const q = query(collectionGroup(db, "Story"));
+        const a = Timestamp.fromDate(new Date()).toDate();
+        a.setDate(a.getDate() - 1);
+        console.log(a)
+        const searchUser = [];
+        const q = query(collectionGroup(db, 'Story')
+        // , where('createdAt', '>=', a)
+        );
         const searchUserSnapshot = await getDocs(q);
         searchUserSnapshot.forEach((u) => {
-            searchUser.push(
-                {
+            console.log(u.data().createdAt.toDate() )
+            if(u.data().createdAt.toDate() >= a){
+                searchUser.push({
                     id: u.id,
-                    ...u.data()
-                }
-            );
+                    ...u.data(),
+                });
+            }
+            
         });
-        console.log(searchUser)
+        console.log(searchUser);
         setStories(searchUser);
-    }
+    };
 
     const progressAnim = progress.interpolate({
         inputRange: [0, screenWidth],
@@ -67,18 +71,15 @@ export const StoryScreen = (props: RootStackScreenProps<RootNavigatekey.Story>) 
             duration: 5000,
             useNativeDriver: false,
         }).start((finish) => {
-              
             if (finish.finished) {
                 startScroll(next + 1);
                 setCurStory(next);
-                try{
+                try {
                     flatlistRef.current?.scrollToIndex({ animated: true, index: next });
                 } catch {
-                    pauseScroll()
+                    pauseScroll();
                 }
-                
             }
-           
         });
     };
     const pauseScroll = () => {
@@ -104,7 +105,7 @@ export const StoryScreen = (props: RootStackScreenProps<RootNavigatekey.Story>) 
     };
 
     useEffect(() => {
-        fetchUserData()
+        fetchUserData();
         startScroll(curStory + 1);
     }, []);
 

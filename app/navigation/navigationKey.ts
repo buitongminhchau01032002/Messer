@@ -31,5 +31,6 @@ export enum RootNavigatekey {
     Story = 'Story',
     NewStory = 'NewStory',
     AddToMulti = 'AddToMulti',
-    MyStory = 'MyStory'
+    MyStory = 'MyStory',
+    ChangeInfomation = 'ChangeInfomation'
 }
