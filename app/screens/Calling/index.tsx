@@ -1,11 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Center, HStack, IconButton, Image, Text, VStack, useTheme } from 'native-base';
+import { Box, HStack, IconButton, Image, Text, VStack, useTheme } from 'native-base';
 import { RootStackScreenProps } from 'types';
 import { RootNavigatekey } from 'navigation/navigationKey';
-import { Feather, Ionicons } from '@expo/vector-icons';
-import { Pressable } from 'react-native';
 import { LocalVideo } from './components/LocalVideo';
-import { MicIcon, MicOffIcon, PhoneIcon } from 'components/Icons/Light';
+import { MicIcon, MicOffIcon, PhoneIcon, VideoIcon } from 'components/Icons/Light';
 import {
     RTCPeerConnection,
     RTCIceCandidate,
@@ -21,6 +19,9 @@ import { useAppSelector } from 'hooks/index';
 import sendCallMessage from 'utils/sendCallMessage';
 import { useDispatch } from 'react-redux';
 import { CallState, callActions } from 'slice/call';
+import { SwitchCameraIcon } from 'components/Icons/Light/SwitchCamera';
+import { VolumeIcon } from 'components/Icons/Light/Volume';
+import { VideoOffIcon } from 'components/Icons/Light/VideoOff';
 
 const servers = {
     iceServers: [
@@ -34,6 +35,8 @@ const servers = {
 export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Calling>) => {
     const { colors } = useTheme();
     const [isOnMic, setIsOnMic] = useState(true);
+    const [isOnSpeaker, setIsOnSpeaker] = useState(true);
+    const [isOnVideo, setIsOnVideo] = useState(true);
     const callState = useAppSelector((state) => state.call);
     const dispatch = useDispatch();
     const isFocused = useIsFocused();
@@ -45,41 +48,65 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     useEffect(() => {
         props.navigation.setOptions({
             headerTintColor: colors.primary[900],
+            headerRight: () => (
+                <HStack>
+                    <IconButton
+                        rounded="full"
+                        onPress={handleToggleVideo}
+                        icon={
+                            isOnVideo ? (
+                                <VideoIcon size="xl" color={colors.primary[900]} />
+                            ) : (
+                                <VideoOffIcon size="xl" color={colors.primary[900]} />
+                            )
+                        }
+                        // onPress={handleHangup}
+                    />
+                    <IconButton
+                        rounded="full"
+                        onPress={handleSwitchCamera}
+                        icon={<SwitchCameraIcon size="xl" color={colors.primary[900]} />}
+                        // onPress={handleHangup}
+                    />
+                </HStack>
+            ),
         });
-    }, [props.navigation]);
+    }, [props.navigation, isOnVideo, localStream]);
 
     useEffect(() => {
         if (!isFocused) return;
         initCall();
     }, [isFocused]);
 
+
     async function initCall() {
         try {
             await setUpWebcamAndMediaStream();
-            await joinCall(callState.infor?.id);
+            // await joinCall(callState.infor?.id);
         } catch (err) {
             // props.navigation.goBack();
         }
     }
 
+    function handleToggleVideo() {
+        setIsOnVideo(!isOnVideo);
+    }
     function handleToggleMic() {
-        if (isOnMic) {
-            if (localStream) {
-                localStream.getVideoTracks()[0]._switchCamera();
-            }
-        } else {
-            if (localStream) {
-                localStream.getVideoTracks()[0]._switchCamera();
-            }
-        }
         setIsOnMic(!isOnMic);
     }
-    
+    function handleToggleSpeaker() {
+        setIsOnSpeaker(!isOnSpeaker);
+    }
+    function handleSwitchCamera() {
+        localStream && localStream.getVideoTracks()[0]._switchCamera();
+    }
 
     async function setUpWebcamAndMediaStream() {
         pc.current = new RTCPeerConnection(servers);
         const local = await mediaDevices.getUserMedia({
-            video: true,
+            video: {
+                facingMode: 'environment',
+            },
             audio: true,
         });
         pc.current.addStream(local);
@@ -126,7 +153,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
 
         await pc.current!.setRemoteDescription(new RTCSessionDescription(offerDescription));
 
-        const answerDescription = (await pc.current?.createAnswer()) as RTCSessionDescription ;
+        const answerDescription = (await pc.current?.createAnswer()) as RTCSessionDescription;
         await pc.current?.setLocalDescription(answerDescription);
 
         const answer = {
@@ -157,8 +184,6 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
             });
         pc.current && pc.current.close();
 
-        
-
         // this is from user
         //if (callInfo.fromUser.id === user.id) {
         // sendCallMessage(callInfo.toUser.device, {
@@ -179,7 +204,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         props.navigation.goBack();
         // }
     }
-
+    
     return (
         <Box position="relative" flex={1}>
             <Box position="absolute" top="0" left="0" right="0" bottom="0">
@@ -202,7 +227,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
                     alt=""
                 />
             </Box>
-            <LocalVideo stream={remoteStream}/>
+            <LocalVideo stream={remoteStream} />
             <VStack px="7" pt="24" pb="20" justifyContent="space-between" h="full">
                 <Box>
                     <Text color="primary.900" fontWeight="bold" fontSize="32">
@@ -232,11 +257,12 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
                         size={12}
                         bg="gray:900:alpha.50"
                         rounded="full"
+                        onPress={handleToggleSpeaker}
                         icon={
-                            isOnMic ? (
-                                <Feather name="volume" size={24} color={colors.white} />
+                            isOnSpeaker ? (
+                                <VolumeIcon size="xl" color={colors.primary[900]} />
                             ) : (
-                                <Feather name="volume" size={24} color={colors.white} />
+                                <VolumeIcon size="xl" color={colors.white} />
                             )
                         }
                     />
