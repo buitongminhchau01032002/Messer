@@ -16,9 +16,8 @@ import {
 import { addDoc, collection, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from 'config/firebase';
 import { useIsFocused } from '@react-navigation/native';
-import { useAppSelector } from 'hooks/index';
+import { useAppDispatch, useAppSelector } from 'hooks/index';
 import sendCallMessage from 'utils/sendCallMessage';
-import { useDispatch } from 'react-redux';
 import { CallState, callActions } from 'slice/call';
 import { SwitchCameraIcon } from 'components/Icons/Light/SwitchCamera';
 import { VolumeIcon } from 'components/Icons/Light/Volume';
@@ -33,19 +32,20 @@ const servers = {
     iceCandidatePoolSize: 10,
 };
 
-export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Calling>) => {
+export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Calling> | any) => {
     const { colors } = useTheme();
     const [isOnMic, setIsOnMic] = useState(true);
     const [isOnSpeaker, setIsOnSpeaker] = useState(true);
     const [isOnVideo, setIsOnVideo] = useState(true);
     const callState = useAppSelector((state) => state.call);
     const user = useAppSelector((state) => state.auth.user);
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const isFocused = useIsFocused();
 
-    const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
-    const [localStream, setLocalStream] = useState<MediaStream | null>(null);
-    const pc = useRef<RTCPeerConnection | null>(null);
+    const [remoteStream, setRemoteStream] = useState<MediaStream | null>(props?.route.params?.remoteStream || null);
+    const [localStream, setLocalStream] = useState<MediaStream | null>(props?.route.params?.localStream ||null);
+    const pc = useRef<RTCPeerConnection | null>(props?.route.params?.pc || null);
+
 
     useEffect(() => {
         props.navigation.setOptions({
@@ -80,6 +80,8 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         initCall();
     }, []);
 
+    console.log('🍤', localStream)
+
     useEffect(() => {
         if (callState.state === CallState.NoCall) {
             handleEndCall();
@@ -88,12 +90,32 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
 
     async function initCall() {
         try {
-            await setUpWebcamAndMediaStream();
-            await joinCall(callState.infor?.id);
+            if (!pc.current) {
+                await setUpWebcamAndMediaStream();
+                await joinCall(callState.infor?.id);
+            }
         } catch (err) {
             props.navigation.goBack();
         }
     }
+
+    useEffect(() => {
+        // Check connection state
+        const eventHandler = (event) => {
+            console.log('🔌 Peer Connection State: ' + pc.current?.connectionState);
+            if (
+                pc.current?.connectionState === 'disconnected' ||
+                pc.current?.connectionState === 'failed'
+            ) {
+                handleEndCall();
+            }
+        }
+        pc.current?.addEventListener('connectionstatechange', eventHandler);
+
+        return () => {
+            pc.current?.removeEventListener('connectionstatechange', eventHandler);
+        }
+    }, [localStream, remoteStream])
 
     function handleToggleVideo() {
         setIsOnVideo(!isOnVideo);
