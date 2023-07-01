@@ -20,7 +20,7 @@ import {
 import { AppTabsNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppTabsStackScreenProps } from 'types';
+import { AppTabsStackScreenProps, RootStackScreenProps } from 'types';
 import { MessageItem } from './components/MessageItem';
 import { EvilIcons, FontAwesome, FontAwesome5, Ionicons, Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Animated, TouchableHighlight, StyleSheet, TouchableOpacity } from 'react-native';
@@ -123,9 +123,8 @@ import {
     TrashIcon,
     VolumeMuteIcon,
 } from 'components/Icons/Light';
-import { ListItem } from './components/ListItem';
 
-export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.Message>) => {
+export const MyStoryScreen = (props: RootStackScreenProps<RootNavigatekey.MyStory>) => {
     const { navigation } = props;
     const { colors } = useTheme();
     const [singleRooms, setSingleRooms] = useState([]);

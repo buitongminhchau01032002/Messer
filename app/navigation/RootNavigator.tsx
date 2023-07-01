@@ -28,7 +28,7 @@ import storage from 'services/storage';
 import { FontAwesome } from '@expo/vector-icons';
 import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { reLogin } from 'slice/auth';
+import { reLogin, storeUserFromFirestore } from 'slice/auth';
 import { Alert } from 'react-native';
 import { MessageDetailScreen } from 'screens/Message/pages/MessagesDetail';
 import { WalletScreen } from 'screens/Wallet';
@@ -48,6 +48,9 @@ import { auth } from 'config/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { StoryScreen } from 'screens/Story';
 import { NewStoryScreen } from 'screens/NewStory';
+import { MultiRoomMessageDetailScreen } from 'screens/Message/pages/MultiRoomMessagesDetail';
+import { AddToMultiRoomScreen } from 'screens/Message/pages/AddToMultiRoom';
+import { MyStoryScreen } from 'screens/MyStory';
 
 export default function Navigation() {
     // hooks
@@ -90,6 +93,8 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function RootNavigator() {
     // hooks
     const isAppReady = useAppSelector((state) => state.application.isAppReady);
+    // const user = useAppSelector((state) => state.auth.user);
+
     const dispatch = useAppDispatch();
     const navigation = useNavigation();
     // const { isLogin } = useAppSelector((state) => state.auth);
@@ -166,13 +171,18 @@ function RootNavigator() {
         return <IntroScreen />;
     }
 
-    onAuthStateChanged(auth, (user) => {
-        console.log('current user', user?.email);
-        if (user) {
+    onAuthStateChanged(auth, async (user) => {
+        if (user != null) {
+            const userRef = doc(db, 'User', user.uid);
+            const userSnap = await getDoc(userRef);
+            const currentUser = {
+                id: user.uid,
+                ...userSnap.data(),
+            };
+            dispatch(storeUserFromFirestore(currentUser));
             setIsLogin(true);
         } else {
-            // setIsLogin(false);
-            setIsLogin(true);
+            setIsLogin(false);
         }
     });
     return (
@@ -195,6 +205,11 @@ function RootNavigator() {
                 <Stack.Screen
                     name={RootNavigatekey.MessageDetail}
                     component={MessageDetailScreen}
+                    options={{ headerShadowVisible: false }}
+                />
+                <Stack.Screen
+                    name={RootNavigatekey.MultiRoomMessageDetail}
+                    component={MultiRoomMessageDetailScreen}
                     options={{ headerShadowVisible: false }}
                 />
                 <Stack.Screen name={RootNavigatekey.Intro} component={IntroScreen} options={{ headerShown: false }} />
@@ -222,6 +237,11 @@ function RootNavigator() {
                     options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
                 />
                 <Stack.Screen
+                    name={RootNavigatekey.AddToMulti}
+                    component={AddToMultiRoomScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+                <Stack.Screen
                     name={RootNavigatekey.Story}
                     component={StoryScreen}
                     options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
@@ -230,6 +250,12 @@ function RootNavigator() {
                 <Stack.Screen
                     name={RootNavigatekey.NewStory}
                     component={NewStoryScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+
+                <Stack.Screen
+                    name={RootNavigatekey.MyStory}
+                    component={MyStoryScreen}
                     options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
                 />
             </Stack.Group>
