@@ -93,7 +93,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function RootNavigator() {
     // hooks
     const isAppReady = useAppSelector((state) => state.application.isAppReady);
-    // const user = useAppSelector((state) => state.auth.user);
+    const user = useAppSelector((state) => state.auth.user);
 
     const dispatch = useAppDispatch();
     const navigation = useNavigation();
@@ -105,19 +105,19 @@ function RootNavigator() {
         getToken();
         const unsubscribe = messaging().onMessage(async (payload: FirebaseMessagingTypes.RemoteMessage) => {
             // Vibration.vibrate([2000, 1000], true);
+            console.log('🍟 Recieved messgage: ', payload.data);
             if (payload.data?.type === 'create') {
                 handleRecievedCall(payload.data.docId);
             }
             if (payload.data?.type === 'reject') {
-                // handleEndCall();
+                handleEndCall();
             }
             if (payload.data?.type === 'cancel') {
-                // handleRecievedCancelCall(payload.data);
+                handleRecievedCancelCall(payload.data);
             }
             if (payload.data?.type === 'hangup') {
-                // handleEndCall();
+                handleEndCall();
             }
-            console.log('🍟 Recieved messgage: ', payload.data);
         });
         messaging().setBackgroundMessageHandler(async (remoteMessage) => {
             console.log('Message handled in the background!', remoteMessage);
@@ -128,7 +128,25 @@ function RootNavigator() {
         });
 
         return unsubscribe;
+    }, [user, callState]);
+
+    useEffect(() => {
+        onAuthStateChanged(auth, async (user) => {
+            if (user != null) {
+                const userRef = doc(db, 'User', user.uid);
+                const userSnap = await getDoc(userRef);
+                const currentUser = {
+                    id: user.uid,
+                    ...userSnap.data(),
+                };
+                dispatch(storeUserFromFirestore(currentUser));
+                setIsLogin(true);
+            } else {
+                setIsLogin(false);
+            }
+        });
     }, []);
+
     async function getToken() {
         const fcmToken = await messaging().getToken();
         if (fcmToken) {
@@ -140,29 +158,40 @@ function RootNavigator() {
         const docSnap = await getDoc(doc(db, 'calls', docId));
         if (docSnap.exists()) {
             if (callState.state !== CallState.NoCall) {
-                sendCallMessage(docSnap.data()?.fromUser?.device, {
+                sendCallMessage(docSnap.data()?.fromUser?.deviceToken, {
                     type: 'reject',
                     docId: docSnap.id,
                 });
                 return;
             }
 
-            // TODO: check toUser is correct current user
-            // if (docSnap.data()?.toUser?.id === user?.id) {
-            //
-            // }
-            if (true) {
-                navigation.navigate(RootNavigatekey.ComingCall);
+            // Check this call is correct user
+            if (docSnap.data()?.toUser?.id === user?.id) {
                 dispatch(callActions.changeCallInfor({ id: docSnap.id, ...docSnap.data() }));
                 dispatch(callActions.changeCallState(CallState.Coming));
+                navigation.navigate(RootNavigatekey.ComingCall);
             }
+        }
+    }
+
+    function handleEndCall() {
+        // In other call screens, handle state change to end call
+        dispatch(callActions.changeCallInfor(null));
+        dispatch(callActions.changeCallState(CallState.NoCall));
+    }
+
+    function handleRecievedCancelCall(data: any) {
+        // Check call in message reject is correct call
+        if (callState.state === CallState.Coming && callState.infor?.id === data?.docId) {
+            dispatch(callActions.changeCallInfor(null));
+            dispatch(callActions.changeCallState(CallState.NoCall));
         }
     }
 
     // Log
     useEffect(() => {
         console.log('🍍 State call:', callState.state);
-        console.log('🍏 Call infor:', callState.infor);
+        console.log('🍏 Call infor:', callState.infor && "Has call infor");
     }, [callState]);
 
     // signOut(auth)
@@ -171,20 +200,6 @@ function RootNavigator() {
         return <IntroScreen />;
     }
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user != null) {
-            const userRef = doc(db, 'User', user.uid);
-            const userSnap = await getDoc(userRef);
-            const currentUser = {
-                id: user.uid,
-                ...userSnap.data(),
-            };
-            dispatch(storeUserFromFirestore(currentUser));
-            setIsLogin(true);
-        } else {
-            setIsLogin(false);
-        }
-    });
     return (
         <Stack.Navigator>
             {!isLogin ? (

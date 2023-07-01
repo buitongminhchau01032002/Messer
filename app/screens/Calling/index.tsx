@@ -10,6 +10,7 @@ import {
     RTCSessionDescription,
     RTCView,
     MediaStream,
+    MediaStreamTrack,
     mediaDevices,
 } from 'react-native-webrtc';
 import { addDoc, collection, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
@@ -38,6 +39,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     const [isOnSpeaker, setIsOnSpeaker] = useState(true);
     const [isOnVideo, setIsOnVideo] = useState(true);
     const callState = useAppSelector((state) => state.call);
+    const user = useAppSelector((state) => state.auth.user);
     const dispatch = useDispatch();
     const isFocused = useIsFocused();
 
@@ -74,17 +76,22 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     }, [props.navigation, isOnVideo, localStream]);
 
     useEffect(() => {
-        if (!isFocused) return;
+        // if (!isFocused) return;
         initCall();
-    }, [isFocused]);
+    }, []);
 
+    useEffect(() => {
+        if (callState.state === CallState.NoCall) {
+            handleEndCall();
+        }
+    }, [callState]);
 
     async function initCall() {
         try {
             await setUpWebcamAndMediaStream();
-            // await joinCall(callState.infor?.id);
+            await joinCall(callState.infor?.id);
         } catch (err) {
-            // props.navigation.goBack();
+            props.navigation.goBack();
         }
     }
 
@@ -98,29 +105,37 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         setIsOnSpeaker(!isOnSpeaker);
     }
     function handleSwitchCamera() {
-        localStream && localStream.getVideoTracks()[0]._switchCamera();
+        // TODO: Change logic
+        // localStream && localStream.getVideoTracks()[0]._switchCamera();
     }
 
     async function setUpWebcamAndMediaStream() {
         pc.current = new RTCPeerConnection(servers);
         const local = await mediaDevices.getUserMedia({
-            video: {
-                facingMode: 'environment',
-            },
+            // video: {
+            //     facingMode: 'environment',
+            // },
+            video: true,
             audio: true,
         });
-        pc.current.addStream(local);
+        pc.current?.addStream(local);
         setLocalStream(local);
         let remote = new MediaStream(undefined);
         setRemoteStream(remote);
 
         // Check connection state
-        pc.current.addEventListener('connectionstatechange', (event) => {
+        pc.current?.addEventListener('connectionstatechange', (event) => {
             console.log('🔌 Peer Connection State: ' + pc.current?.connectionState);
+            if (
+                pc.current?.connectionState === 'disconnected' ||
+                pc.current?.connectionState === 'failed'
+            ) {
+                handleEndCall();
+            }
         });
 
         // Push tracks from local stream to peer connection
-        local.getTracks().forEach((track) => {
+        local.getTracks().forEach((track: MediaStreamTrack) => {
             pc.current?.getLocalStreams()[0].addTrack(track);
         });
 
@@ -173,44 +188,47 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     }
 
     async function handleHangup() {
-        localStream &&
-            localStream.getTracks().forEach((track) => {
-                track.stop();
-            });
-
-        remoteStream &&
-            remoteStream.getTracks().forEach((track) => {
-                track.stop();
-            });
-        pc.current && pc.current.close();
-
+        // Send mesage to other divice to hangup
+        let deviceToken;
         // this is from user
-        //if (callInfo.fromUser.id === user.id) {
-        // sendCallMessage(callInfo.toUser.device, {
-        //     type: 'hangup',
-        //     docId: callInfo.id,
-        // });
-        //}
-
+        if (callState.infor?.fromUser.id === user?.id) {
+            deviceToken = callState.infor?.toUser.deviceToken;
+        }
         // this is to user
-        // if (callInfo.toUser.id === user.id) {
-        const device = callState.infor?.fromUser?.device;
-        await sendCallMessage(device, {
-            type: 'hangup',
-            docId: callState.infor?.id,
+        if (callState.infor?.toUser.id === user?.id) {
+            deviceToken = callState.infor?.fromUser.deviceToken;
+        }
+        try {
+            deviceToken &&
+                sendCallMessage(deviceToken, {
+                    type: 'hangup',
+                    docId: callState.infor?.id,
+                });
+        } finally {
+            handleEndCall();
+        }
+    }
+
+    function handleEndCall() {
+        localStream?.getTracks().forEach((track) => {
+            track.stop();
         });
+        remoteStream?.getTracks().forEach((track) => {
+            track.stop();
+        });
+        pc.current?.close();
         dispatch(callActions.changeCallState(CallState.NoCall));
         dispatch(callActions.changeCallInfor(null));
         props.navigation.goBack();
-        // }
     }
-    
+
     return (
         <Box position="relative" flex={1}>
             <Box position="absolute" top="0" left="0" right="0" bottom="0">
                 {/* VIDEO CALL */}
                 <RTCView
-                    streamURL={localStream?.toURL() || ''}
+                    // @ts-ignore
+                    streamURL={remoteStream?.toURL() || ''}
                     objectFit="cover"
                     style={{
                         height: '100%',
@@ -227,7 +245,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
                     alt=""
                 />
             </Box>
-            <LocalVideo stream={remoteStream} />
+            <LocalVideo stream={localStream} />
             <VStack px="7" pt="24" pb="20" justifyContent="space-between" h="full">
                 <Box>
                     <Text color="primary.900" fontWeight="bold" fontSize="32">

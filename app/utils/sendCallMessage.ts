@@ -1,5 +1,6 @@
 export default async function sendCallMessage(device: String, data: Object) {
     try {
+        console.log('⚙️Preparing to send message', device, data);
         const res = await fetch('https://fcm.googleapis.com/fcm/send', {
             method: 'POST',
             headers: {

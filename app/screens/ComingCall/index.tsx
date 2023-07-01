@@ -10,11 +10,20 @@ import sendCallMessage from 'utils/sendCallMessage';
 import { useAppDispatch, useAppSelector } from 'hooks/index';
 import { CallState, callActions } from 'slice/call';
 
+const COMMING_CALL_TIMEOUT = 10000;
+
 export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.ComingCall>) => {
     const { colors } = useTheme();
     const dispatch = useAppDispatch();
     // const [pickupButtonDragging, setPickupButtonDragging] = useState(false);
     // const [hangupButtonDragging, setHangupButtonDragging] = useState(false);
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            handleRejectCall();
+        }, COMMING_CALL_TIMEOUT);
+        return () => clearTimeout(timer);
+    }, []);
+
     useEffect(() => {
         props.navigation.setOptions({
             headerTintColor: colors.white,
@@ -22,6 +31,12 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
     }, [props.navigation]);
 
     const callState = useAppSelector((state) => state.call);
+
+    useEffect(() => {
+        if (callState.state === CallState.NoCall) {
+            props.navigation.goBack();
+        }
+    }, [callState]);
 
     // const handleOnPickupButtonDrag = useCallback(() => {
     //     'worklet';
@@ -44,7 +59,7 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
     // }, []);
 
     function handleRejectCall() {
-        sendCallMessage(callState.infor?.fromUser?.device, {
+        sendCallMessage(callState.infor?.fromUser?.deviceToken, {
             type: 'reject',
             docId: callState.infor?.id,
         });
