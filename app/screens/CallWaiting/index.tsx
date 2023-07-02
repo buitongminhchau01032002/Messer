@@ -188,6 +188,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
         // Listen for remote answer
         onSnapshot(callDoc, (snapshot) => {
             const data = snapshot.data();
+            // @ts-ignore
             if (!pc.current?.currentRemoteDescription && data?.answer) {
                 const answerDescription = new RTCSessionDescription(data.answer);
                 pc.current?.setRemoteDescription(answerDescription);
@@ -236,11 +237,11 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
                 <Image
                     size="40"
                     rounded="full"
-                    source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }}
+                    source={{ uri: callState.infor?.toUser?.avatar }}
                     alt="Avatar"
                 />
                 <Text color="white" mt="5" fontSize={24} fontWeight="bold">
-                    Rahul Malviya
+                    {callState.infor?.toUser?.name}
                 </Text>
                 <Text color="gray.300" mt="2" fontSize={12}>
                     Waiting...

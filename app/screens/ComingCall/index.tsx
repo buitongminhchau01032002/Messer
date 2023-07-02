@@ -79,7 +79,7 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
                     h="full"
                     w="full"
                     source={{
-                        uri: 'https://images.unsplash.com/photo-1542596768-5d1d21f1cf98?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80',
+                        uri: callState.infor?.fromUser.avatar,
                     }}
                     alt=""
                 />
@@ -90,7 +90,7 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
                         Coming call…
                     </Text>
                     <Text color="white" fontWeight="bold" fontSize="32">
-                        Erika Mateo
+                        {callState.infor?.fromUser.name}
                     </Text>
                 </Box>
                 <Center>

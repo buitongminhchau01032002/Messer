@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Box, HStack, IconButton, Image, Text, VStack, useTheme } from 'native-base';
 import { RootStackScreenProps } from 'types';
 import { RootNavigatekey } from 'navigation/navigationKey';
@@ -45,7 +45,16 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     const [remoteStream, setRemoteStream] = useState<MediaStream | null>(props?.route.params?.remoteStream || null);
     const [localStream, setLocalStream] = useState<MediaStream | null>(props?.route.params?.localStream ||null);
     const pc = useRef<RTCPeerConnection | null>(props?.route.params?.pc || null);
-
+    const remoteNameOfUser = useMemo(() => {
+        // this is from user
+        if (callState.infor?.fromUser.id === user?.id) {
+            return callState.infor?.toUser.name;
+        }
+        // this is to user
+        if (callState.infor?.toUser.id === user?.id) {
+            return callState.infor?.fromUser.name;
+        }
+    }, [callState.infor])
 
     useEffect(() => {
         props.navigation.setOptions({
@@ -80,8 +89,6 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         initCall();
     }, []);
 
-    console.log('🍤', localStream)
-
     useEffect(() => {
         if (callState.state === CallState.NoCall) {
             handleEndCall();
@@ -101,7 +108,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
 
     useEffect(() => {
         // Check connection state
-        const eventHandler = (event) => {
+        const eventHandler = (event: any) => {
             console.log('🔌 Peer Connection State: ' + pc.current?.connectionState);
             if (
                 pc.current?.connectionState === 'disconnected' ||
@@ -271,7 +278,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
             <VStack px="7" pt="24" pb="20" justifyContent="space-between" h="full">
                 <Box>
                     <Text color="primary.900" fontWeight="bold" fontSize="32">
-                        Erika
+                        {remoteNameOfUser}
                     </Text>
                 </Box>
                 <HStack alignItems="center" justifyContent="center" space="10">
