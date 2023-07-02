@@ -51,6 +51,7 @@ import { NewStoryScreen } from 'screens/NewStory';
 import { MultiRoomMessageDetailScreen } from 'screens/Message/pages/MultiRoomMessagesDetail';
 import { AddToMultiRoomScreen } from 'screens/Message/pages/AddToMultiRoom';
 import { MyStoryScreen } from 'screens/MyStory';
+import { ChangeInformationScreen } from 'screens/ChangeInfomation';
 
 export default function Navigation() {
     // hooks
@@ -217,6 +218,7 @@ function RootNavigator() {
             )}
             <Stack.Group navigationKey={isLogin ? 'user' : 'guest'}>
                 <Stack.Screen name={RootNavigatekey.Information} component={InformationScreen} />
+                <Stack.Screen name={RootNavigatekey.ChangeInfomation} component={ChangeInformationScreen} />
                 <Stack.Screen
                     name={RootNavigatekey.MessageDetail}
                     component={MessageDetailScreen}

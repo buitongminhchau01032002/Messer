@@ -28,7 +28,7 @@ export type Message = {
     createdAt: Timestamp | FieldValue;
     fileIds?: any[];
     sender: User | string;
-    type: 'text' | 'image' | 'file' | 'notification';
+    type: 'text' | 'image' | 'file' | 'notification' | 'story';
 };
 export type User = {
     id: string;

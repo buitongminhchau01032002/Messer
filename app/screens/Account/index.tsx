@@ -26,16 +26,29 @@ import {
     Image,
     ScrollView,
     useTheme,
+    Menu,
 } from 'native-base';
 import { AppTabsNavigationKey, AuthNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
-import { TouchableOpacity } from 'react-native';
+import { RefreshControl, TouchableOpacity } from 'react-native';
 import { AppTabsStackScreenProps } from 'types';
 import { FontAwesome } from '@expo/vector-icons';
 import { NavigateScreen } from 'components/Navigate';
 import { auth, db } from 'config/firebase';
 import { signOut } from 'firebase/auth';
-import { Timestamp, collection, doc, documentId, getDoc, getDocs, query, where } from 'firebase/firestore';
+import {
+    Timestamp,
+    collection,
+    deleteDoc,
+    doc,
+    documentId,
+    getDoc,
+    getDocs,
+    orderBy,
+    query,
+    where,
+} from 'firebase/firestore';
 import { FlatList } from 'react-native-gesture-handler';
+import { EllipsisIcon } from 'components/Icons/Light';
 type MenuItem = {
     title: string;
     icon: React.ReactNode;
@@ -48,6 +61,7 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
     const { navigation } = props;
     const { colors } = useTheme();
     const user = useAppSelector((state) => state.auth.user);
+    const [refreshing, setRefreshing] = React.useState(false);
     // const currentUser  = auth.currentUser?.uid
     const [currentUser, setCurrentUser] = useState({
         avatar: '',
@@ -57,24 +71,29 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
     });
     const [stories, setStories] = useState([]);
 
-    useEffect(() => {
-        console.log(user);
+    const init = async () => {
+        console.log(user?.name);
         setCurrentUser(user);
-    }, []);
+        const storyRef = await getDocs(query(collection(db, 'User', user.id, 'Story'), orderBy('createdAt', 'desc')));
+        const storiesTemp = [];
+        storyRef.forEach((s) => {
+            storiesTemp.push({
+                id: s.id,
+                ...s.data(),
+            });
+        });
+        setStories(storiesTemp);
+    };
 
     //story
     useEffect(() => {
-        const getStory = async () => {
-            const storyRef = await getDocs(collection(db, 'User', user.id, 'Story'));
-            const storiesTemp = [];
-            storyRef.forEach((s) => {
-                storiesTemp.push(s.data());
-            });
-            setStories(storiesTemp);
-            console.log(storiesTemp);
-        };
+        init().catch(console.error);
+    }, []);
 
-        getStory().catch(console.error);
+    const onRefresh = React.useCallback(async () => {
+        setRefreshing(true);
+        await init();
+        setRefreshing(false);
     }, []);
 
     // hooks
@@ -128,12 +147,21 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         },
     ];
 
+    async function handleDelete(item: never) {
+        await deleteDoc(doc(db, 'User', item.owner.id, 'Story', item.id));
+        init();
+    }
+
     return (
         <Box h="full" p={APP_PADDING} bg="white">
-            <ScrollView>
+            <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
                 <VStack space={2}>
                     <VStack space={2} mt={5} mb={10}>
-                        <TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => {
+                                navigation.navigate(RootNavigatekey.ChangeInfomation);
+                            }}
+                        >
                             <HStack space={2}>
                                 <Image
                                     size={120}
@@ -165,16 +193,46 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                         renderItem={({ item }) => (
                             <Box height="150px" flex={1} margin={2} position={'relative'}>
                                 <Image
+                                    alt="..."
                                     flex={1}
                                     source={{
                                         uri: item.imageUrl,
                                     }}
                                 />
-                                <Text position={'absolute'} color={'white'}>
+                                <Text position={'absolute'} color="primary.900">
                                     {(item.createdAt as Timestamp).toDate().toLocaleDateString()}
                                 </Text>
-                                <HStack position={'absolute'} right={0} bottom={0}>
-                                    <FontAwesome name="heart-o" size={24} color={colors.primary[900]} />
+                                <HStack justifyContent={'space-between'}>
+                                    <Menu
+                                        mb={2}
+                                        placement="top right"
+                                        trigger={(triggerProps) => {
+                                            return (
+                                                <TouchableOpacity
+                                                    p={1}
+                                                    bg="gray.100"
+                                                    borderRadius={100}
+                                                    {...triggerProps}
+                                                >
+                                                    <EllipsisIcon color="primary.900" size="md" />
+                                                </TouchableOpacity>
+                                            );
+                                        }}
+                                    >
+                                        <Menu.Item
+                                            onPress={() => {
+                                                handleDelete(item);
+                                            }}
+                                        >
+                                            <Text bold fontSize="md" color="primary.900">
+                                                Remove
+                                            </Text>
+                                        </Menu.Item>
+                                    </Menu>
+                                    <HStack>
+                                        <Text color={colors.primary[900]}>{item.likedUser.length} </Text>
+                                        <FontAwesome name="heart-o" size={24} color={colors.primary[900]} />
+                                    </HStack>
                                 </HStack>
                             </Box>
                         )}

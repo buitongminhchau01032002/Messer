@@ -1,6 +1,6 @@
 import { APP_PADDING } from 'app/constants/Layout';
 import { TouchableOpacity } from 'components/TouchableOpacity';
-import { Avatar, Box, Divider, HStack, HamburgerIcon, Menu, Pressable, Text, VStack } from 'native-base';
+import { Avatar, Box, Divider, HStack, HamburgerIcon, Menu, Pressable, Text, VStack, Image } from 'native-base';
 import React, { useLayoutEffect, useRef } from 'react';
 import { View } from 'react-native';
 import { Message, SendType, User } from '../type';
@@ -31,6 +31,23 @@ export const MessageItem = (props: Props) => {
                                         {(message.replyMessage as Message).content}
                                     </Text>
                                 </VStack>
+                            </HStack>
+                        ) : undefined}
+                        {message.type == 'story' ? (
+                            <HStack bg="primary.200" p={APP_PADDING} space="sm" borderRadius={2}>
+                                {message.fileIds[0] ? (
+                                    <Image
+                                        // flex={1}
+                                        height={30}
+                                        width={30}
+                                        source={{
+                                            uri: message.fileIds[0],
+                                        }}
+                                        alt=""
+                                    />
+                                ) : (
+                                    <></>
+                                )}
                             </HStack>
                         ) : undefined}
                         <Text color="white">{message.content}</Text>
@@ -123,6 +140,26 @@ export const MessageItem = (props: Props) => {
                                 </VStack>
                             </HStack>
                         ) : undefined}
+                        {message.type == 'story' ? (
+                            <HStack space="sm" borderRadius={2}>
+                                <VStack>
+                                    <Text color = 'white'>Reply your story</Text>
+                                    {message.fileIds[0] ? (
+                                        <Image
+                                        alignSelf={'flex-end'}
+                                            height={150}
+                                            width={100}
+                                            source={{
+                                                uri: message.fileIds[0],
+                                            }}
+                                            alt=""
+                                        />
+                                    ) : (
+                                        <></>
+                                    )}
+                                </VStack>
+                            </HStack>
+                        ) : undefined}
                         <Text color="white">{message.content}</Text>
                     </VStack>
                 </TouchableOpacity>
@@ -131,7 +168,7 @@ export const MessageItem = (props: Props) => {
     } else {
         return (
             <HStack space="sm" flex={1} alignSelf={'center'}>
-                <Text color='gray.500'>{message.content}</Text>
+                <Text color="gray.500">{message.content}</Text>
             </HStack>
         );
     }

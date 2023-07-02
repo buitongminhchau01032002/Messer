@@ -9,6 +9,7 @@ import { ActivityIndicator, TouchableOpacity } from "react-native";
 import { Timestamp, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { auth, db, storage } from "config/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { useAppSelector } from "hooks/index";
 
 export type Storys = {
     id?: string,
@@ -19,7 +20,9 @@ export type Storys = {
 }
 
 export const NewStoryScreen = (props: RootStackScreenProps<RootNavigatekey.NewStory>) => {
-    const currentUser = auth.currentUser?.uid!
+    // const currentUser = auth.currentUser?.uid!
+    const currentUser = useAppSelector((state) => state.auth.user);
+
     const { navigation, route } = props;
     const [imageUrl, setImageUrl] = useState('')
     const { colors } = useTheme()
@@ -67,10 +70,11 @@ export const NewStoryScreen = (props: RootStackScreenProps<RootNavigatekey.NewSt
                     imageUrl: url,
                     createdAt: serverTimestamp(),
                     seenUser: [],
-                    likedUser: []
+                    likedUser: [],
+                    owner: currentUser
                 }
 
-                addDoc(collection(db, 'User', currentUser, 'Story'), newStory).then(async values => {
+                addDoc(collection(db, 'User', currentUser?.id??"", 'Story'), newStory).then(async values => {
                     console.log(values.id)
                 })
             })
