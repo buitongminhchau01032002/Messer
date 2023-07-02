@@ -69,8 +69,8 @@ export const ContactScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         })();
     }, []);
 
-    function handleCall(user: any) {
-        props.navigation.navigate(RootNavigatekey.CallWaiting, {toUser: user});
+    function handleCall(user: any, type: string) {
+        props.navigation.navigate(RootNavigatekey.CallWaiting, {toUser: user, type});
     }
 
     return (
@@ -153,7 +153,11 @@ export const ContactScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     {users?.map((user) => (
                         <HStack key={user.id} py="2" borderBottomColor="black" borderBottomWidth={1} justifyContent="space-between" alignItems="center">
                             <Text>{user.email}</Text>
-                            <IconButton onPress={() => handleCall(user)} icon={<VideoIcon size="xl"/>}/>
+                            <HStack>
+
+                            <IconButton onPress={() => handleCall(user, 'no-video')} icon={<PhoneIcon size="md"/>}/>
+                            <IconButton onPress={() => handleCall(user, 'video')} icon={<VideoIcon size="xl"/>}/>
+                            </HStack>
                         </HStack>
                     ))}
                 </ScrollView>

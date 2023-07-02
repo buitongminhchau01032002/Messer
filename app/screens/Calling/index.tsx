@@ -43,18 +43,18 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     const isFocused = useIsFocused();
 
     const [remoteStream, setRemoteStream] = useState<MediaStream | null>(props?.route.params?.remoteStream || null);
-    const [localStream, setLocalStream] = useState<MediaStream | null>(props?.route.params?.localStream ||null);
+    const [localStream, setLocalStream] = useState<MediaStream | null>(props?.route.params?.localStream || null);
     const pc = useRef<RTCPeerConnection | null>(props?.route.params?.pc || null);
-    const remoteNameOfUser = useMemo(() => {
+    const remoteUser = useMemo(() => {
         // this is from user
         if (callState.infor?.fromUser.id === user?.id) {
-            return callState.infor?.toUser.name;
+            return callState.infor?.toUser;
         }
         // this is to user
         if (callState.infor?.toUser.id === user?.id) {
-            return callState.infor?.fromUser.name;
+            return callState.infor?.fromUser;
         }
-    }, [callState.infor])
+    }, [callState.infor]);
 
     useEffect(() => {
         props.navigation.setOptions({
@@ -110,19 +110,16 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         // Check connection state
         const eventHandler = (event: any) => {
             console.log('🔌 Peer Connection State: ' + pc.current?.connectionState);
-            if (
-                pc.current?.connectionState === 'disconnected' ||
-                pc.current?.connectionState === 'failed'
-            ) {
+            if (pc.current?.connectionState === 'disconnected' || pc.current?.connectionState === 'failed') {
                 handleEndCall();
             }
-        }
+        };
         pc.current?.addEventListener('connectionstatechange', eventHandler);
 
         return () => {
             pc.current?.removeEventListener('connectionstatechange', eventHandler);
-        }
-    }, [localStream, remoteStream])
+        };
+    }, [localStream, remoteStream]);
 
     function handleToggleVideo() {
         if (isOnVideo) {
@@ -169,10 +166,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         // Check connection state
         pc.current?.addEventListener('connectionstatechange', (event) => {
             console.log('🔌 Peer Connection State: ' + pc.current?.connectionState);
-            if (
-                pc.current?.connectionState === 'disconnected' ||
-                pc.current?.connectionState === 'failed'
-            ) {
+            if (pc.current?.connectionState === 'disconnected' || pc.current?.connectionState === 'failed') {
                 handleEndCall();
             }
         });
@@ -267,24 +261,69 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
 
     return (
         <Box position="relative" flex={1}>
-            <Box position="absolute" top="0" left="0" right="0" bottom="0">
+            <Box backgroundColor="gray.900" position="absolute" top="0" left="0" right="0" bottom="0">
                 {/* VIDEO CALL */}
-                <RTCView
-                    // @ts-ignore
-                    streamURL={remoteStream?.toURL() || ''}
-                    objectFit="cover"
-                    style={{
-                        height: '100%',
-                        width: '100%',
-                    }}
-                />
+                {callState.infor?.type !== 'no-video' && (
+                    <RTCView
+                        // @ts-ignore
+                        streamURL={remoteStream?.toURL() || ''}
+                        objectFit="cover"
+                        style={{
+                            height: '100%',
+                            width: '100%',
+                        }}
+                    />
+                )}
+
+                {callState.infor?.type === 'no-video' && (
+                    <>
+                        <VStack alignItems="center" position="relative" flex={1} pt="32">
+                            <Box position="absolute" top="0" left="0" right="0" bottom="0">
+                                {/* <Image
+                        style={{
+                            height: '100%',
+                            width: '100%',
+                        }}
+                        source={{
+                            uri: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+                        }}
+                        alt=""
+                    /> */}
+
+                                <Box
+                                    position="absolute"
+                                    top="0"
+                                    left="0"
+                                    right="0"
+                                    bottom="0"
+                                    backgroundColor="black:alpha.60"
+                                />
+                            </Box>
+
+                            <Image
+                                size="40"
+                                rounded="full"
+                                source={{ uri: remoteUser?.avatar }}
+                                alt="Avatar"
+                            />
+                            <Text color="white" mt="5" fontSize={24} fontWeight="bold">
+                                {remoteUser?.name}
+                            </Text>
+                            <Text color="gray.300" mt="2" fontSize={12}>
+                                Calling...
+                            </Text>
+                        </VStack>
+                    </>
+                )}
             </Box>
-            <LocalVideo stream={localStream} />
+            {callState.infor?.type !== 'no-video' && <LocalVideo stream={localStream} />}
             <VStack px="7" pt="24" pb="20" justifyContent="space-between" h="full">
                 <Box>
-                    <Text color="primary.900" fontWeight="bold" fontSize="32">
-                        {remoteNameOfUser}
-                    </Text>
+                    {callState.infor?.type !== 'no-video' && (
+                        <Text color="primary.900" fontWeight="bold" fontSize="32">
+                            {remoteUser?.name}
+                        </Text>
+                    )}
                 </Box>
                 <HStack alignItems="center" justifyContent="center" space="10">
                     {/* MIC */}

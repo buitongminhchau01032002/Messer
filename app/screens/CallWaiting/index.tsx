@@ -37,7 +37,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
     const isCallCreated = useRef<Boolean>(false);
     const [isOnMic, setIsOnMic] = useState(true);
     const [isOnSpeaker, setIsOnSpeaker] = useState(true);
-    const { toUser } = props.route.params;
+    const { toUser, type } = props.route.params;
     const user = useAppSelector((state) => state.auth.user);
     const dispatch = useAppDispatch();
     const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
@@ -120,7 +120,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
             // video: {
             //     facingMode: 'environment',
             // },
-            video: true,
+            video: type === 'no-video' ? false : true,
             audio: true,
         });
         pc.current?.addStream(local);
@@ -172,11 +172,12 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
             offer,
             fromUser: user,
             toUser: toUser,
+            type,
             createdAt: serverTimestamp(),
         });
 
         dispatch(callActions.changeCallState(CallState.Waiting));
-        dispatch(callActions.changeCallInfor({ id: callDoc.id, toUser, fromUser: user }));
+        dispatch(callActions.changeCallInfor({ id: callDoc.id, type, toUser, fromUser: user }));
         sendCallMessage(toUser.deviceToken, {
             type: 'create',
             docId: callDoc.id,
@@ -243,16 +244,18 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
                         }}
                         alt=""
                     /> */}
-                    <RTCView
-                        // @ts-ignore
-                        streamURL={localStream?.toURL() || ''}
-                        objectFit="cover"
-                        style={{
-                            height: '100%',
-                            width: '100%',
-                        }}
-                        mirror
-                    />
+                    {type !== 'no-video' && (
+                        <RTCView
+                            // @ts-ignore
+                            streamURL={localStream?.toURL() || ''}
+                            objectFit="cover"
+                            style={{
+                                height: '100%',
+                                width: '100%',
+                            }}
+                            mirror
+                        />
+                    )}
                     <Box position="absolute" top="0" left="0" right="0" bottom="0" backgroundColor="black:alpha.60" />
                 </Box>
 
