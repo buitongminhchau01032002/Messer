@@ -11,7 +11,7 @@ import {
     AppTabsNavigationKey,
     AuthNavigationKey,
 } from 'navigation/navigationKey';
-import { Room, SingleRoom } from 'screens/Message/type';
+import { MultiRoom, Room, SingleRoom } from 'screens/Message/type';
 
 declare global {
     namespace ReactNavigation {
@@ -20,7 +20,7 @@ declare global {
 }
 // params type
 export type AppTabsStackParamList = {
-    [AppTabsNavigationKey.Home]: undefined;
+    [AppTabsNavigationKey.Contact]: undefined;
     [AppTabsNavigationKey.Message]: undefined;
     [AppTabsNavigationKey.Budget]: undefined;
     [AppTabsNavigationKey.Account]: undefined;
@@ -39,7 +39,9 @@ export type RootStackParamList = {
     [RootNavigatekey.Information]: {email: string , password: string, phone: string};
     [RootNavigatekey.InformationQR]: undefined;
     [RootNavigatekey.MessageDetail]: {type: "single"|"multi" , room: SingleRoom};
+    [RootNavigatekey.MultiRoomMessageDetail]: {type: "single"|"multi" , room: MultiRoom};
     [RootNavigatekey.NotFound]: undefined;
+    [RootNavigatekey.AddToMulti]: {roomId?: string};
     [RootNavigatekey.Intro]: undefined;
     [RootNavigatekey.Modal]: undefined;
     [RootNavigatekey.ComingCall]: undefined;
@@ -48,6 +50,7 @@ export type RootStackParamList = {
     [RootNavigatekey.Search]: undefined;
     [RootNavigatekey.Story]: undefined;
     [RootNavigatekey.NewStory]: undefined;
+    [RootNavigatekey.MyStory] :undefined;
 };
 // props type
 export type AppTabsStackScreenProps<Screen extends keyof AppTabsStackParamList> = CompositeScreenProps<

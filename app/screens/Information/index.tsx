@@ -94,7 +94,9 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
         // const deviceToken = await getToken(messaging, { vapidKey: "BJJdsMAPga6bGAvN4k-pBmeEU9NZbuCD-k_-vZdUUruF-QmsO0oOTjTs9Nu27x7FNIyDuKPu_EhPEi2wZ4q6h5A" } )
         if (!auth.currentUser) {
 
-            const deviceToken = await messaging().getToken()
+            // const deviceToken = await messaging().getToken()
+            const deviceToken = "await messaging().getToken()"
+
             //upload avatar
             const imgResponse = await fetch(imageUrl)
             const blob = await imgResponse.blob()

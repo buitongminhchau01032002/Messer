@@ -6,8 +6,18 @@ export type AuthStateType = {
     token?: string;
     session: any;
     isLogin: boolean;
-    user: any;
+    user?: {
+      id: string,
+      avatar: string,
+      deviceToken: string,
+      email: string,
+      gender: string,
+      name: string, 
+      phone: string
+    };
 };
+
+
 
 const initialState: AuthStateType = {
     token: '',

@@ -41,7 +41,7 @@ export const MyTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) 
                     };
 
                     return (
-                        <VStack flex={1}>
+                        <VStack flex={1} key={index}>
                             <HStack>
 
                                 <Box flex={0.5}></Box>

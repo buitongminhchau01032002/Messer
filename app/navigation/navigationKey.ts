@@ -5,7 +5,7 @@ export enum AuthNavigationKey {
 }
 
 export enum AppTabsNavigationKey {
-    Home = 'Home',
+    Contact = 'Contact',
     Message = 'Message',
     FloatButton = 'FloatButton',
     Account = 'Account',
@@ -19,6 +19,7 @@ export enum RootNavigatekey {
     Intro = 'Intro',
     Wallet = 'Wallet',
     MessageDetail = 'MessageDetail',
+    MultiRoomMessageDetail = 'MultiRoomMessageDetail',
     Modal = 'Modal',
     Information = 'Information',
     InformationQR = 'InformationQR',
@@ -28,6 +29,7 @@ export enum RootNavigatekey {
     CallWaiting = 'CallWaiting',
     Search = 'Search',
     Story = 'Story',
-    NewStory = 'NewStory'
-
+    NewStory = 'NewStory',
+    AddToMulti = 'AddToMulti',
+    MyStory = 'MyStory'
 }
