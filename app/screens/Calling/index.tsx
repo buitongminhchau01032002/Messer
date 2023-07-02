@@ -125,9 +125,23 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     }, [localStream, remoteStream])
 
     function handleToggleVideo() {
+        if (isOnVideo) {
+            // handle off video
+            localStream!.getVideoTracks()[0].enabled = false;
+        } else {
+            // handle on video
+            localStream!.getVideoTracks()[0].enabled = true;
+        }
         setIsOnVideo(!isOnVideo);
     }
     function handleToggleMic() {
+        if (isOnMic) {
+            // handle off video
+            localStream!.getAudioTracks()[0].enabled = false;
+        } else {
+            // handle on video
+            localStream!.getAudioTracks()[0].enabled = true;
+        }
         setIsOnMic(!isOnMic);
     }
     function handleToggleSpeaker() {
@@ -135,7 +149,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     }
     function handleSwitchCamera() {
         // TODO: Change logic
-        // localStream && localStream.getVideoTracks()[0]._switchCamera();
+        localStream?.getVideoTracks()[0]._switchCamera();
     }
 
     async function setUpWebcamAndMediaStream() {
