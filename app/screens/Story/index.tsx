@@ -47,6 +47,7 @@ const screenWidth = Dimensions.get('window').width;
 
 export const StoryScreen = (props: RootStackScreenProps<RootNavigatekey.Story>) => {
     const { colors } = useTheme();
+    const { navigation, route } = props;
     const flatlistRef = useRef<FlatList | null>(null);
     const [curStory, setCurStory] = useState(0);
     const [stories, setStories] = useState([]);
@@ -142,12 +143,11 @@ export const StoryScreen = (props: RootStackScreenProps<RootNavigatekey.Story>) 
             if (finish.finished) {
                 startScroll(next + 1);
                 setCurStory(next);
-                try{
+                try {
                     flatlistRef.current?.scrollToIndex({ animated: true, index: next });
-                } catch (e){
-                    pauseScroll()
+                } catch (e) {
+                    pauseScroll();
                 }
-                
             }
         });
     };
@@ -157,7 +157,13 @@ export const StoryScreen = (props: RootStackScreenProps<RootNavigatekey.Story>) 
     };
 
     useEffect(() => {
-        fetchStory();
+        // fetchStory();
+        console.log(route.params.stories)
+        // stories.sort((a,b) => {return a.id != route.params.id})
+        const newStories = [];
+        newStories.push(route.params.stories.find((a) => a.id == route.params.id))
+        newStories.push(...route.params.stories.filter((a) => a.id != route.params.id))
+        setStories(newStories);
         startScroll(curStory + 1);
     }, []);
 
@@ -168,7 +174,7 @@ export const StoryScreen = (props: RootStackScreenProps<RootNavigatekey.Story>) 
     }, [props.navigation]);
 
     async function handleMessage(item: any): Promise<void> {
-        if(text.length == 0) return;
+        if (text.length == 0) return;
         const newMessage: Message = {
             content: text,
             sender: currentUser.id,
@@ -231,7 +237,7 @@ export const StoryScreen = (props: RootStackScreenProps<RootNavigatekey.Story>) 
             });
         }
 
-        setText("")
+        setText('');
     }
 
     return (

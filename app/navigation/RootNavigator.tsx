@@ -94,7 +94,13 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function RootNavigator() {
     // hooks
     const isAppReady = useAppSelector((state) => state.application.isAppReady);
+<<<<<<< Updated upstream
     // const user = useAppSelector((state) => state.auth.user);
+=======
+    const user = useAppSelector((state) => state.auth.user);
+    
+
+>>>>>>> Stashed changes
 
     const dispatch = useAppDispatch();
     const navigation = useNavigation();
@@ -133,7 +139,7 @@ function RootNavigator() {
     async function getToken() {
         const fcmToken = await messaging().getToken();
         if (fcmToken) {
-            console.log(fcmToken);
+            console.log("token", fcmToken);
         }
     }
 

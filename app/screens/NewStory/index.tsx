@@ -80,6 +80,7 @@ export const NewStoryScreen = (props: RootStackScreenProps<RootNavigatekey.NewSt
             })
         });
         setLoading(false)
+        navigation.goBack()
     }
 
     return (
