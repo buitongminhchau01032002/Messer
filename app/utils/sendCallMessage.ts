@@ -6,7 +6,7 @@ export default async function sendCallMessage(device: String, data: Object) {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization:
-                    'key=AAAAu3T5eSI:APA91bFfynL6hecTGjN4jGBUULhccdSWIBKjG0oBWefs3D5KvDu5IWHUJSJD9F3uMjhmuZbXqsUSj6GBsqRYkQgt2d2If4FUaYHy3bZ-E8NpBhqHYjsyfB9D1Nk-hxVKelYn165SqRdL',
+                    'key=AAAArh5WpuU:APA91bFK0Rn1vNcKtdwKwOL8uRMlkwQAg3QB3DA_H02jdhRnKizn0S0eewGruC-bvbvIdsP3FBmvAtH79Y2RLrCg5Yz_jlEyQlF9tuzFzpbPjD7qrKIkLffc2ERr74-Fv_Bt04VxKr4r',
             },
             body: JSON.stringify({
                 to: device,

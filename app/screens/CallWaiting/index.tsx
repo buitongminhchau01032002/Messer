@@ -19,7 +19,6 @@ import { CallState, callActions } from 'slice/call';
 import sendCallMessage from 'utils/sendCallMessage';
 import { MicIcon, MicOffIcon, PhoneIcon } from 'components/Icons/Light';
 import { VolumeIcon } from 'components/Icons/Light/Volume';
-import sendMessage from 'utils/sendMessage';
 
 const servers = {
     iceServers: [
@@ -207,7 +206,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
 
     async function handleCancelCall() {
         try {
-            sendMessage(toUser.deviceToken, {
+            sendCallMessage(toUser.deviceToken, {
                 type: 'cancel',
                 docId: callState.infor?.id,
             });
