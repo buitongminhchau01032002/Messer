@@ -142,7 +142,12 @@ export const StoryScreen = (props: RootStackScreenProps<RootNavigatekey.Story>) 
             if (finish.finished) {
                 startScroll(next + 1);
                 setCurStory(next);
-                flatlistRef.current?.scrollToIndex({ animated: true, index: next });
+                try{
+                    flatlistRef.current?.scrollToIndex({ animated: true, index: next });
+                } catch (e){
+                    pauseScroll()
+                }
+                
             }
         });
     };
