@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, HStack, IconButton, Image, Text, VStack, useTheme } from 'native-base';
+import { Box, HStack, IconButton, Image, Text, Toast, VStack, useTheme } from 'native-base';
 import { RootStackScreenProps } from 'types';
 import { RootNavigatekey } from 'navigation/navigationKey';
 import { Feather } from '@expo/vector-icons';
@@ -247,6 +247,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
         dispatch(callActions.changeCallState(CallState.NoCall));
         dispatch(callActions.changeCallInfor(null));
         props.navigation.canGoBack() && props.navigation.goBack();
+        Toast.show({ description: 'Call ended!' });
     }
 
     return (

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, HStack, IconButton, Image, Text, VStack, useTheme } from 'native-base';
+import { Box, HStack, IconButton, Image, Text, Toast, VStack, useTheme } from 'native-base';
 import { RootStackScreenProps } from 'types';
 import { RootNavigatekey } from 'navigation/navigationKey';
 import { LocalVideo } from './components/LocalVideo';
@@ -276,6 +276,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         dispatch(callActions.changeCallState(CallState.NoCall));
         dispatch(callActions.changeCallInfor(null));
         props.navigation.canGoBack() && props.navigation.goBack();
+        Toast.show({ description: 'Call ended!' });
     }
 
     return (

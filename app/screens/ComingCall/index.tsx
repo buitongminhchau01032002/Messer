@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Box, Center, HStack, IconButton, Image, Text, VStack, useTheme } from 'native-base';
+import { Box, Center, HStack, IconButton, Image, Text, Toast, VStack, useTheme } from 'native-base';
 import { runOnJS } from 'react-native-reanimated';
 import { RootStackScreenProps } from 'types';
 import { RootNavigatekey } from 'navigation/navigationKey';
@@ -66,6 +66,7 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
         props.navigation.goBack();
         dispatch(callActions.changeCallState(CallState.NoCall));
         dispatch(callActions.changeCallInfor(null));
+        Toast.show({ description: 'Call ended!' });
     }
 
     function handleAcceptCall() {
