@@ -22,6 +22,8 @@ import { CallState, callActions } from 'slice/call';
 import { SwitchCameraIcon } from 'components/Icons/Light/SwitchCamera';
 import { VolumeIcon } from 'components/Icons/Light/Volume';
 import { VideoOffIcon } from 'components/Icons/Light/VideoOff';
+import { BackHandler } from 'react-native';
+import { Alert } from 'react-native';
 
 const servers = {
     iceServers: [
@@ -87,6 +89,23 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     useEffect(() => {
         // if (!isFocused) return;
         initCall();
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+            Alert.alert(
+                'Hang up',
+                'Do you want to hang up now!',
+                [
+                    { text: 'Keep call', style: 'cancel', onPress: () => {} },
+                    {
+                        text: 'Hang up',
+                        style: 'destructive',
+                        onPress: () => handleEndCall(),
+                    },
+                ],
+                { cancelable: true },
+            );
+            return true;
+        });
+        return () => backHandler.remove();
     }, []);
 
     useEffect(() => {
@@ -256,7 +275,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         pc.current?.close();
         dispatch(callActions.changeCallState(CallState.NoCall));
         dispatch(callActions.changeCallInfor(null));
-        props.navigation.goBack();
+        props.navigation.canGoBack() && props.navigation.goBack();
     }
 
     return (
@@ -300,12 +319,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
                                 />
                             </Box>
 
-                            <Image
-                                size="40"
-                                rounded="full"
-                                source={{ uri: remoteUser?.avatar }}
-                                alt="Avatar"
-                            />
+                            <Image size="40" rounded="full" source={{ uri: remoteUser?.avatar }} alt="Avatar" />
                             <Text color="white" mt="5" fontSize={24} fontWeight="bold">
                                 {remoteUser?.name}
                             </Text>

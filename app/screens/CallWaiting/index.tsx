@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, Center, HStack, IconButton, Image, Pressable, Text, VStack, useTheme } from 'native-base';
+import { Box, HStack, IconButton, Image, Text, VStack, useTheme } from 'native-base';
 import { RootStackScreenProps } from 'types';
 import { RootNavigatekey } from 'navigation/navigationKey';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { addDoc, collection, doc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from 'config/firebase';
 import {
@@ -19,6 +19,8 @@ import { CallState, callActions } from 'slice/call';
 import sendCallMessage from 'utils/sendCallMessage';
 import { MicIcon, MicOffIcon, PhoneIcon } from 'components/Icons/Light';
 import { VolumeIcon } from 'components/Icons/Light/Volume';
+import { Alert } from 'react-native';
+import { BackHandler } from 'react-native';
 
 const servers = {
     iceServers: [
@@ -67,6 +69,24 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
     useEffect(() => {
         // if (!isFocused) return;
         initCall();
+
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+            Alert.alert(
+                'Hang up',
+                'Do you want to hang up now!',
+                [
+                    { text: 'Keep call', style: 'cancel', onPress: () => {} },
+                    {
+                        text: 'Hang up',
+                        style: 'destructive',
+                        onPress: () => handleEndCall(),
+                    },
+                ],
+                { cancelable: true },
+            );
+            return true;
+        });
+        return () => backHandler.remove();
     }, []);
 
     useEffect(() => {
@@ -226,7 +246,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
         pc.current?.close();
         dispatch(callActions.changeCallState(CallState.NoCall));
         dispatch(callActions.changeCallInfor(null));
-        props.navigation.goBack();
+        props.navigation.canGoBack() && props.navigation.goBack();
     }
 
     return (
