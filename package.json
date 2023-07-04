@@ -27,6 +27,7 @@
     "expo": "~47.0.14",
     "expo-asset": "~8.7.0",
     "expo-av": "~13.0.3",
+    "expo-barcode-scanner": "~12.1.0",
     "expo-constants": "~14.0.2",
     "expo-contacts": "~11.0.1",
     "expo-dev-client": "~2.0.1",

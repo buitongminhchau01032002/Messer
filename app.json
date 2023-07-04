@@ -43,6 +43,12 @@
         },
         "plugins": [
             "@react-native-firebase/app",
+            [
+                "expo-barcode-scanner",
+                {
+                    "cameraPermission": "Allow Messer to access camera."
+                }
+            ],
             "@config-plugins/react-native-webrtc",
             [
                 "expo-contacts",

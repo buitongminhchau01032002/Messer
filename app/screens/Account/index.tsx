@@ -71,6 +71,10 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
     });
     const [stories, setStories] = useState([]);
 
+    useEffect(() => {
+        setCurrentUser(user);
+    },[user])
+
     const init = async () => {
         console.log(user?.name);
         setCurrentUser(user);

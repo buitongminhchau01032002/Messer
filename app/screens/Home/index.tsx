@@ -32,14 +32,10 @@ import { useTranslation } from 'react-i18next';
 import { logout } from 'slice/auth';
 import { AppTabsStackScreenProps } from 'types';
 import * as Contacts from 'expo-contacts';
-<<<<<<< Updated upstream
-import { MessageCircleIcon, PhoneIcon } from 'components/Icons/Light';
-=======
 import { MessageCircleIcon, PhoneIcon, PlusIcon, VideoIcon } from 'components/Icons/Light';
 import { Timestamp, collection, collectionGroup, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from 'config/firebase';
 import { RefreshControl, TouchableOpacity } from 'react-native-gesture-handler';
->>>>>>> Stashed changes
 
 export const ContactScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.Contact>) => {
     // hooks
@@ -52,8 +48,6 @@ export const ContactScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
     const [refreshing, setRefreshing] = React.useState(false);
 
     const [contacts, setContacts] = useState<Contacts.Contact[]>([]);
-<<<<<<< Updated upstream
-=======
     const [users, setUsers] = useState<any[]>([]);
 
     const onRefresh = React.useCallback(async () => {
@@ -61,7 +55,6 @@ export const ContactScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         await init();
         setRefreshing(false);
     }, []);
->>>>>>> Stashed changes
 
     const init = async () => {
         const dayBefore = Timestamp.fromDate(new Date()).toDate();
@@ -109,14 +102,11 @@ export const ContactScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
             console.error(e);
         });
     }, []);
-<<<<<<< Updated upstream
-=======
 
     function handleCall(user: any) {
         props.navigation.navigate(RootNavigatekey.CallWaiting, { toUser: user });
     }
 
->>>>>>> Stashed changes
     return (
         // <Box h="full">
         //     <Box p={APP_PADDING} w="full" flex={1}>
@@ -171,18 +161,6 @@ export const ContactScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         <Box h="full">
             
             <Box p={APP_PADDING} w="full" flex={1}>
-<<<<<<< Updated upstream
-                <Text>Welcome to Home</Text>
-                <Box h={20} bg='primary.100' style={{
-                    // shadowRadius: 2,
-                    // shadowOffset: {
-                    //     width: 0,
-                    //     height: -10,
-                    // },
-                    // shadowColor: '#000000',
-                    // elevation: 6,
-                }} shadow={9}></Box>
-=======
                 {/* <Text>Welcome to Home</Text>
                 <Box
                     h={20}
@@ -200,14 +178,10 @@ export const ContactScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     }
                     shadow={9}
                 ></Box>
->>>>>>> Stashed changes
                 <Button onPress={() => navigate.navigate(RootNavigatekey.ComingCall)}>To coming call</Button>
                 <Button onPress={() => navigate.navigate(RootNavigatekey.Calling)}>To calling</Button>
                 <Button onPress={() => navigate.navigate(RootNavigatekey.CallWaiting)}>To call waiting</Button>
                 <Button onPress={() => navigate.navigate(RootNavigatekey.Story)}>To Story</Button>
-<<<<<<< Updated upstream
-                <Button onPress={() => navigate.navigate(RootNavigatekey.NewStory)}>To New Story</Button>
-=======
                 <Button onPress={() => navigate.navigate(RootNavigatekey.NewStory)}>To New Story</Button> */}
                 <FlatList
                     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -218,6 +192,7 @@ export const ContactScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                             <Pressable
                                 height="220px"
                                 flex={1}
+                                margin={2}
                                 onPress={() => {
                                     // console.log(stories)
                                     const temp = stories.filter((e) => {
@@ -229,7 +204,7 @@ export const ContactScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                                 <Box
                                     height="220px"
                                     flex={1}
-                                    margin={2}
+                                    // margin={2}
                                     position={'relative'}
                                     borderRadius={10}
                                     overflow={'hidden'}
@@ -314,7 +289,6 @@ export const ContactScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                         </HStack>
                     ))}
                 </ScrollView> */}
->>>>>>> Stashed changes
             </Box>
         </Box >
     );

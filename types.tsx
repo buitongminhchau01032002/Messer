@@ -45,6 +45,7 @@ export type RootStackParamList = {
     [RootNavigatekey.Calling]: undefined;
     [RootNavigatekey.CallWaiting]: undefined;
     [RootNavigatekey.Search]: undefined;
+    [RootNavigatekey.QRScan]: undefined;
     [RootNavigatekey.Story]: { id: string; stories: [] };
     [RootNavigatekey.NewStory]: undefined;
     [RootNavigatekey.MyStory]: undefined;

@@ -52,6 +52,7 @@ import { MultiRoomMessageDetailScreen } from 'screens/Message/pages/MultiRoomMes
 import { AddToMultiRoomScreen } from 'screens/Message/pages/AddToMultiRoom';
 import { MyStoryScreen } from 'screens/MyStory';
 import { ChangeInformationScreen } from 'screens/ChangeInfomation';
+import { QRScanScreen } from 'screens/QRScan';
 
 export default function Navigation() {
     // hooks
@@ -94,13 +95,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function RootNavigator() {
     // hooks
     const isAppReady = useAppSelector((state) => state.application.isAppReady);
-<<<<<<< Updated upstream
     // const user = useAppSelector((state) => state.auth.user);
-=======
-    const user = useAppSelector((state) => state.auth.user);
-    
-
->>>>>>> Stashed changes
 
     const dispatch = useAppDispatch();
     const navigation = useNavigation();
@@ -139,7 +134,7 @@ function RootNavigator() {
     async function getToken() {
         const fcmToken = await messaging().getToken();
         if (fcmToken) {
-            console.log("token", fcmToken);
+            console.log('token', fcmToken);
         }
     }
 
@@ -242,6 +237,11 @@ function RootNavigator() {
                 <Stack.Screen
                     name={RootNavigatekey.Search}
                     component={SearchScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+                <Stack.Screen
+                    name={RootNavigatekey.QRScan}
+                    component={QRScanScreen}
                     options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
                 />
                 <Stack.Screen
