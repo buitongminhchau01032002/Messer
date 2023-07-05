@@ -81,7 +81,7 @@ type MenuItem = {
     onPress?: () => void;
 };
 
-export const MessageManageScreen = (props: RootStackScreenProps<RootNavigatekey.MessageManage>) => {
+export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigatekey.MultiMessageManage>) => {
     //navigate
     const { navigation, route } = props;
     //navigate params
@@ -110,34 +110,32 @@ export const MessageManageScreen = (props: RootStackScreenProps<RootNavigatekey.
             headerTitle: 'Manage',
             headerTintColor: colors.primary[900],
             headerTitleStyle: { color: colors.blue[900] },
-        });
+        });     
     }, [navigation]);
 
     useEffect(() => {
-        const mediaRef = collection(db, 'SingleRoom', currentRoom, 'MediaStore');
+        const mediaRef = collection(db, 'MultiRoom', currentRoom, 'MediaStore');
         const mediaQuery = query(mediaRef, orderBy('createdAt', 'asc'));
 
-        const unsubPinMessage = onSnapshot(mediaQuery.withConverter(converter<Media>()), async (mediaSnap) => {
-            const images: Media[] = [];
-            const videos: Media[] = [];
-            console.log("unsupPinMessage")
-            mediaSnap.forEach((media) => {
-                const doc = media.data();
-                if (doc.type === 'image') {
-                    images.push({ id: media.id, ...doc });
-                } else {
-                    videos.push({ id: media.id, ...doc });
-                }
+        const fetchPinnedMessage = async () => {
+            const unsub = onSnapshot(mediaQuery.withConverter(converter<Media>()), async (mediaSnap) => {
+                const images: Media[] = [];
+                const videos: Media[] = [];
+                mediaSnap.forEach((media) => {
+                    const doc = media.data();
+                    if (doc.type === 'image') {
+                        images.push({ id: media.id, ...doc });
+                    } else {
+                        videos.push({ id: media.id, ...doc });
+                    }
+                });
+                setImageList(images);
+                setVideoList(videos);
             });
-            setImageList(images);
-            setVideoList(videos);
-        });
-        // const fetchPinnedMessage = async () => {
-            
-        // };
+        };
 
-        // fetchPinnedMessage().catch(console.error);
-        return () => unsubPinMessage()
+        fetchPinnedMessage().catch(console.error);
+        // return () => unsub()
     }, []);
 
     const mediaItems: MenuItem[] = [

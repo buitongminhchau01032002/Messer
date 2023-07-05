@@ -45,14 +45,14 @@ export default function AppTabsNavigator() {
                     tabBarIcon: () => <MessageCircleIcon size='md' color='primary.900' />,
                 }}
             />
-            <BottomTab.Screen
+            {/* <BottomTab.Screen
                 name={AppTabsNavigationKey.Budget}
                 component={BudgetScreen}
                 options={{
                     title: AppTabsNavigationKey.Budget,
                     tabBarIcon: () => <BellIcon size='md' color='primary.900' />,
                 }}
-            />
+            /> */}
             <BottomTab.Screen
                 name={AppTabsNavigationKey.Account}
                 component={AccountScreen}

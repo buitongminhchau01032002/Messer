@@ -124,6 +124,7 @@ import {
     VolumeMuteIcon,
 } from 'components/Icons/Light';
 import { ListItem } from './components/ListItem';
+import { useIsFocused } from '@react-navigation/native';
 
 export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.Message>) => {
     const { navigation } = props;
@@ -132,8 +133,11 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
     const [multiRooms, setMutiRooms] = useState([]);
     const [rooms, setRooms] = useState([]);
     const currentUserId = auth.currentUser?.uid;
+    const isFocus = useIsFocused();
 
     useEffect(() => {
+        // if(isFocus)
+        
         const q = query(
             collection(db, 'SingleRoom'),
             or(where('user1', '==', currentUserId), where('user2', '==', currentUserId)),
@@ -149,7 +153,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     ...data,
                 });
             });
-            console.log('???what');
+            console.log('????what');
             setSingleRooms(rooms);
         });
 
@@ -189,8 +193,18 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         //     unsubscribe()
         //     unsubscribeMuti()
         // }
-        return () => unsubscribe();
-    }, []);
+
+        if (!isFocus){
+            console.log("unfocus")
+            unsubscribe();
+            unsubscribeMuti();
+        };
+       
+        return () => {
+            unsubscribe();
+            unsubscribeMuti();
+        };
+    }, [isFocus]);
 
     useEffect(() => {
         try {

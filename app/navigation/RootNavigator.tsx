@@ -55,6 +55,7 @@ import { ChangeInformationScreen } from 'screens/ChangeInfomation';
 import { QRScanScreen } from 'screens/QRScan';
 import { NotificationScreen } from 'screens/Notification';
 import { MessageManageScreen } from 'screens/Message/pages/MessageManage';
+import { MultiMessageManageScreen } from 'screens/Message/pages/MultiMessageManage';
 
 export default function Navigation() {
     // hooks
@@ -123,6 +124,7 @@ function RootNavigator() {
                 handleEndCall();
             }
         });
+        
         messaging().setBackgroundMessageHandler(async (remoteMessage) => {
             console.log('Message handled in the background!', remoteMessage);
         });
@@ -230,6 +232,11 @@ function RootNavigator() {
                 <Stack.Screen
                     name={RootNavigatekey.MessageManage}
                     component={MessageManageScreen}
+                    options={{ headerShadowVisible: false }}
+                />
+                <Stack.Screen
+                    name={RootNavigatekey.MultiMessageManage}
+                    component={MultiMessageManageScreen}
                     options={{ headerShadowVisible: false }}
                 />
                 <Stack.Screen

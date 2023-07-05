@@ -20,6 +20,7 @@ export enum RootNavigatekey {
     Wallet = 'Wallet',
     MessageDetail = 'MessageDetail',
     MessageManage = 'MessageManage',
+    MultiMessageManage = 'MultiMessageManage',
     MultiRoomMessageDetail = 'MultiRoomMessageDetail',
     Modal = 'Modal',
     Information = 'Information',
@@ -35,5 +36,5 @@ export enum RootNavigatekey {
     MyStory = 'MyStory',
     ChangeInfomation = 'ChangeInfomation',
     QRScan = 'QRScan',
-    Notification = 'Notification'
+    Notification = 'Notification',
 }
