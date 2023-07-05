@@ -115,7 +115,12 @@ export const MessageManageScreen = (props: RootStackScreenProps<RootNavigatekey.
 
     useEffect(() => {
         const mediaRef = collection(db, 'SingleRoom', currentRoom, 'MediaStore');
-        const mediaQuery = query(mediaRef, orderBy('createdAt', 'asc'));
+        const mediaQuery = query(
+            mediaRef,
+            where('isDeleted', '!=', true),
+            orderBy('isDeleted'),
+            orderBy('createdAt', 'asc'),
+        );
 
         const fetchPinnedMessage = async () => {
             const unsub = onSnapshot(mediaQuery.withConverter(converter<Media>()), async (mediaSnap) => {

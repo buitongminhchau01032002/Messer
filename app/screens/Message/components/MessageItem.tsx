@@ -30,11 +30,12 @@ type Props = {
     sendType: SendType;
     onQuote?: () => void;
     onPin?: () => void;
+    onRemove?: () => void;
     isPinned: boolean;
     onPressImage?: (idx: number, gallary: Media[]) => void;
 };
 export const MessageItem = (props: Props) => {
-    const { message, sendType, onQuote, onPin, onPressImage, isPinned } = props;
+    const { message, sendType, onQuote, onPin, onPressImage, onRemove, isPinned } = props;
     const [isFocus, setIsFocus] = useState(false);
     const [timeoutUnfocus, setTimeoutUnfocus] = useState<NodeJS.Timeout>();
 
@@ -56,6 +57,7 @@ export const MessageItem = (props: Props) => {
                         setIsFocus(true);
                     }}
                     position="relative"
+                    px={2}
                 >
                     {message.type === 'text' ? (
                         <Box>
@@ -78,6 +80,7 @@ export const MessageItem = (props: Props) => {
                                 borderRadius="md"
                                 borderTopLeftRadius={0}
                                 p={APP_PADDING}
+                                px={6}
                                 bg="primary.900"
                                 space="2"
                             >
@@ -102,21 +105,21 @@ export const MessageItem = (props: Props) => {
                             </Text>
                         </Box>
                     ) : message.type !== 'story' ? (
-                        <HStack
-                            flexWrap={'wrap'}
-                            borderWidth={2}
-                            borderColor="primary.900"
-                            borderRadius={12}
-                            overflow="hidden"
-                        >
-                            {(JSON.parse(message.content!) as Media[]).map((file) => (
-                                <Box w={120} h={120} position="relative">
+                        <HStack flexWrap={'wrap'} borderRadius={12} p={2} bg="primary.900" overflow="hidden">
+                            {(JSON.parse(message.content!) as Media[]).map((file, idx) => (
+                                <Box w={100} h={100} position="relative">
                                     {file.type === 'image' ? (
-                                        <Image w="100%" h="100%" alt="..." src={file.url} />
+                                        <Pressable
+                                            w="100%"
+                                            h="100%"
+                                            onPress={() => onPressImage?.(idx, JSON.parse(message.content!) as Media[])}
+                                        >
+                                            <Image borderRadius={4} w="100%" h="100%" alt="..." src={file.url} />
+                                        </Pressable>
                                     ) : (
-                                        <Box w={120} h={120} bg="black">
+                                        <Box w={100} h={100} bg="black" borderRadius={4} overflow="hidden">
                                             <Video
-                                                style={{ width: 120, height: 120 }}
+                                                style={{ width: 100, height: 100 }}
                                                 source={{
                                                     uri: file.url,
                                                 }}
@@ -126,10 +129,10 @@ export const MessageItem = (props: Props) => {
                                         </Box>
                                     )}
                                     {/* {file.thumb ? (
-                                <Box position="absolute" top={50} left={50} opacity={0.5}>
-                                    <PlayIcon />
-                                </Box>
-                            ) : undefined} */}
+                                    <Box position="absolute" top={50} left={50} opacity={0.5}>
+                                        <PlayIcon />
+                                    </Box>
+                                ) : undefined} */}
                                 </Box>
                             ))}
                         </HStack>
@@ -146,7 +149,7 @@ export const MessageItem = (props: Props) => {
                                         height={150}
                                         width={100}
                                         source={{
-                                            uri: message.fileIds[0],
+                                            uri: message.fileIds?.[0],
                                         }}
                                         alt=""
                                     />
@@ -194,11 +197,13 @@ export const MessageItem = (props: Props) => {
                                     </Text>
                                 </Menu.Item>
                             )}
-                            <Menu.Item onPress={() => Clipboard.setStringAsync(message.content ?? '')}>
-                                <Text bold fontSize="md">
-                                    Copy
-                                </Text>
-                            </Menu.Item>
+                            {message.type === 'text' && (
+                                <Menu.Item onPress={() => Clipboard.setStringAsync(message.content ?? '')}>
+                                    <Text bold fontSize="md">
+                                        Copy
+                                    </Text>
+                                </Menu.Item>
+                            )}
                             {/* <Menu.Item>
                                 <Text bold fontSize="md" color="primary.900">
                                     Remove
@@ -249,16 +254,18 @@ export const MessageItem = (props: Props) => {
                                     </Text>
                                 </Menu.Item>
                             )}
-                            <Menu.Item>
-                                <Text bold fontSize="md">
-                                    Copy
-                                </Text>
-                            </Menu.Item>
-                            {/* <Menu.Item>
+                            {message.type === 'text' && (
+                                <Menu.Item onPress={() => Clipboard.setStringAsync(message.content ?? '')}>
+                                    <Text bold fontSize="md">
+                                        Copy
+                                    </Text>
+                                </Menu.Item>
+                            )}
+                            <Menu.Item onPress={onRemove}>
                                 <Text bold fontSize="md" color="primary.900">
                                     Remove
                                 </Text>
-                            </Menu.Item> */}
+                            </Menu.Item>
                         </Menu>
                     ) : undefined}
                 </HStack>
@@ -295,7 +302,14 @@ export const MessageItem = (props: Props) => {
                                     _pressed={{ bg: 'white' }}
                                 />
                             )}
-                            <VStack borderRadius="md" borderTopRightRadius={0} p={APP_PADDING} bg="blue.900" space="2">
+                            <VStack
+                                borderRadius="md"
+                                px={6}
+                                borderTopRightRadius={0}
+                                p={APP_PADDING}
+                                bg="blue.900"
+                                space="2"
+                            >
                                 {message.replyMessage ? (
                                     <HStack bg="blue.200" p={APP_PADDING} space="sm" borderRadius={2}>
                                         <Divider orientation="vertical" thickness={2} bg="blue.900"></Divider>
@@ -316,27 +330,21 @@ export const MessageItem = (props: Props) => {
                             </Text>
                         </Box>
                     ) : message.type !== 'story' ? (
-                        <HStack
-                            flexWrap={'wrap'}
-                            borderWidth={2}
-                            borderColor="primary.900"
-                            borderRadius={12}
-                            overflow="hidden"
-                        >
+                        <HStack flexWrap={'wrap'} borderRadius={12} p={2} bg="blue.900" overflow="hidden">
                             {(JSON.parse(message.content!) as Media[]).map((file, idx) => (
-                                <Box w={120} h={120} position="relative">
+                                <Box w={100} h={100} position="relative">
                                     {file.type === 'image' ? (
                                         <Pressable
                                             w="100%"
                                             h="100%"
                                             onPress={() => onPressImage?.(idx, JSON.parse(message.content!) as Media[])}
                                         >
-                                            <Image w="100%" h="100%" alt="..." src={file.url} />
+                                            <Image borderRadius={4} w="100%" h="100%" alt="..." src={file.url} />
                                         </Pressable>
                                     ) : (
-                                        <Box w={120} h={120} bg="black">
+                                        <Box w={100} h={100} bg="black" borderRadius={4} overflow="hidden">
                                             <Video
-                                                style={{ width: 120, height: 120 }}
+                                                style={{ width: 100, height: 100 }}
                                                 source={{
                                                     uri: file.url,
                                                 }}
@@ -366,7 +374,7 @@ export const MessageItem = (props: Props) => {
                                         height={150}
                                         width={100}
                                         source={{
-                                            uri: message.fileIds[0],
+                                            uri: message?.fileIds?.[0]!,
                                         }}
                                         alt=""
                                     />

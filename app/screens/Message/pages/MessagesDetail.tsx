@@ -111,11 +111,13 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                     <TouchableOpacity>
                         <PhoneIcon color="primary.900" size="md" />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => {
-                        const otherUser = users.find((e) => e.id !== currentUser?.id)
-                        console.log(otherUser)
-                        props.navigation.navigate(RootNavigatekey.CallWaiting, { toUser: otherUser });
-                    }}>
+                    <TouchableOpacity
+                        onPress={() => {
+                            const otherUser = users.find((e) => e.id !== currentUser?.id);
+                            console.log(otherUser);
+                            props.navigation.navigate(RootNavigatekey.CallWaiting, { toUser: otherUser });
+                        }}
+                    >
                         <VideoIcon color="primary.900" size="md" />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => navigation.navigate(RootNavigatekey.MessageManage, route.params)}>
@@ -131,10 +133,20 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
 
     useEffect(() => {
         const messageRef = collection(db, 'SingleRoom', currentRoom, 'Message');
-        const messageQuery = query(messageRef, orderBy('createdAt', 'asc'));
+        const messageQuery = query(
+            messageRef,
+            where('isDeleted', '!=', true),
+            orderBy('isDeleted'),
+            orderBy('createdAt', 'asc'),
+        );
 
         const pinnedMessageRef = collection(db, 'SingleRoom', currentRoom, 'PinMessage');
-        const pinnedMessageQuery = query(pinnedMessageRef, orderBy('createdAt', 'asc'));
+        const pinnedMessageQuery = query(
+            pinnedMessageRef,
+            where('isDeleted', '!=', true),
+            orderBy('isDeleted'),
+            orderBy('createdAt', 'asc'),
+        );
 
         const fetchMessageData = async () => {
             // await fetchUserData().catch(console.error)
@@ -201,8 +213,14 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
             );
         };
 
-        fetchMessageData().catch(console.error);
-        fetchPinnedMessage().catch(console.error);
+        fetchMessageData().catch((e) => {
+            console.warn(e);
+            setIsLoading(false);
+        });
+        fetchPinnedMessage().catch((e) => {
+            console.warn(e);
+            setIsLoadingPinnedMessage(false);
+        });
         setIsLoading(true);
         setIsLoadingPinnedMessage(true);
         // return () => unsub()
@@ -210,7 +228,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
 
     useEffect(() => {
         scrollRef.current?.scrollToEnd();
-    }, [messages]);
+    }, [messages.length]);
 
     const handleSendMessage = (content: string, type?: string) => {
         if (!content) {
@@ -222,6 +240,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
             content,
             sender: currentUser.id,
             type: type ?? 'text',
+            isDeleted: false,
             createdAt: serverTimestamp(),
         };
         if (quoteMessage) {
@@ -240,39 +259,38 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                 lastMessageTimestamp: newMessage.createdAt,
                 reads: [currentUser.id],
             });
-            console.log(room.unnotifications)
+            console.log(room.unnotifications);
 
-            try{
-                if(!room.unnotifications.includes(receiver.id)){
-                    console.log(receiver.deviceToken)
+            try {
+                if (!room.unnotifications.includes(receiver.id)) {
+                    console.log(receiver.deviceToken);
                     fetch('https://fcm.googleapis.com/fcm/send', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': 'key=AAAAu3T5eSI:APA91bFfynL6hecTGjN4jGBUULhccdSWIBKjG0oBWefs3D5KvDu5IWHUJSJD9F3uMjhmuZbXqsUSj6GBsqRYkQgt2d2If4FUaYHy3bZ-E8NpBhqHYjsyfB9D1Nk-hxVKelYn165SqRdL',
-        
+                            Authorization:
+                                'key=AAAAu3T5eSI:APA91bFfynL6hecTGjN4jGBUULhccdSWIBKjG0oBWefs3D5KvDu5IWHUJSJD9F3uMjhmuZbXqsUSj6GBsqRYkQgt2d2If4FUaYHy3bZ-E8NpBhqHYjsyfB9D1Nk-hxVKelYn165SqRdL',
                         },
                         body: JSON.stringify({
-                            "to": receiver.deviceToken,
-                            "notification": {
-                                "body": newMessage.content,
-                                "OrganizationId": "2",
-                                "content_available": true,
-                                "priority": "high",
-                                "subtitle": "PhotoMe",
-                                "title": sender.name.concat(" texted you")
-                            }
+                            to: receiver.deviceToken,
+                            notification: {
+                                body: newMessage.content,
+                                OrganizationId: '2',
+                                content_available: true,
+                                priority: 'high',
+                                subtitle: 'PhotoMe',
+                                title: sender.name.concat(' texted you'),
+                            },
                         }),
                     });
                 }
-            }catch(e){
-                console.log(e)
+            } catch (e) {
+                console.log(e);
             }
-           
-        })
-        setContent('')
-        setQuoteMessage(undefined)
-    }
+        });
+        setContent('');
+        setQuoteMessage(undefined);
+    };
     //         fetch('https://fcm.googleapis.com/fcm/send', {
     //             method: 'POST',
     //             headers: {
@@ -302,6 +320,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
         addDoc(collection(db, 'SingleRoom', currentRoom, 'PinMessage'), {
             id: message.id,
             content: message.content,
+            isDeleted: false,
             createdAt: serverTimestamp(),
         }).then(async (values) => {
             setIsPinning(false);
@@ -355,6 +374,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                 addDoc(collection(db, 'SingleRoom', currentRoom, 'MediaStore'), {
                     url: link.url,
                     type: link.type,
+                    isDeleted: false,
                     createdAt: serverTimestamp(),
                 }),
             );
@@ -404,6 +424,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                 addDoc(collection(db, 'SingleRoom', currentRoom, 'MediaStore'), {
                     url: link.url,
                     type: link.type,
+                    isDeleted: false,
                     createdAt: serverTimestamp(),
                 }),
             );
@@ -412,6 +433,25 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
             setIsSending(false);
         }
         setIsUpFile(false);
+    };
+
+    const handleRemoveMessage = async (message: Message) => {
+        const docRef = doc(db, 'SingleRoom', currentRoom, 'Message', message.id!);
+        updateDoc(docRef, {
+            isDeleted: true,
+        });
+        if (message.type === 'media') {
+            const mediaList = JSON.parse(message.content!) as Media[];
+            const querySnapshot = await getDocs(collection(db, 'SingleRoom', currentRoom, 'MediaStore'));
+            querySnapshot.forEach((snap) => {
+                if (mediaList.find((m) => m.url === snap.data().url)) {
+                    const mediaRef = doc(db, 'SingleRoom', currentRoom, 'MediaStore', snap.id);
+                    updateDoc(mediaRef, {
+                        isDeleted: true,
+                    });
+                }
+            });
+        }
     };
 
     const handleCloseGallery = () => {
@@ -472,6 +512,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                                             setCurGallary(gallary);
                                             setIsOpenGallary(true);
                                         }}
+                                        onRemove={() => handleRemoveMessage(message)}
                                     />
                                 );
                             })}
@@ -494,7 +535,13 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                                 <Text bold color="white">
                                     {(quoteMessage.sender as User).name}
                                 </Text>
-                                <Text numberOfLines={3}>{quoteMessage.content}</Text>
+                                {quoteMessage.type === 'text' ? (
+                                    <Text numberOfLines={3}>{quoteMessage.content}</Text>
+                                ) : (
+                                    <Text numberOfLines={3} fontWeight="bold">
+                                        Media
+                                    </Text>
+                                )}
                             </VStack>
                             <VStack justifyContent="center" h="full">
                                 <Pressable onPress={() => setQuoteMessage(undefined)}>
