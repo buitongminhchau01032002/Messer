@@ -111,7 +111,11 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                     <TouchableOpacity>
                         <PhoneIcon color="primary.900" size="md" />
                     </TouchableOpacity>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => {
+                        const otherUser = users.find((e) => e.id !== currentUser?.id)
+                        console.log(otherUser)
+                        props.navigation.navigate(RootNavigatekey.CallWaiting, { toUser: otherUser });
+                    }}>
                         <VideoIcon color="primary.900" size="md" />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => navigation.navigate(RootNavigatekey.MessageManage, route.params)}>

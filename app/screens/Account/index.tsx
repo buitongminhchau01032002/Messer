@@ -45,6 +45,7 @@ import {
     getDocs,
     orderBy,
     query,
+    updateDoc,
     where,
 } from 'firebase/firestore';
 import { FlatList } from 'react-native-gesture-handler';
@@ -145,7 +146,11 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         {
             title: 'Logout',
             icon: <Icon as={<FontAwesome />} name="logout" size="xl" color={'primary.900'}></Icon>,
-            onPress: () => {
+            onPress: async () => {
+                const docRef = doc(db, 'User', user?.id ?? '');
+                 await updateDoc(docRef, {
+                    deviceToken: '',
+                });
                 signOut(auth);
             },
         },

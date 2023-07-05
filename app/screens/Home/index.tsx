@@ -56,6 +56,18 @@ export const ContactScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         setRefreshing(false);
     }, []);
 
+    // useEffect(() => {
+    //     (async () => {
+    //         const usersSnap = await getDocs(collection(db, 'User'));
+    //         const _users : any[] = [];
+    //         usersSnap.forEach((userSnap) => {
+    //             _users.push({ id: userSnap.id, ...userSnap.data() });
+    //         });
+    //         const hhmm = _users.find((e) => e.id == "quyym5LLTxf09mHHJ2jWPdOaqzo1")
+    //         props.navigation.navigate(RootNavigatekey.CallWaiting, {toUser: hhmm});
+    //     })();
+    // }, []);
+
     const init = async () => {
         const dayBefore = Timestamp.fromDate(new Date()).toDate();
         dayBefore.setDate(dayBefore.getDate() - 1);
