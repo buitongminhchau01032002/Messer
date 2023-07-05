@@ -107,27 +107,41 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
     useEffect(() => {
         navigation.setOptions({
             headerRight: () => (
-                <HStack space={4}>
-                    <TouchableOpacity>
-                        <PhoneIcon color="primary.900" size="md" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => {
-                        const otherUser = users.find((e) => e.id !== currentUser?.id)
-                        console.log(otherUser)
-                        props.navigation.navigate(RootNavigatekey.CallWaiting, { toUser: otherUser });
-                    }}>
-                        <VideoIcon color="primary.900" size="md" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate(RootNavigatekey.MessageManage, route.params)}>
-                        <EllipsisIcon color="primary.900" size="md" />
-                    </TouchableOpacity>
+                // Chau: some style and navigate to call screen
+                <HStack>
+                    <IconButton
+                        onPress={() => {
+                            const otherUser = users.find((e) => e.id !== currentUser?.id);
+                            console.log('other user', otherUser);
+                            props.navigation.navigate(RootNavigatekey.CallWaiting, {
+                                toUser: otherUser,
+                                type: 'no-video',
+                            });
+                        }}
+                        icon={<PhoneIcon color="primary.900" size="md" />}
+                    />
+                    <IconButton
+                        onPress={() => {
+                            const otherUser = users.find((e) => e.id !== currentUser?.id);
+                            console.log('other user', otherUser);
+                            props.navigation.navigate(RootNavigatekey.CallWaiting, {
+                                toUser: otherUser,
+                                type: 'video',
+                            });
+                        }}
+                        icon={<VideoIcon color="primary.900" size="xl" />}
+                    />
+                    <IconButton
+                        onPress={() => navigation.navigate(RootNavigatekey.MessageManage, route.params)}
+                        icon={<EllipsisIcon color="primary.900" size="md" />}
+                    />
                 </HStack>
             ),
             headerTitle: '',
             headerTintColor: colors.primary[900],
             headerTitleStyle: { color: colors.blue[900] },
         });
-    }, [navigation]);
+    }, [navigation, users]);
 
     useEffect(() => {
         const messageRef = collection(db, 'SingleRoom', currentRoom, 'Message');
@@ -240,39 +254,38 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                 lastMessageTimestamp: newMessage.createdAt,
                 reads: [currentUser.id],
             });
-            console.log(room.unnotifications)
+            console.log(room.unnotifications);
 
-            try{
-                if(!room.unnotifications.includes(receiver.id)){
-                    console.log(receiver.deviceToken)
+            try {
+                if (!room.unnotifications.includes(receiver.id)) {
+                    console.log(receiver.deviceToken);
                     fetch('https://fcm.googleapis.com/fcm/send', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': 'key=AAAAu3T5eSI:APA91bFfynL6hecTGjN4jGBUULhccdSWIBKjG0oBWefs3D5KvDu5IWHUJSJD9F3uMjhmuZbXqsUSj6GBsqRYkQgt2d2If4FUaYHy3bZ-E8NpBhqHYjsyfB9D1Nk-hxVKelYn165SqRdL',
-        
+                            Authorization:
+                                'key=AAAAu3T5eSI:APA91bFfynL6hecTGjN4jGBUULhccdSWIBKjG0oBWefs3D5KvDu5IWHUJSJD9F3uMjhmuZbXqsUSj6GBsqRYkQgt2d2If4FUaYHy3bZ-E8NpBhqHYjsyfB9D1Nk-hxVKelYn165SqRdL',
                         },
                         body: JSON.stringify({
-                            "to": receiver.deviceToken,
-                            "notification": {
-                                "body": newMessage.content,
-                                "OrganizationId": "2",
-                                "content_available": true,
-                                "priority": "high",
-                                "subtitle": "PhotoMe",
-                                "title": sender.name.concat(" texted you")
-                            }
+                            to: receiver.deviceToken,
+                            notification: {
+                                body: newMessage.content,
+                                OrganizationId: '2',
+                                content_available: true,
+                                priority: 'high',
+                                subtitle: 'PhotoMe',
+                                title: sender.name.concat(' texted you'),
+                            },
                         }),
                     });
                 }
-            }catch(e){
-                console.log(e)
+            } catch (e) {
+                console.log(e);
             }
-           
-        })
-        setContent('')
-        setQuoteMessage(undefined)
-    }
+        });
+        setContent('');
+        setQuoteMessage(undefined);
+    };
     //         fetch('https://fcm.googleapis.com/fcm/send', {
     //             method: 'POST',
     //             headers: {

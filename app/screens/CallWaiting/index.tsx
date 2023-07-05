@@ -40,7 +40,7 @@ const servers = {
     iceCandidatePoolSize: 10,
 };
 
-const COMMING_CALL_TIMEOUT = 10000000;
+const COMMING_CALL_TIMEOUT = 20000;
 
 export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.CallWaiting>) => {
     const { colors } = useTheme();
@@ -54,7 +54,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
     const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
     const [localStream, setLocalStream] = useState<MediaStream | null>(null);
     const pc = useRef<RTCPeerConnection | null>(null);
-    console.log('🆓', localStream);
+    // console.log('🆓', localStream);
 
     useEffect(() => {
         props.navigation.setOptions({
