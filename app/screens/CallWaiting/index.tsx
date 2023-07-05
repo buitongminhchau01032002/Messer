@@ -95,7 +95,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
 
     useEffect(() => {
         // if (!isFocused) return;
-        initCall();
+        const unsub = initCall();
 
         const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
             Alert.alert(
@@ -113,7 +113,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
             );
             return true;
         });
-        return () => backHandler.remove();
+        return () => { backHandler.remove(); unsub.then((u) => u())}
     }, []);
 
     useEffect(() => {
@@ -155,11 +155,14 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
     }, [callState]);
 
     async function initCall() {
+        let ubsub = () => {};
         try {
             await setUpWebcamAndMediaStream();
-            await createOffer(toUser);
+            ubsub = await createOffer(toUser);
         } catch (err) {
             props.navigation.goBack();
+        } finally {
+            return ubsub;
         }
     }
 
@@ -216,8 +219,8 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
 
         await setDoc(callDoc, {
             offer,
-            fromUser: user,
-            toUser: toUser,
+            fromUser: { ...user, isOnVideo: true },
+            toUser: { ...toUser, isOnVideo: true },
             type,
             createdAt: serverTimestamp(),
         });
@@ -231,7 +234,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
         isCallCreated.current = true;
 
         // Listen for remote answer
-        onSnapshot(callDoc, (snapshot) => {
+        const unsub = onSnapshot(callDoc, (snapshot) => {
             const data = snapshot.data();
             // @ts-ignore
             if (!pc.current?.currentRemoteDescription && data?.answer) {
@@ -249,6 +252,9 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
                 }
             });
         });
+
+        return unsub;
+
     }
 
     async function handleCancelCall() {

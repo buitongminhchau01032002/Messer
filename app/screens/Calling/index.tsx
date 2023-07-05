@@ -47,6 +47,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     const [isOnMic, setIsOnMic] = useState(props?.route.params?.isOnMic ?? true);
     const [isOnSpeaker, setIsOnSpeaker] = useState(props?.route.params?.isOnSpeaker ?? true);
     const [isOnVideo, setIsOnVideo] = useState(props?.route.params?.isOnVideo ?? true);
+    const [isRemoveVideoOn, setIsRemoveVideoOn] = useState(true);
     const callState = useAppSelector((state) => state.call);
     const user = useAppSelector((state) => state.auth.user);
     const dispatch = useAppDispatch();
@@ -65,6 +66,26 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         if (callState.infor?.toUser.id === user?.id) {
             return callState.infor?.fromUser;
         }
+    }, [callState.infor]);
+
+    // Listen to offvideo
+    useEffect(() => {
+        if (!callState.infor) {
+            return;
+        }
+
+        const unsubscribe = onSnapshot(doc(db, 'calls', callState.infor?.id), (doc) => {
+            // this is from user
+            if (callState.infor?.fromUser.id === user?.id) {
+                setIsRemoveVideoOn(doc.data()?.toUser?.isOnVideo);
+            }
+            // this is to user
+            if (callState.infor?.toUser.id === user?.id) {
+                setIsRemoveVideoOn(doc.data()?.fromUser?.isOnVideo);
+            }
+        });
+
+        return () => unsubscribe();
     }, [callState.infor]);
 
     useEffect(() => {
@@ -150,14 +171,28 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     }, [localStream, remoteStream]);
 
     function handleToggleVideo() {
-        if (isOnVideo) {
-            // handle off video
-            localStream!.getVideoTracks()[0].enabled = false;
-        } else {
-            // handle on video
-            localStream!.getVideoTracks()[0].enabled = true;
+        // if (isOnVideo) {
+        //     // handle off video
+        //     localStream!.getVideoTracks()[0].enabled = false;
+        // } else {
+        //     // handle on video
+        //     localStream!.getVideoTracks()[0].enabled = true;
+        // }
+        const isOnVideoAfterChange = !isOnVideo;
+        // this is from user
+        if (callState.infor?.fromUser.id === user?.id) {
+            console.log('setting video', isOnVideoAfterChange);
+            updateDoc(doc(db, 'calls', callState.infor?.id), {
+                'fromUser.isOnVideo': isOnVideoAfterChange,
+            });
         }
-        setIsOnVideo(!isOnVideo);
+        // this is from user
+        if (callState.infor?.toUser.id === user?.id) {
+            updateDoc(doc(db, 'calls', callState.infor?.id), {
+                'toUser.isOnVideo': isOnVideoAfterChange,
+            });
+        }
+        setIsOnVideo(isOnVideoAfterChange);
     }
     function handleToggleMic() {
         if (isOnMic) {
@@ -288,17 +323,22 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         <Box position="relative" flex={1}>
             <Box backgroundColor="gray.900" position="absolute" top="0" left="0" right="0" bottom="0">
                 {/* VIDEO CALL */}
-                {callState.infor?.type !== 'no-video' && (
-                    <RTCView
-                        // @ts-ignore
-                        streamURL={remoteStream?.toURL() || ''}
-                        objectFit="cover"
-                        style={{
-                            height: '100%',
-                            width: '100%',
-                        }}
-                    />
-                )}
+                {callState.infor?.type !== 'no-video' &&
+                    (isRemoveVideoOn ? (
+                        <RTCView
+                            // @ts-ignore
+                            streamURL={remoteStream?.toURL() || ''}
+                            objectFit="cover"
+                            style={{
+                                height: '100%',
+                                width: '100%',
+                            }}
+                        />
+                    ) : (
+                        <HStack justifyContent="center" alignItems="center" bg="gray.900" w="100%" h="100%">
+                            <VideoOffIcon size="20" color="white" />
+                        </HStack>
+                    ))}
 
                 {callState.infor?.type === 'no-video' && (
                     <>
@@ -343,7 +383,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
                     </>
                 )}
             </Box>
-            {callState.infor?.type !== 'no-video' && <LocalVideo stream={localStream} />}
+            {callState.infor?.type !== 'no-video' && <LocalVideo isOnVideo={isOnVideo} stream={localStream} />}
             <VStack px="7" pt="24" pb="20" justifyContent="space-between" h="full">
                 <Box>
                     {callState.infor?.type !== 'no-video' && (

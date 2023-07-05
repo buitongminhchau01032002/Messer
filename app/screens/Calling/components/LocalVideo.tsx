@@ -14,6 +14,7 @@ import { Box, Center, HStack, Image, Text, useTheme } from 'native-base';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { Dimensions } from 'react-native';
 import { RTCView, MediaStream } from 'react-native-webrtc';
+import { VideoOffIcon } from 'components/Icons/Light/VideoOff';
 type ContextType = {
     translateX: number;
     translateY: number;
@@ -21,9 +22,10 @@ type ContextType = {
 
 type LocalVideoPropsType = {
     stream: MediaStream | null;
+    isOnVideo: boolean;
 };
 
-export function LocalVideo({ stream }: LocalVideoPropsType) {
+export function LocalVideo({ stream, isOnVideo }: LocalVideoPropsType) {
     const { colors } = useTheme();
 
     const translateX = useSharedValue(0);
@@ -75,17 +77,23 @@ export function LocalVideo({ stream }: LocalVideoPropsType) {
             <PanGestureHandler onGestureEvent={panGestureEvent}>
                 <Animated.View style={[rStyle]}>
                     <Box w={132} h={200} position="absolute" rounded="md" overflow="hidden" top="10" right="4">
-                        <RTCView
-                            // @ts-ignore
-                            streamURL={stream?.toURL() || ''}
-                            objectFit="cover"
-                            style={{
-                                height: '100%',
-                                width: '100%',
-                                borderRadius: 8,
-                            }}
-                            mirror
-                        />
+                        {isOnVideo ? (
+                            <RTCView
+                                // @ts-ignore
+                                streamURL={stream?.toURL() || ''}
+                                objectFit="cover"
+                                style={{
+                                    height: '100%',
+                                    width: '100%',
+                                    borderRadius: 8,
+                                }}
+                                mirror
+                            />
+                        ) : (
+                            <HStack justifyContent="center" alignItems="center" bg="gray.800" w={132} h={200}>
+                                <VideoOffIcon size="16" color="white"/>
+                            </HStack>
+                        )}
                     </Box>
                 </Animated.View>
             </PanGestureHandler>
