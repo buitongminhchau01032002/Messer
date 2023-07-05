@@ -36,7 +36,7 @@ import {
 import { AppTabsNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Platform, ScrollView } from 'react-native';
+import { ActivityIndicator, Alert, Platform, ScrollView } from 'react-native';
 import { AppTabsStackScreenProps, RootStackScreenProps } from 'types';
 import { MessageItem } from '../components/MessageItem';
 import { Media, Message, SendType, User } from '../type';
@@ -133,20 +133,10 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
 
     useEffect(() => {
         const messageRef = collection(db, 'SingleRoom', currentRoom, 'Message');
-        const messageQuery = query(
-            messageRef,
-            where('isDeleted', '!=', true),
-            orderBy('isDeleted'),
-            orderBy('createdAt', 'asc'),
-        );
+        const messageQuery = query(messageRef, orderBy('createdAt', 'asc'));
 
         const pinnedMessageRef = collection(db, 'SingleRoom', currentRoom, 'PinMessage');
-        const pinnedMessageQuery = query(
-            pinnedMessageRef,
-            where('isDeleted', '!=', true),
-            orderBy('isDeleted'),
-            orderBy('createdAt', 'asc'),
-        );
+        const pinnedMessageQuery = query(pinnedMessageRef, orderBy('createdAt', 'asc'));
 
         const fetchMessageData = async () => {
             // await fetchUserData().catch(console.error)
@@ -435,23 +425,38 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
         setIsUpFile(false);
     };
 
-    const handleRemoveMessage = async (message: Message) => {
-        const docRef = doc(db, 'SingleRoom', currentRoom, 'Message', message.id!);
-        updateDoc(docRef, {
-            isDeleted: true,
-        });
-        if (message.type === 'media') {
-            const mediaList = JSON.parse(message.content!) as Media[];
-            const querySnapshot = await getDocs(collection(db, 'SingleRoom', currentRoom, 'MediaStore'));
-            querySnapshot.forEach((snap) => {
-                if (mediaList.find((m) => m.url === snap.data().url)) {
-                    const mediaRef = doc(db, 'SingleRoom', currentRoom, 'MediaStore', snap.id);
-                    updateDoc(mediaRef, {
-                        isDeleted: true,
-                    });
-                }
-            });
-        }
+    const handleDeleteMessage = (message: Message) => {
+        Alert.alert(
+            'Warning',
+            "Can't restore after delete, are you sure you want delete?",
+            [
+                {
+                    text: 'OK',
+                    onPress: async () => {
+                        const docRef = doc(db, 'SingleRoom', currentRoom, 'Message', message.id!);
+                        updateDoc(docRef, {
+                            isDeleted: true,
+                        });
+                        if (message.type === 'media') {
+                            const mediaList = JSON.parse(message.content!) as Media[];
+                            const querySnapshot = await getDocs(
+                                collection(db, 'SingleRoom', currentRoom, 'MediaStore'),
+                            );
+                            querySnapshot.forEach((snap) => {
+                                if (mediaList.find((m) => m.url === snap.data().url)) {
+                                    const mediaRef = doc(db, 'SingleRoom', currentRoom, 'MediaStore', snap.id);
+                                    updateDoc(mediaRef, {
+                                        isDeleted: true,
+                                    });
+                                }
+                            });
+                        }
+                    },
+                },
+                { text: 'Cancel', style: 'cancel' },
+            ],
+            { cancelable: true },
+        );
     };
 
     const handleCloseGallery = () => {
@@ -512,7 +517,8 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                                             setCurGallary(gallary);
                                             setIsOpenGallary(true);
                                         }}
-                                        onRemove={() => handleRemoveMessage(message)}
+                                        onDelete={() => handleDeleteMessage(message)}
+                                        isDeleted={message.isDeleted}
                                     />
                                 );
                             })}

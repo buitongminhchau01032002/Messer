@@ -30,12 +30,13 @@ type Props = {
     sendType: SendType;
     onQuote?: () => void;
     onPin?: () => void;
-    onRemove?: () => void;
+    onDelete?: () => void;
     isPinned: boolean;
+    isDeleted: boolean;
     onPressImage?: (idx: number, gallary: Media[]) => void;
 };
 export const MessageItem = (props: Props) => {
-    const { message, sendType, onQuote, onPin, onPressImage, onRemove, isPinned } = props;
+    const { message, sendType, onQuote, onPin, onPressImage, onDelete, isDeleted, isPinned } = props;
     const [isFocus, setIsFocus] = useState(false);
     const [timeoutUnfocus, setTimeoutUnfocus] = useState<NodeJS.Timeout>();
 
@@ -45,7 +46,7 @@ export const MessageItem = (props: Props) => {
                 <Avatar source={{ uri: (message.sender as User).avatar }} size="sm"></Avatar>
                 <TouchableOpacity
                     maxWidth="70%"
-                    onLongPress={onQuote}
+                    onLongPress={isDeleted ? undefined : onQuote}
                     onPress={() => {
                         let timeoutHidden = setTimeout(() => {
                             setIsFocus(false);
@@ -59,7 +60,13 @@ export const MessageItem = (props: Props) => {
                     position="relative"
                     px={2}
                 >
-                    {message.type === 'text' ? (
+                    {message.isDeleted ? (
+                        <Box p={2} mb={4} borderRadius="md" borderTopLeftRadius={0} bg="black" opacity={0.5}>
+                            <Text color="white" fontSize="xs" italic>
+                                Message is deleted
+                            </Text>
+                        </Box>
+                    ) : message.type === 'text' ? (
                         <Box>
                             {isPinned && (
                                 <IconButton
@@ -161,7 +168,7 @@ export const MessageItem = (props: Props) => {
                     )}
                 </TouchableOpacity>
                 <HStack flex={1} alignItems="flex-end">
-                    {isFocus ? (
+                    {isFocus && !isDeleted ? (
                         <Menu
                             mb={2}
                             placement="top right"
@@ -218,7 +225,7 @@ export const MessageItem = (props: Props) => {
         return (
             <HStack space="sm">
                 <HStack flex={1} alignItems="flex-end" justifyContent="flex-end">
-                    {isFocus ? (
+                    {isFocus && !isDeleted ? (
                         <Menu
                             mb={2}
                             placement="top right"
@@ -261,9 +268,9 @@ export const MessageItem = (props: Props) => {
                                     </Text>
                                 </Menu.Item>
                             )}
-                            <Menu.Item onPress={onRemove}>
+                            <Menu.Item onPress={onDelete}>
                                 <Text bold fontSize="md" color="primary.900">
-                                    Remove
+                                    Delete
                                 </Text>
                             </Menu.Item>
                         </Menu>
@@ -272,7 +279,7 @@ export const MessageItem = (props: Props) => {
                 <TouchableOpacity
                     maxWidth="70%"
                     alignItems="flex-end"
-                    onLongPress={onQuote}
+                    onLongPress={isDeleted ? undefined : onQuote}
                     onPress={() => {
                         let timeoutHidden = setTimeout(() => {
                             setIsFocus(false);
@@ -285,7 +292,13 @@ export const MessageItem = (props: Props) => {
                     }}
                 >
                     {/* {message.type ==='story' ? <></> : (true ? <></> : <></>)} */}
-                    {message.type === 'text' ? (
+                    {message.isDeleted ? (
+                        <Box p={2} borderRadius="md" borderTopRightRadius={0} bg="black" opacity={0.5}>
+                            <Text color="white" fontSize="xs" italic>
+                                Message is deleted
+                            </Text>
+                        </Box>
+                    ) : message.type === 'text' ? (
                         <Box>
                             {isPinned && (
                                 <IconButton
