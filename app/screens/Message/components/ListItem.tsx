@@ -13,9 +13,15 @@ import {
     doc,
     serverTimestamp,
     deleteDoc,
+    updateDoc,
+    arrayUnion,
+    arrayRemove,
+    addDoc,
 } from 'firebase/firestore';
+import { useAppSelector } from 'hooks/index';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en.json';
+import { update } from 'lodash';
 import { now } from 'moment';
 import { HStack, VStack, Box, Text, Image, IconButton } from 'native-base';
 import React from 'react';
@@ -34,8 +40,10 @@ export const ListItem = (item: {
     name: string | null;
     users: [] | null;
     onPress?: () => void;
+    unnotifications: [] | null;
 }) => {
-    const currentUserId = auth.currentUser?.uid;
+    const currentUser = useAppSelector((state) => state.auth.user);
+
     const [imgUrl, setImg] = useState(
         'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Solid_white.svg/2048px-Solid_white.svg.png',
     );
@@ -46,12 +54,73 @@ export const ListItem = (item: {
     const [lastMessage, setLastMessage] = useState('');
     const [time, setTime] = useState('');
     const [read, setRead] = useState(false);
+    const [isUnnotify, setUnnotify] = useState(false);
 
     const rightSwipeActions = () => {
         return (
             <HStack px={4} space={4} alignItems="center" bg="black" justifyContent="center">
-                <IconButton borderRadius={100} bg="gray.700" icon={<LogoutIcon color="white" size="sm" />} />
-                <IconButton borderRadius={100} bg="gray.700" icon={<BellOffIcon color="white" size="sm" />} />
+                <IconButton
+                    borderRadius={100}
+                    bg="gray.700"
+                    icon={<LogoutIcon color="white" size="sm" />}
+                    onPress={async () => {
+                        if (item.type == 'single') {
+                            await updateDoc(doc(db, 'SingleRoom', item.id), {
+                                users: arrayRemove(currentUser.id),
+                            });
+                        } else {
+                            await updateDoc(doc(db, 'MultiRoom', item.id), {
+                                users: arrayRemove(currentUser.id),
+                            });
+
+                            const content = currentUser?.name.concat(' leave room.');
+
+                            const newMessage = {
+                                content,
+                                sender: '',
+                                senderName: '',
+                                type: 'text',
+                                createdAt: serverTimestamp(),
+                            };
+
+                            await addDoc(collection(db, 'MultiRoom', item.id, 'Message'), newMessage).then(async () => {
+                                await updateDoc(doc(db, 'MultiRoom', item.id ?? ''), {
+                                    lastMessage: newMessage,
+                                    lastMessageTimestamp: newMessage.createdAt,
+                                    reads: [],
+                                });
+                            });
+                        }
+                    }}
+                />
+                <IconButton
+                    borderRadius={100}
+                    bg={isUnnotify ? 'blue.800' : 'gray.700'}
+                    icon={<BellOffIcon color="white" size="sm" />}
+                    onPress={async () => {
+                        if (item.type == 'single') {
+                            if (!isUnnotify) {
+                                await updateDoc(doc(db, 'SingleRoom', item.id), {
+                                    unnotifications: arrayUnion(currentUser.id),
+                                });
+                            } else {
+                                await updateDoc(doc(db, 'SingleRoom', item.id), {
+                                    unnotifications: arrayRemove(currentUser.id),
+                                });
+                            }
+                        } else {
+                            if (!isUnnotify) {
+                                await updateDoc(doc(db, 'MultiRoom', item.id), {
+                                    unnotifications: arrayUnion(currentUser.id),
+                                });
+                            } else {
+                                await updateDoc(doc(db, 'MultiRoom', item.id), {
+                                    unnotifications: arrayRemove(currentUser.id),
+                                });
+                            }
+                        }
+                    }}
+                />
                 <IconButton borderRadius={100} bg="gray.700" icon={<LinkIcon color="white" size="sm" />} />
                 <IconButton
                     borderRadius={100}
@@ -84,8 +153,13 @@ export const ListItem = (item: {
     useEffect(() => {
         // set current user read
         const reads = item.reads ?? [];
-        setRead(reads.includes(currentUserId));
+        setRead(reads.includes(currentUser.id));
     }, [item.reads]);
+
+    useEffect(() => {
+        const unnotifies = item.unnotifications ?? [];
+        setUnnotify(unnotifies.includes(currentUser.id));
+    }, [item.unnotifications]);
 
     useEffect(() => {
         const timeAgo = new TimeAgo('en-US');
@@ -105,7 +179,7 @@ export const ListItem = (item: {
     useEffect(() => {
         if (item.type == 'single') {
             var otherUserId: string;
-            if (item.user1 == currentUserId) {
+            if (item.user1 == currentUser.id) {
                 otherUserId = item.user2;
             } else {
                 otherUserId = item.user1;
@@ -171,7 +245,6 @@ export const ListItem = (item: {
                                     style={{ width: 48, height: 48 }}
                                     borderRadius={100}
                                 />
-                                
                             </Box>
                         )}
 

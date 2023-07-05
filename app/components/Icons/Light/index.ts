@@ -16,3 +16,5 @@ export { PhoneOffIcon } from './PhoneOff';
 export { MicOffIcon } from './MicOff';
 export { SearchIcon } from './Search';
 export { PlusIcon } from './Plus';
+export { AttachIcon } from './Attach';
+export { CameraIcon } from './Camera';

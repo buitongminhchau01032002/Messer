@@ -249,7 +249,7 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
                                             ? SendType.Send
                                             : SendType.Receive
                                     }
-                                    onLongPress={() => {
+                                    onQuote={() => {
                                         setQuoteMessage(message);
                                     }}
                                 />

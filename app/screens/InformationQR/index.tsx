@@ -16,6 +16,7 @@ import { RootStackScreenProps } from 'types';
 import { FontAwesome } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
 import { useTheme } from 'native-base';
+import { useAppSelector } from 'hooks/index';
 
 type MenuItem = {
     title: string;
@@ -27,6 +28,7 @@ type MenuItem = {
 export const InformationScreenQR = (props: RootStackScreenProps<RootNavigatekey.InformationQR>) => {
     // navigation
     const { navigation } = props;
+    const currentUser = useAppSelector((state) => state.auth.user);
     // hooks
     useEffect(() => {
         props.navigation.setOptions({
@@ -89,16 +91,16 @@ export const InformationScreenQR = (props: RootStackScreenProps<RootNavigatekey.
                             <TouchableOpacity>
                                 <VStack space={2}>
                                     <Avatar size={200} bg="primary.900" ml={5} source={{
-                                        uri: "https://images.unsplash.com/photo-1510771463146-e89e6e86560e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=627&q=80"
+                                        uri: currentUser?.avatar
                                     }}>
 
-                                        Sa Đam
+                                        {currentUser?.name}
                                     </Avatar>
                                     <VStack space={2} ml={2} alignItems='center'>
                                         <Text bold fontSize={26}>
-                                            Dennis
+                                        {currentUser?.name}
                                         </Text>
-                                        <Text color="gray.400" fontSize={16}>hello@depper.com</Text>
+                                        <Text color="gray.400" fontSize={16}>{currentUser?.email}</Text>
                                     </VStack>
                                 </VStack>
                             </TouchableOpacity>
@@ -113,7 +115,7 @@ export const InformationScreenQR = (props: RootStackScreenProps<RootNavigatekey.
                             <QRCode
                                 size={350}
                                 color={colors.primary[900]}
-                                value="Xin chào cả nhà iu"
+                                value={currentUser?.id}
 
                             />
                         </Center>

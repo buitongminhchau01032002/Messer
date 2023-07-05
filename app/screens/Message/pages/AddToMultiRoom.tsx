@@ -73,7 +73,7 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
         setSearchingUser(searchUser);
         console.log(selectedUsers);
     };
-    const handleSubmit = async () => {
+    const handleAddMember = async () => {
         if (roomId) {
             const roomRef = doc(db, 'MultiRoom', roomId);
             await updateDoc(roomRef, {
@@ -82,7 +82,7 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
                         return u.id;
                     }),
                 ),
-            });
+            }).then();
         }
     };
 
@@ -96,6 +96,7 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
         const docRef = await addDoc(collection(db, 'MultiRoom'), {
             name: roomName,
             users: ids,
+            owner: currentUser?.id,
             lastMessageTimestamp: serverTimestamp()
         });
         // navigation.navigate(RootNavigatekey.MultiRoomMessageDetail, { type: 'multi', room: {id: ""}} );/
@@ -159,7 +160,7 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
                             if (!roomId) {
                                 setNameDialogVisible(true);
                             } else {
-                                handleSubmit();
+                                handleAddMember();
                             }
                         }}
                     >

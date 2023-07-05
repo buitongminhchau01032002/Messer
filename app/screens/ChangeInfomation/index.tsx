@@ -156,10 +156,10 @@ export const ChangeInformationScreen = (props: RootStackScreenProps<RootNavigate
                             </TouchableOpacity>
                             <VStack space={2} ml={2} alignItems="center">
                                 <Text bold fontSize={26}>
-                                    Dennis
+                                    {currentUser?.name}
                                 </Text>
                                 <Text color="gray.400" fontSize={16}>
-                                    hello@depper.com
+                                    {currentUser?.email}
                                 </Text>
                             </VStack>
                         </Center>
@@ -223,7 +223,7 @@ export const ChangeInformationScreen = (props: RootStackScreenProps<RootNavigate
                                         });
                                     }}
                                 >
-                                    Sign in
+                                    Change
                                 </CButton>
                             </VStack>
                         )}

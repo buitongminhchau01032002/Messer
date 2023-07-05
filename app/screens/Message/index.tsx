@@ -197,12 +197,18 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
             const roomCollect = [];
             roomCollect.push(...singleRooms);
             roomCollect.push(...multiRooms);
-            // roomCollect.sort(function(a, b){return +b.lastMessage.createdAt.toDate() - a.lastMessage.createdAt.toDate()})
+            try {
+                roomCollect.sort(function (a, b) {
+                    return +b.lastMessage.createdAt.toDate() - a.lastMessage.createdAt.toDate();
+                });
+            } catch (e) {
+                console.log(e);
+            }
+
             setRooms(roomCollect);
-        } catch (e){
-            console.error(e)
+        } catch (e) {
+            console.error(e);
         }
-       
     }, [singleRooms, multiRooms]);
 
     useEffect(() => {
@@ -222,7 +228,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={async () => {
-                            navigation.navigate(RootNavigatekey.AddToMulti, {roomId : undefined});
+                            navigation.navigate(RootNavigatekey.AddToMulti, { roomId: undefined });
                         }}
                     >
                         <PlusIcon size="md" color="primary.900" />
@@ -239,7 +245,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                 <VStack space={2}>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                         <HStack space={4}>
-                            {userList.map((item, idx) => (
+                            {/* {userList.map((item, idx) => (
                                 <TouchableOpacity onPress={() => {}}>
                                     <VStack width={16} space={1} alignItems="center" ml={idx === 0 ? 4 : 0}>
                                         <Center width={16} height={16} position="relative">
@@ -267,7 +273,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                                         </Text>
                                     </VStack>
                                 </TouchableOpacity>
-                            ))}
+                            ))} */}
                         </HStack>
                     </ScrollView>
                     <VStack space={2}>

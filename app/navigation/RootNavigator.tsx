@@ -52,6 +52,9 @@ import { MultiRoomMessageDetailScreen } from 'screens/Message/pages/MultiRoomMes
 import { AddToMultiRoomScreen } from 'screens/Message/pages/AddToMultiRoom';
 import { MyStoryScreen } from 'screens/MyStory';
 import { ChangeInformationScreen } from 'screens/ChangeInfomation';
+import { QRScanScreen } from 'screens/QRScan';
+import { NotificationScreen } from 'screens/Notification';
+import { MessageManageScreen } from 'screens/Message/pages/MessageManage';
 
 export default function Navigation() {
     // hooks
@@ -151,7 +154,7 @@ function RootNavigator() {
     async function getToken() {
         const fcmToken = await messaging().getToken();
         if (fcmToken) {
-            console.log(fcmToken);
+            console.log('token', fcmToken);
         }
     }
 
@@ -225,6 +228,11 @@ function RootNavigator() {
                     options={{ headerShadowVisible: false }}
                 />
                 <Stack.Screen
+                    name={RootNavigatekey.MessageManage}
+                    component={MessageManageScreen}
+                    options={{ headerShadowVisible: false }}
+                />
+                <Stack.Screen
                     name={RootNavigatekey.MultiRoomMessageDetail}
                     component={MultiRoomMessageDetailScreen}
                     options={{ headerShadowVisible: false }}
@@ -251,6 +259,16 @@ function RootNavigator() {
                 <Stack.Screen
                     name={RootNavigatekey.Search}
                     component={SearchScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+                <Stack.Screen
+                    name={RootNavigatekey.Notification}
+                    component={NotificationScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+                <Stack.Screen
+                    name={RootNavigatekey.QRScan}
+                    component={QRScanScreen}
                     options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
                 />
                 <Stack.Screen

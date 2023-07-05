@@ -2,13 +2,27 @@ import { APP_PADDING } from 'app/constants/Layout';
 import { SearchIcon } from 'components/Icons/Light/Search';
 import { auth, db } from 'config/firebase';
 import { query, collection, where, onSnapshot, or, getDocs, addDoc, serverTimestamp, and } from 'firebase/firestore';
-import { ScrollView, View, Text, HStack, useTheme, TextField, Input, Box, VStack, Image, Divider } from 'native-base';
+import {
+    ScrollView,
+    View,
+    Text,
+    HStack,
+    useTheme,
+    TextField,
+    Input,
+    Box,
+    VStack,
+    Image,
+    Divider,
+    Pressable,
+} from 'native-base';
 import { RootNavigatekey } from 'navigation/navigationKey';
 import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { RootStackScreenProps } from 'types';
 import { ListItem } from './component/ListItem';
+import { FontAwesome } from '@expo/vector-icons';
 
 export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>) => {
     const { navigation } = props;
@@ -41,6 +55,15 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
             headerTransparent: false,
             headerTintColor: colors.primary[900],
             headerTitleStyle: { color: colors.blue[900] },
+            headerRight: () => (
+                <Pressable
+                    onPress={() => {
+                        navigation.navigate(RootNavigatekey.QRScan);
+                    }}
+                >
+                    <FontAwesome name="qrcode" size={24} color="black" />
+                </Pressable>
+            ),
         });
     }, [props.navigation]);
 

@@ -29,7 +29,7 @@ import {
     Menu,
 } from 'native-base';
 import { AppTabsNavigationKey, AuthNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
-import { RefreshControl, TouchableOpacity } from 'react-native';
+import { Alert, RefreshControl, TouchableOpacity } from 'react-native';
 import { AppTabsStackScreenProps } from 'types';
 import { FontAwesome } from '@expo/vector-icons';
 import { NavigateScreen } from 'components/Navigate';
@@ -45,6 +45,7 @@ import {
     getDocs,
     orderBy,
     query,
+    updateDoc,
     where,
 } from 'firebase/firestore';
 import { FlatList } from 'react-native-gesture-handler';
@@ -70,6 +71,10 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         phone: '',
     });
     const [stories, setStories] = useState([]);
+
+    useEffect(() => {
+        setCurrentUser(user);
+    }, [user]);
 
     const init = async () => {
         console.log(user?.name);
@@ -114,7 +119,7 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         {
             title: 'Nofication',
             icon: <Icon as={<FontAwesome />} name="bell" size="xl" color={'primary.900'} />,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
+            onPress: () => navigation.navigate(RootNavigatekey.Notification),
         },
         {
             title: 'Pricacy and Security',
@@ -141,15 +146,31 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         {
             title: 'Logout',
             icon: <Icon as={<FontAwesome />} name="logout" size="xl" color={'primary.900'}></Icon>,
-            onPress: () => {
+            onPress: async () => {
+                const docRef = doc(db, 'User', user?.id ?? '');
+                 await updateDoc(docRef, {
+                    deviceToken: '',
+                });
                 signOut(auth);
             },
         },
     ];
 
     async function handleDelete(item: never) {
-        await deleteDoc(doc(db, 'User', item.owner.id, 'Story', item.id));
-        init();
+        Alert.alert('Delete chat', 'You want to delete this channel?', [
+            {
+                text: 'Cancel',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+            },
+            {
+                text: 'OK',
+                onPress: async () => {
+                    await deleteDoc(doc(db, 'User', item.owner.id, 'Story', item.id));
+                    init();
+                },
+            },
+        ]);
     }
 
     return (
