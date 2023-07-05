@@ -23,7 +23,15 @@ import { SwitchCameraIcon } from 'components/Icons/Light/SwitchCamera';
 import { VolumeIcon } from 'components/Icons/Light/Volume';
 import { VideoOffIcon } from 'components/Icons/Light/VideoOff';
 import { BackHandler } from 'react-native';
-import { Alert } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
+import Animated, {
+    interpolate,
+    useAnimatedStyle,
+    useSharedValue,
+    withDelay,
+    withRepeat,
+    withTiming,
+} from 'react-native-reanimated';
 
 const servers = {
     iceServers: [
@@ -61,28 +69,28 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     useEffect(() => {
         props.navigation.setOptions({
             headerTintColor: colors.primary[900],
-            headerRight: () => (
-                <HStack>
-                    <IconButton
-                        rounded="full"
-                        onPress={handleToggleVideo}
-                        icon={
-                            isOnVideo ? (
-                                <VideoIcon size="xl" color={colors.primary[900]} />
-                            ) : (
-                                <VideoOffIcon size="xl" color={colors.primary[900]} />
-                            )
-                        }
-                        // onPress={handleHangup}
-                    />
-                    <IconButton
-                        rounded="full"
-                        onPress={handleSwitchCamera}
-                        icon={<SwitchCameraIcon size="xl" color={colors.primary[900]} />}
-                        // onPress={handleHangup}
-                    />
-                </HStack>
-            ),
+            headerBackVisible: false,
+            headerRight: () =>
+                callState?.infor?.type !== 'no-video' && (
+                    <HStack>
+                        <IconButton
+                            rounded="full"
+                            onPress={handleToggleVideo}
+                            icon={
+                                isOnVideo ? (
+                                    <VideoIcon size="xl" color={colors.primary[900]} />
+                                ) : (
+                                    <VideoOffIcon size="xl" color={colors.primary[900]} />
+                                )
+                            }
+                        />
+                        <IconButton
+                            rounded="full"
+                            onPress={handleSwitchCamera}
+                            icon={<SwitchCameraIcon size="xl" color={colors.primary[900]} />}
+                        />
+                    </HStack>
+                ),
         });
     }, [props.navigation, isOnVideo, localStream]);
 
@@ -324,9 +332,16 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
                             <Text color="white" mt="5" fontSize={24} fontWeight="bold">
                                 {remoteUser?.name}
                             </Text>
-                            <Text color="gray.300" mt="2" fontSize={12}>
-                                Calling...
-                            </Text>
+                            <HStack mt="2" justifyContent="center" alignItems="center" space="2">
+                                <Box position="relative" size="4" rounded="full" bg="red.500">
+                                    <Ring delay={0} />
+                                    <Ring delay={400} />
+                                    <Ring delay={800} />
+                                </Box>
+                                <Text color="gray.300" fontSize={12}>
+                                    Calling...
+                                </Text>
+                            </HStack>
                         </VStack>
                     </>
                 )}
@@ -377,3 +392,42 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         </Box>
     );
 };
+
+const Ring = ({ delay }) => {
+    const ring = useSharedValue(0);
+
+    const ringStyle = useAnimatedStyle(() => {
+        return {
+            opacity: 0.8 - ring.value,
+            transform: [
+                {
+                    scale: interpolate(ring.value, [0, 1], [0, 3]),
+                },
+            ],
+        };
+    });
+    useEffect(() => {
+        ring.value = withDelay(
+            delay,
+            withRepeat(
+                withTiming(1, {
+                    duration: 1600,
+                }),
+                -1,
+                false,
+            ),
+        );
+    }, []);
+    return <Animated.View style={[styles.ring, ringStyle]} />;
+};
+
+const styles = StyleSheet.create({
+    ring: {
+        position: 'absolute',
+        width: 16,
+        height: 16,
+        borderRadius: 99999,
+        borderColor: '#ef4444',
+        borderWidth: 2,
+    },
+});

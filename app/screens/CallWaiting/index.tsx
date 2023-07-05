@@ -59,6 +59,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
     useEffect(() => {
         props.navigation.setOptions({
             headerTintColor: colors.primary[900],
+            headerBackVisible: false,
             headerRight: () => (
                 <HStack>
                     <Feather name="video" size={20} color={colors.primary[900]} />

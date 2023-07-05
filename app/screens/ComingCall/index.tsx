@@ -40,6 +40,7 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
 
     useEffect(() => {
         props.navigation.setOptions({
+            headerBackVisible: false,
             headerTintColor: colors.white,
         });
     }, [props.navigation]);
@@ -98,6 +99,7 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
                     }}
                     alt=""
                 />
+                <Box position="absolute" top="0" left="0" right="0" bottom="0" bg="black:alpha.40" />
             </Box>
             <VStack px="7" pt="24" pb="24" justifyContent="space-between" h="full">
                 <Box>
