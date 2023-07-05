@@ -74,8 +74,11 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
         console.log(selectedUsers);
     };
     const handleAddMember = async () => {
+       
         if (roomId) {
+          
             const roomRef = doc(db, 'MultiRoom', roomId);
+            
             await updateDoc(roomRef, {
                 users: arrayUnion(
                     ...selectedUsers.map((u) => {
@@ -176,6 +179,7 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
     }, [props.navigation]);
 
     const handleNavigate = async (otherUserId: any) => {
+        
         const idx = selectedUsers.indexOf(otherUserId);
         if (idx > -1) {
             selectedUsers.splice(idx, 1);
@@ -277,12 +281,13 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
                         color={'blue.900'}
                         mt="2"
                         backgroundColor={'white'}
+                       // onChange={() => fetchUserData().catch(console.error)}
                         onSubmitEditing={() => fetchUserData().catch(console.error)}
                     />
                     <SearchIcon size={'sm'} color={'red.500'} />
                 </View>
                 <Text fontWeight={'bold'} marginY={8}>
-                    Channel
+                    Users
                 </Text>
                 <VStack space={4}>
                     {searchingUsers.map((item, idx) => (
