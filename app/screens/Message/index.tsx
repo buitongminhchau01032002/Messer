@@ -240,7 +240,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                         <HStack space={4}>
                             {userList.map((item, idx) => (
-                                <TouchableOpacity onPress={() => {}}>
+                                <TouchableOpacity key={idx} onPress={() => {}}>
                                     <VStack width={16} space={1} alignItems="center" ml={idx === 0 ? 4 : 0}>
                                         <Center width={16} height={16} position="relative">
                                             <Image
