@@ -21,6 +21,15 @@ import { MicIcon, MicOffIcon, PhoneIcon } from 'components/Icons/Light';
 import { VolumeIcon } from 'components/Icons/Light/Volume';
 import { Alert } from 'react-native';
 import { BackHandler } from 'react-native';
+import Animated, {
+    useAnimatedStyle,
+    useSharedValue,
+    withDelay,
+    withRepeat,
+    withTiming,
+    interpolate,
+} from 'react-native-reanimated';
+import { StyleSheet } from 'react-native';
 
 const servers = {
     iceServers: [
@@ -280,7 +289,18 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
                     <Box position="absolute" top="0" left="0" right="0" bottom="0" backgroundColor="black:alpha.60" />
                 </Box>
 
-                <Image size="40" rounded="full" source={{ uri: callState.infor?.toUser?.avatar }} alt="Avatar" />
+                <Box position="relative" size="40" rounded="full" bg="gray.500">
+                    <Ring delay={0} />
+                    <Ring delay={400} />
+                    <Ring delay={800} />
+                    <Image
+                        position="absolute"
+                        size="40"
+                        rounded="full"
+                        source={{ uri: callState.infor?.toUser?.avatar }}
+                        alt=""
+                    />
+                </Box>
                 <Text color="white" mt="5" fontSize={24} fontWeight="bold">
                     {callState.infor?.toUser?.name}
                 </Text>
@@ -323,3 +343,42 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
         </VStack>
     );
 };
+
+const Ring = ({ delay }) => {
+    const ring = useSharedValue(0);
+
+    const ringStyle = useAnimatedStyle(() => {
+        return {
+            opacity: 0.8 - ring.value,
+            transform: [
+                {
+                    scale: interpolate(ring.value, [0, 1], [0, 3]),
+                },
+            ],
+        };
+    });
+    useEffect(() => {
+        ring.value = withDelay(
+            delay,
+            withRepeat(
+                withTiming(1, {
+                    duration: 2000,
+                }),
+                -1,
+                false,
+            ),
+        );
+    }, []);
+    return <Animated.View style={[styles.ring, ringStyle]} />;
+};
+
+const styles = StyleSheet.create({
+    ring: {
+        position: 'absolute',
+        width: 160,
+        height: 160,
+        borderRadius: 99999,
+        borderColor: 'white',
+        borderWidth: 3,
+    },
+});
