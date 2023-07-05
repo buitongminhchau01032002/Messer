@@ -1,26 +1,27 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Box, Center, HStack, IconButton, Image, Text, VStack, useTheme } from 'native-base';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Box, HStack, IconButton, Image, Text, VStack, useTheme } from 'native-base';
 import { RootStackScreenProps } from 'types';
 import { RootNavigatekey } from 'navigation/navigationKey';
-import { Feather, Ionicons } from '@expo/vector-icons';
-import { Pressable } from 'react-native';
 import { LocalVideo } from './components/LocalVideo';
-import { MicIcon, MicOffIcon, PhoneIcon } from 'components/Icons/Light';
+import { MicIcon, MicOffIcon, PhoneIcon, VideoIcon } from 'components/Icons/Light';
 import {
     RTCPeerConnection,
     RTCIceCandidate,
     RTCSessionDescription,
     RTCView,
     MediaStream,
+    MediaStreamTrack,
     mediaDevices,
 } from 'react-native-webrtc';
 import { addDoc, collection, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from 'config/firebase';
 import { useIsFocused } from '@react-navigation/native';
-import { useAppSelector } from 'hooks/index';
+import { useAppDispatch, useAppSelector } from 'hooks/index';
 import sendCallMessage from 'utils/sendCallMessage';
-import { useDispatch } from 'react-redux';
 import { CallState, callActions } from 'slice/call';
+import { SwitchCameraIcon } from 'components/Icons/Light/SwitchCamera';
+import { VolumeIcon } from 'components/Icons/Light/Volume';
+import { VideoOffIcon } from 'components/Icons/Light/VideoOff';
 
 const servers = {
     iceServers: [
@@ -31,69 +32,153 @@ const servers = {
     iceCandidatePoolSize: 10,
 };
 
-export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Calling>) => {
+export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Calling> | any) => {
     const { colors } = useTheme();
     const [isOnMic, setIsOnMic] = useState(true);
+    const [isOnSpeaker, setIsOnSpeaker] = useState(true);
+    const [isOnVideo, setIsOnVideo] = useState(true);
     const callState = useAppSelector((state) => state.call);
-    const dispatch = useDispatch();
+    const user = useAppSelector((state) => state.auth.user);
+    const dispatch = useAppDispatch();
     const isFocused = useIsFocused();
 
-    const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
-    const [localStream, setLocalStream] = useState<MediaStream | null>(null);
-    const pc = useRef<RTCPeerConnection | null>(null);
+    const [remoteStream, setRemoteStream] = useState<MediaStream | null>(props?.route.params?.remoteStream || null);
+    const [localStream, setLocalStream] = useState<MediaStream | null>(props?.route.params?.localStream ||null);
+    const pc = useRef<RTCPeerConnection | null>(props?.route.params?.pc || null);
+    const remoteNameOfUser = useMemo(() => {
+        // this is from user
+        if (callState.infor?.fromUser.id === user?.id) {
+            return callState.infor?.toUser.name;
+        }
+        // this is to user
+        if (callState.infor?.toUser.id === user?.id) {
+            return callState.infor?.fromUser.name;
+        }
+    }, [callState.infor])
 
     useEffect(() => {
         props.navigation.setOptions({
             headerTintColor: colors.primary[900],
+            headerRight: () => (
+                <HStack>
+                    <IconButton
+                        rounded="full"
+                        onPress={handleToggleVideo}
+                        icon={
+                            isOnVideo ? (
+                                <VideoIcon size="xl" color={colors.primary[900]} />
+                            ) : (
+                                <VideoOffIcon size="xl" color={colors.primary[900]} />
+                            )
+                        }
+                        // onPress={handleHangup}
+                    />
+                    <IconButton
+                        rounded="full"
+                        onPress={handleSwitchCamera}
+                        icon={<SwitchCameraIcon size="xl" color={colors.primary[900]} />}
+                        // onPress={handleHangup}
+                    />
+                </HStack>
+            ),
         });
-    }, [props.navigation]);
+    }, [props.navigation, isOnVideo, localStream]);
 
     useEffect(() => {
-        if (!isFocused) return;
+        // if (!isFocused) return;
         initCall();
-    }, [isFocused]);
+    }, []);
+
+    useEffect(() => {
+        if (callState.state === CallState.NoCall) {
+            handleEndCall();
+        }
+    }, [callState]);
 
     async function initCall() {
         try {
-            await setUpWebcamAndMediaStream();
-            await joinCall(callState.infor?.id);
+            if (!pc.current) {
+                await setUpWebcamAndMediaStream();
+                await joinCall(callState.infor?.id);
+            }
         } catch (err) {
-            // props.navigation.goBack();
+            props.navigation.goBack();
         }
     }
 
+    useEffect(() => {
+        // Check connection state
+        const eventHandler = (event: any) => {
+            console.log('🔌 Peer Connection State: ' + pc.current?.connectionState);
+            if (
+                pc.current?.connectionState === 'disconnected' ||
+                pc.current?.connectionState === 'failed'
+            ) {
+                handleEndCall();
+            }
+        }
+        pc.current?.addEventListener('connectionstatechange', eventHandler);
+
+        return () => {
+            pc.current?.removeEventListener('connectionstatechange', eventHandler);
+        }
+    }, [localStream, remoteStream])
+
+    function handleToggleVideo() {
+        if (isOnVideo) {
+            // handle off video
+            localStream!.getVideoTracks()[0].enabled = false;
+        } else {
+            // handle on video
+            localStream!.getVideoTracks()[0].enabled = true;
+        }
+        setIsOnVideo(!isOnVideo);
+    }
     function handleToggleMic() {
         if (isOnMic) {
-            if (localStream) {
-                localStream.getVideoTracks()[0]._switchCamera();
-            }
+            // handle off video
+            localStream!.getAudioTracks()[0].enabled = false;
         } else {
-            if (localStream) {
-                localStream.getVideoTracks()[0]._switchCamera();
-            }
+            // handle on video
+            localStream!.getAudioTracks()[0].enabled = true;
         }
         setIsOnMic(!isOnMic);
     }
-    
+    function handleToggleSpeaker() {
+        setIsOnSpeaker(!isOnSpeaker);
+    }
+    function handleSwitchCamera() {
+        // TODO: Change logic
+        localStream?.getVideoTracks()[0]._switchCamera();
+    }
 
     async function setUpWebcamAndMediaStream() {
         pc.current = new RTCPeerConnection(servers);
         const local = await mediaDevices.getUserMedia({
+            // video: {
+            //     facingMode: 'environment',
+            // },
             video: true,
             audio: true,
         });
-        pc.current.addStream(local);
+        pc.current?.addStream(local);
         setLocalStream(local);
         let remote = new MediaStream(undefined);
         setRemoteStream(remote);
 
         // Check connection state
-        pc.current.addEventListener('connectionstatechange', (event) => {
+        pc.current?.addEventListener('connectionstatechange', (event) => {
             console.log('🔌 Peer Connection State: ' + pc.current?.connectionState);
+            if (
+                pc.current?.connectionState === 'disconnected' ||
+                pc.current?.connectionState === 'failed'
+            ) {
+                handleEndCall();
+            }
         });
 
         // Push tracks from local stream to peer connection
-        local.getTracks().forEach((track) => {
+        local.getTracks().forEach((track: MediaStreamTrack) => {
             pc.current?.getLocalStreams()[0].addTrack(track);
         });
 
@@ -126,7 +211,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
 
         await pc.current!.setRemoteDescription(new RTCSessionDescription(offerDescription));
 
-        const answerDescription = (await pc.current?.createAnswer()) as RTCSessionDescription ;
+        const answerDescription = (await pc.current?.createAnswer()) as RTCSessionDescription;
         await pc.current?.setLocalDescription(answerDescription);
 
         const answer = {
@@ -146,38 +231,38 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     }
 
     async function handleHangup() {
-        localStream &&
-            localStream.getTracks().forEach((track) => {
-                track.stop();
-            });
-
-        remoteStream &&
-            remoteStream.getTracks().forEach((track) => {
-                track.stop();
-            });
-        pc.current && pc.current.close();
-
-        
-
+        // Send mesage to other divice to hangup
+        let deviceToken;
         // this is from user
-        //if (callInfo.fromUser.id === user.id) {
-        // sendCallMessage(callInfo.toUser.device, {
-        //     type: 'hangup',
-        //     docId: callInfo.id,
-        // });
-        //}
-
+        if (callState.infor?.fromUser.id === user?.id) {
+            deviceToken = callState.infor?.toUser.deviceToken;
+        }
         // this is to user
-        // if (callInfo.toUser.id === user.id) {
-        const device = callState.infor?.fromUser?.device;
-        await sendCallMessage(device, {
-            type: 'hangup',
-            docId: callState.infor?.id,
+        if (callState.infor?.toUser.id === user?.id) {
+            deviceToken = callState.infor?.fromUser.deviceToken;
+        }
+        try {
+            deviceToken &&
+                sendCallMessage(deviceToken, {
+                    type: 'hangup',
+                    docId: callState.infor?.id,
+                });
+        } finally {
+            handleEndCall();
+        }
+    }
+
+    function handleEndCall() {
+        localStream?.getTracks().forEach((track) => {
+            track.stop();
         });
+        remoteStream?.getTracks().forEach((track) => {
+            track.stop();
+        });
+        pc.current?.close();
         dispatch(callActions.changeCallState(CallState.NoCall));
         dispatch(callActions.changeCallInfor(null));
         props.navigation.goBack();
-        // }
     }
 
     return (
@@ -185,28 +270,20 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
             <Box position="absolute" top="0" left="0" right="0" bottom="0">
                 {/* VIDEO CALL */}
                 <RTCView
-                    streamURL={localStream?.toURL() || ''}
+                    // @ts-ignore
+                    streamURL={remoteStream?.toURL() || ''}
                     objectFit="cover"
                     style={{
                         height: '100%',
                         width: '100%',
                     }}
-                    mirror
-                />
-                <Image
-                    h="full"
-                    w="full"
-                    source={{
-                        uri: 'https://images.unsplash.com/photo-1542596768-5d1d21f1cf98?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80',
-                    }}
-                    alt=""
                 />
             </Box>
-            <LocalVideo stream={remoteStream}/>
+            <LocalVideo stream={localStream} />
             <VStack px="7" pt="24" pb="20" justifyContent="space-between" h="full">
                 <Box>
                     <Text color="primary.900" fontWeight="bold" fontSize="32">
-                        Erika
+                        {remoteNameOfUser}
                     </Text>
                 </Box>
                 <HStack alignItems="center" justifyContent="center" space="10">
@@ -232,11 +309,12 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
                         size={12}
                         bg="gray:900:alpha.50"
                         rounded="full"
+                        onPress={handleToggleSpeaker}
                         icon={
-                            isOnMic ? (
-                                <Feather name="volume" size={24} color={colors.white} />
+                            isOnSpeaker ? (
+                                <VolumeIcon size="xl" color={colors.primary[900]} />
                             ) : (
-                                <Feather name="volume" size={24} color={colors.white} />
+                                <VolumeIcon size="xl" color={colors.white} />
                             )
                         }
                     />

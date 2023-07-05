@@ -48,8 +48,8 @@ export function LocalVideo({ stream }: LocalVideoPropsType) {
             if (translateY.value < 0) {
                 translateY.value = 0;
             }
-            if (translateY.value > SCREEN_DIMENSION.height - 200 - 144 - 40) {
-                translateY.value = SCREEN_DIMENSION.height - 200 - 144 - 40;
+            if (translateY.value > SCREEN_DIMENSION.height - 200 - 174 - 40) {
+                translateY.value = SCREEN_DIMENSION.height - 200 - 174 - 40;
             }
         },
         onEnd: () => {
@@ -71,22 +71,12 @@ export function LocalVideo({ stream }: LocalVideoPropsType) {
         };
     });
     return (
-        <GestureHandlerRootView style={{ width: '100%', top: 0, bottom: 144, position: 'absolute', zIndex: 99999 }}>
+        <GestureHandlerRootView style={{ width: '100%', top: 30, bottom: 174, position: 'absolute', zIndex: 99999 }}>
             <PanGestureHandler onGestureEvent={panGestureEvent}>
                 <Animated.View style={[rStyle]}>
-                    <Box w={132} h={200} position="absolute" top="10" right="4">
-                        {/* VIDEO CALL */}
-                        {/* <Image
-                            h="full"
-                            w="full"
-                            shadow="3"
-                            rounded="lg"
-                            source={{
-                                uri: 'https://images.unsplash.com/photo-1504199367641-aba8151af406?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80',
-                            }}
-                            alt=""
-                        /> */}
+                    <Box w={132} h={200} position="absolute" rounded="md" overflow="hidden" top="10" right="4">
                         <RTCView
+                            // @ts-ignore
                             streamURL={stream?.toURL() || ''}
                             objectFit="cover"
                             style={{

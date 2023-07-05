@@ -10,7 +10,7 @@ export enum AppTabsNavigationKey {
     FloatButton = 'FloatButton',
     Account = 'Account',
     Budget = 'Budget',
-    Story = 'Story'
+    Story = 'Story',
 }
 
 export enum RootNavigatekey {
@@ -19,6 +19,7 @@ export enum RootNavigatekey {
     Intro = 'Intro',
     Wallet = 'Wallet',
     MessageDetail = 'MessageDetail',
+    MessageManage = 'MessageManage',
     MultiRoomMessageDetail = 'MultiRoomMessageDetail',
     Modal = 'Modal',
     Information = 'Information',

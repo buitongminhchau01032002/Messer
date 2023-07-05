@@ -159,7 +159,6 @@ export const ContactScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         //     </VStack>
         // </ScrollView>
         <Box h="full">
-            
             <Box p={APP_PADDING} w="full" flex={1}>
                 {/* <Text>Welcome to Home</Text>
                 <Box
@@ -290,6 +289,6 @@ export const ContactScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     ))}
                 </ScrollView> */}
             </Box>
-        </Box >
+        </Box>
     );
 };

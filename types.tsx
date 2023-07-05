@@ -35,8 +35,9 @@ export type RootStackParamList = {
     [RootNavigatekey.Information]: { email: string; password: string; phone: string };
     [RootNavigatekey.ChangeInfomation]: undefined;
     [RootNavigatekey.InformationQR]: undefined;
-    [RootNavigatekey.MessageDetail]: { type: 'single' | 'multi'; room: SingleRoom };
-    [RootNavigatekey.MultiRoomMessageDetail]: { type: 'single' | 'multi'; room: MultiRoom };
+    [RootNavigatekey.MessageDetail]: {type: "single"|"multi" , room: SingleRoom};
+    [RootNavigatekey.MessageManage]: {type: "single"|"multi" , room: SingleRoom};
+    [RootNavigatekey.MultiRoomMessageDetail]: {type: "single"|"multi" , room: MultiRoom};
     [RootNavigatekey.NotFound]: undefined;
     [RootNavigatekey.AddToMulti]: { roomId?: string };
     [RootNavigatekey.Intro]: undefined;
