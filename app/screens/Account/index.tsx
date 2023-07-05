@@ -29,7 +29,7 @@ import {
     Menu,
 } from 'native-base';
 import { AppTabsNavigationKey, AuthNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
-import { RefreshControl, TouchableOpacity } from 'react-native';
+import { Alert, RefreshControl, TouchableOpacity } from 'react-native';
 import { AppTabsStackScreenProps } from 'types';
 import { FontAwesome } from '@expo/vector-icons';
 import { NavigateScreen } from 'components/Navigate';
@@ -73,7 +73,7 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
 
     useEffect(() => {
         setCurrentUser(user);
-    },[user])
+    }, [user]);
 
     const init = async () => {
         console.log(user?.name);
@@ -118,7 +118,7 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         {
             title: 'Nofication',
             icon: <Icon as={<FontAwesome />} name="bell" size="xl" color={'primary.900'} />,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
+            onPress: () => navigation.navigate(RootNavigatekey.Notification),
         },
         {
             title: 'Pricacy and Security',
@@ -152,8 +152,20 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
     ];
 
     async function handleDelete(item: never) {
-        await deleteDoc(doc(db, 'User', item.owner.id, 'Story', item.id));
-        init();
+        Alert.alert('Delete chat', 'You want to delete this channel?', [
+            {
+                text: 'Cancel',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+            },
+            {
+                text: 'OK',
+                onPress: async () => {
+                    await deleteDoc(doc(db, 'User', item.owner.id, 'Story', item.id));
+                    init();
+                },
+            },
+        ]);
     }
 
     return (

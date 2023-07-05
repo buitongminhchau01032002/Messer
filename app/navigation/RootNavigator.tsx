@@ -53,6 +53,7 @@ import { AddToMultiRoomScreen } from 'screens/Message/pages/AddToMultiRoom';
 import { MyStoryScreen } from 'screens/MyStory';
 import { ChangeInformationScreen } from 'screens/ChangeInfomation';
 import { QRScanScreen } from 'screens/QRScan';
+import { NotificationScreen } from 'screens/Notification';
 
 export default function Navigation() {
     // hooks
@@ -237,6 +238,11 @@ function RootNavigator() {
                 <Stack.Screen
                     name={RootNavigatekey.Search}
                     component={SearchScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+                <Stack.Screen
+                    name={RootNavigatekey.Notification}
+                    component={NotificationScreen}
                     options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
                 />
                 <Stack.Screen

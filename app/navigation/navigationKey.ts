@@ -33,5 +33,6 @@ export enum RootNavigatekey {
     AddToMulti = 'AddToMulti',
     MyStory = 'MyStory',
     ChangeInfomation = 'ChangeInfomation',
-    QRScan = 'QRScan'
+    QRScan = 'QRScan',
+    Notification = 'Notification'
 }

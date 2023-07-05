@@ -49,6 +49,7 @@ export type RootStackParamList = {
     [RootNavigatekey.Story]: { id: string; stories: [] };
     [RootNavigatekey.NewStory]: undefined;
     [RootNavigatekey.MyStory]: undefined;
+    [RootNavigatekey.Notification]: undefined;
 };
 // props type
 export type AppTabsStackScreenProps<Screen extends keyof AppTabsStackParamList> = CompositeScreenProps<

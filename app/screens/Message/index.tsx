@@ -197,12 +197,18 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
             const roomCollect = [];
             roomCollect.push(...singleRooms);
             roomCollect.push(...multiRooms);
-            // roomCollect.sort(function(a, b){return +b.lastMessage.createdAt.toDate() - a.lastMessage.createdAt.toDate()})
+            try {
+                roomCollect.sort(function (a, b) {
+                    return +b.lastMessage.createdAt.toDate() - a.lastMessage.createdAt.toDate();
+                });
+            } catch (e) {
+                console.log(e);
+            }
+
             setRooms(roomCollect);
-        } catch (e){
-            console.error(e)
+        } catch (e) {
+            console.error(e);
         }
-       
     }, [singleRooms, multiRooms]);
 
     useEffect(() => {
@@ -222,7 +228,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={async () => {
-                            navigation.navigate(RootNavigatekey.AddToMulti, {roomId : undefined});
+                            navigation.navigate(RootNavigatekey.AddToMulti, { roomId: undefined });
                         }}
                     >
                         <PlusIcon size="md" color="primary.900" />

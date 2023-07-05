@@ -83,8 +83,9 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
 
 
 
+
+
     useEffect(() => {
-        console.log(1)
         const messageRef = collection(db, 'SingleRoom', currentRoom, 'Message')
         const messageQuery = query(messageRef, orderBy('createdAt', 'asc'))
 
@@ -130,11 +131,8 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                         avatar: sender.avatar,
                         name: sender.name
                     }
-                    console.log("sender", newMessage.sender)
                     newMessages.push(newMessage)
                 }
-                console.log(0)
-                console.log(messages)
                 setMessages(newMessages)
 
                 setIsLoading(false)
@@ -178,28 +176,35 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                 lastMessageTimestamp: newMessage.createdAt,
                 reads: [currentUser.id]
             });
+            console.log(room.unnotifications)
 
-
-
-            fetch('https://fcm.googleapis.com/fcm/send', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'key=AAAAu3T5eSI:APA91bFfynL6hecTGjN4jGBUULhccdSWIBKjG0oBWefs3D5KvDu5IWHUJSJD9F3uMjhmuZbXqsUSj6GBsqRYkQgt2d2If4FUaYHy3bZ-E8NpBhqHYjsyfB9D1Nk-hxVKelYn165SqRdL',
-
-                },
-                body: JSON.stringify({
-                    "to": receiver.deviceToken,
-                    "notification": {
-                        "body": newMessage.content,
-                        "OrganizationId": "2",
-                        "content_available": true,
-                        "priority": "high",
-                        "subtitle": "PhotoMe",
-                        "title": sender.name.concat(" texted you")
-                    }
-                }),
-            });
+            try{
+                if(!room.unnotifications.includes(receiver.id)){
+                    console.log(receiver.deviceToken)
+                    fetch('https://fcm.googleapis.com/fcm/send', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'key=AAAAu3T5eSI:APA91bFfynL6hecTGjN4jGBUULhccdSWIBKjG0oBWefs3D5KvDu5IWHUJSJD9F3uMjhmuZbXqsUSj6GBsqRYkQgt2d2If4FUaYHy3bZ-E8NpBhqHYjsyfB9D1Nk-hxVKelYn165SqRdL',
+        
+                        },
+                        body: JSON.stringify({
+                            "to": receiver.deviceToken,
+                            "notification": {
+                                "body": newMessage.content,
+                                "OrganizationId": "2",
+                                "content_available": true,
+                                "priority": "high",
+                                "subtitle": "PhotoMe",
+                                "title": sender.name.concat(" texted you")
+                            }
+                        }),
+                    });
+                }
+            }catch(e){
+                console.log(e)
+            }
+           
         })
         setContent('')
         setQuoteMessage(undefined)
