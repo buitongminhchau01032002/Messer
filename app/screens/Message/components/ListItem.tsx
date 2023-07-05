@@ -55,6 +55,14 @@ export const ListItem = (item: {
     const [time, setTime] = useState('');
     const [read, setRead] = useState(false);
     const [isUnnotify, setUnnotify] = useState(false);
+    const [roomImage, setRoomImage] = useState('');
+
+    useEffect(() => {
+        setRoomImage(item.image??"");
+    }, [item.image]);
+    useEffect(() => {
+        setName(item.name??"");
+    }, [item.name]);
 
     const rightSwipeActions = () => {
         return (
@@ -225,7 +233,7 @@ export const ListItem = (item: {
                                 style={{ width: 64, height: 64 }}
                                 borderRadius={100}
                             ></Image>
-                        ) : (
+                        ) : roomImage == "" ? (
                             <Box position={'relative'} width={63} height={63}>
                                 <Image
                                     position={'absolute'}
@@ -246,6 +254,13 @@ export const ListItem = (item: {
                                     borderRadius={100}
                                 />
                             </Box>
+                        ) : (
+                            <Image
+                            alt="..."
+                            source={{ uri: roomImage }}
+                            style={{ width: 64, height: 64 }}
+                            borderRadius={100}
+                        ></Image>
                         )}
 
                         <VStack flex={1} space={0} justifyContent="center">

@@ -65,6 +65,7 @@ import {
     serverTimestamp,
     setDoc,
     deleteDoc,
+    arrayRemove,
 } from 'firebase/firestore';
 import { auth, converter, db, storage } from 'config/firebase';
 import { useAppSelector } from 'hooks/index';
@@ -74,6 +75,8 @@ import * as VideoThumbnails from 'expo-video-thumbnails';
 import { Gallery } from '../components/Gallery';
 import { NavigateScreen } from 'components/Navigate';
 import { ResizeMode, Video } from 'expo-av';
+import Dialog from 'react-native-dialog';
+import { localImages } from 'app/constants/Images';
 type MenuItem = {
     title: string;
     icon: React.ReactNode;
@@ -91,6 +94,10 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
     const { width: windowWidth } = useWindowDimensions();
     const { isOpen: isOpenImages, onOpen: onOpenImages, onClose: onCloseImages } = useDisclose();
     const { isOpen: isOpenVideos, onOpen: onOpenVideos, onClose: onCloseVideos } = useDisclose();
+    const { isOpen: isOpenMembers, onOpen: onOpenMembers, onClose: onCloseMembers } = useDisclose();
+    const [nameDialogVisible, setNameDialogVisible] = useState(false);
+    const [roomImage, setRoomImage] = useState('');
+    const currentUser = useAppSelector((state) => state.auth.user);
 
     // states
     const currentRoom = room.id ?? '';
@@ -98,6 +105,9 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
     const [videoList, setVideoList] = useState<Media[]>([]);
     const [activeIndex, setActiveIndex] = useState(0);
     const [isOpenGallary, setIsOpenGallary] = useState(false);
+    const [users, setUser] = useState([]);
+    const [roomNameChange, setRoomNameChange] = useState('');
+    const [roomName, setRoomName] = useState('');
     // consts
     const spacing = 0;
     const calcImageWidth = (cols: number, spacing: number) => {
@@ -110,7 +120,7 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
             headerTitle: 'Manage',
             headerTintColor: colors.primary[900],
             headerTitleStyle: { color: colors.blue[900] },
-        });     
+        });
     }, [navigation]);
 
     useEffect(() => {
@@ -135,6 +145,21 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
         };
 
         fetchPinnedMessage().catch(console.error);
+
+        const fetchUserData = async () => {
+            const q = query(collection(db, 'User'), where(documentId(), 'in', room.users));
+            const userList = [];
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) => {
+                userList.push({ id: doc.id, ...doc.data() });
+            });
+            setUser(userList);
+        };
+        fetchUserData().catch(console.error);
+
+        setRoomImage(room.image ?? '');
+        setRoomName(room.name);
+        setRoomNameChange(room.name);
         // return () => unsub()
     }, []);
 
@@ -152,9 +177,9 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
     ];
     const infoItems: MenuItem[] = [
         {
-            title: 'Direct share',
-            icon: <Icon as={<FontAwesome />} name="share" size="xl" color={'primary.900'}></Icon>,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
+            title: 'Member',
+            icon: <Icon as={<FontAwesome />} name="user" size="xl" color={'primary.900'}></Icon>,
+            onPress: onOpenMembers,
         },
         {
             title: 'Nofication',
@@ -182,11 +207,129 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
         setActiveIndex(0);
         setIsOpenGallary(false);
     };
+    const pickImage = async () => {
+        // No permissions request is necessary for launching the image library
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+        if (!result.canceled) {
+            // setImageUrl(result.assets[0].uri);
+            const roomRef = doc(db, 'MultiRoom', room.id ?? '');
+
+            const imgResponse = await fetch(result.assets[0].uri);
+            const blob = await imgResponse.blob();
+            const name = result.assets[0].uri.substring(result.assets[0].uri.lastIndexOf('/') + 1);
+            const storageRef = ref(storage, 'images/'.concat(name));
+
+            uploadBytes(storageRef, blob).then((snapshot) => {
+                getDownloadURL(storageRef).then(async (url) => {
+                    await updateDoc(roomRef, {
+                        image: url,
+                    });
+                    setRoomImage(url);
+                });
+            });
+        }
+    };
+
+    const changeRoomName = async () => {
+        const roomRef = doc(db, 'MultiRoom', room.id ?? '');
+        await updateDoc(roomRef, {
+            name: roomNameChange,
+        });
+        setRoomName(roomNameChange);
+        console.log(roomNameChange);
+        setNameDialogVisible(false);
+    };
+
+    async function handleRemoveUser(u: any) {
+        const roomRef = doc(db, 'MultiRoom', room.id ?? '');
+        await updateDoc(roomRef, {
+            users: arrayRemove(u.id),
+        });
+        setUser(
+            users.filter((e) => {
+                return e.id != u.id;
+            }),
+        );
+        // console.log(u)
+    }
 
     return (
         <Box flex={1} bg="white">
+            <Dialog.Container visible={nameDialogVisible}>
+                <Dialog.Title>Enter Room Name</Dialog.Title>
+                <Dialog.Input onChangeText={(t) => setRoomNameChange(t)} />
+                <Dialog.Button
+                    label="Cancel"
+                    onPress={() => {
+                        setNameDialogVisible(false);
+                    }}
+                />
+                <Dialog.Button
+                    label="Change"
+                    onPress={() => {
+                        changeRoomName();
+                    }}
+                />
+            </Dialog.Container>
             <KeyboardAvoidingView flex={1}>
                 <ScrollView p={APP_PADDING}>
+                    <Center>
+                        <TouchableOpacity onPress={pickImage}>
+                            <VStack space={2}>
+                                <Center>
+                                    {roomImage != '' ? (
+                                        <Image
+                                            source={{ uri: roomImage }}
+                                            fallbackSource={localImages.driverPlaceHoder}
+                                            style={{ width: 100, height: 100 }}
+                                            alt="..."
+                                            borderRadius={100}
+                                        ></Image>
+                                    ) : (
+                                        <Box position={'relative'} width={100} height={100}>
+                                            <Image
+                                                position={'absolute'}
+                                                alt="..."
+                                                source={{ uri: users[0]?.avatar ?? '' }}
+                                                style={{ width: 80, height: 80 }}
+                                                borderRadius={100}
+                                                right={0}
+                                                top={0}
+                                            />
+                                            <Image
+                                                position={'absolute'}
+                                                alt="..."
+                                                source={{ uri: users[1]?.avatar ?? '' }}
+                                                left={0}
+                                                bottom={0}
+                                                style={{ width: 80, height: 80 }}
+                                                borderRadius={100}
+                                            />
+                                        </Box>
+                                    )}
+                                    {/* <Image
+                                        source={imageUrl ? { uri: imageUrl } : localImages.avatarPlaceholder}
+                                        fallbackSource={localImages.driverPlaceHoder}
+                                        style={{ width: 100, height: 100 }}
+                                        alt="..."
+                                        borderRadius={100}
+                                    ></Image> */}
+                                </Center>
+                            </VStack>
+                        </TouchableOpacity>
+                        <VStack space={2} ml={2} alignItems="center">
+                            <Pressable onPress={() => setNameDialogVisible(true)}>
+                                <Text bold fontSize={26}>
+                                    {roomName}
+                                </Text>
+                            </Pressable>
+                        </VStack>
+                    </Center>
                     <Text fontSize="sm" my={2}>
                         Media
                     </Text>
@@ -255,6 +398,59 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
                                 </TouchableOpacity>
                             ))}
                         </HStack>
+                    </ScrollView>
+                </Actionsheet.Content>
+            </Actionsheet>
+            <Actionsheet isOpen={isOpenMembers} onClose={onCloseMembers}>
+                <Actionsheet.Content>
+                    <ScrollView style={{ width: '100%' }}>
+                        <VStack space={spacing}>
+                            <Pressable
+                                alignSelf={'flex-end'}
+                                bg={'primary.900'}
+                                padding={2}
+                                onPress={() => {
+                                    navigation.navigate(RootNavigatekey.AddToMulti, { room: room });
+                                    handleCloseGallery()
+                                }}
+                            >
+                                <Text fontWeight="bold" textBreakStrategy="balanced">
+                                    Add member
+                                </Text>
+                            </Pressable>
+                            {users.map((u, idx) => (
+                                <HStack
+                                    key={idx}
+                                    padding={APP_PADDING}
+                                    space={2}
+                                    justifyContent="space-between"
+                                    alignItems={'center'}
+                                >
+                                    <HStack space={2} alignItems={'center'}>
+                                        <Image
+                                            alt="..."
+                                            source={{ uri: u.avatar }}
+                                            style={{ width: 64, height: 64 }}
+                                            borderRadius={100}
+                                        />
+                                        <Text fontWeight="bold" textBreakStrategy="balanced">
+                                            {u.name}
+                                        </Text>
+                                    </HStack>
+                                    {u.id != currentUser?.id ? (
+                                        <Pressable
+                                            onPress={() => {
+                                                handleRemoveUser(u);
+                                            }}
+                                        >
+                                            <Text color="primary.900">Remove</Text>
+                                        </Pressable>
+                                    ) : (
+                                        <></>
+                                    )}
+                                </HStack>
+                            ))}
+                        </VStack>
                     </ScrollView>
                 </Actionsheet.Content>
             </Actionsheet>

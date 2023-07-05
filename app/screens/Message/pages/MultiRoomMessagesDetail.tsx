@@ -111,7 +111,7 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => {
-                            navigation.navigate(RootNavigatekey.AddToMulti, { roomId: currentRoom });
+                            navigation.navigate(RootNavigatekey.AddToMulti, { room: room });
                         }}
                     >
                         <AddIcon color="primary.900" size="md"></AddIcon>
