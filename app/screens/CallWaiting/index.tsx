@@ -40,7 +40,7 @@ const servers = {
     iceCandidatePoolSize: 10,
 };
 
-const COMMING_CALL_TIMEOUT = 20000;
+const COMMING_CALL_TIMEOUT = 30000;
 
 export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.CallWaiting>) => {
     const { colors } = useTheme();

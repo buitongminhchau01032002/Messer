@@ -1,16 +1,26 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect } from 'react';
+import { StyleSheet, Vibration } from 'react-native';
 import { Box, Center, HStack, IconButton, Image, Text, Toast, VStack, useTheme } from 'native-base';
-import { runOnJS } from 'react-native-reanimated';
+import Animated, {
+    interpolate,
+    runOnJS,
+    useAnimatedStyle,
+    useSharedValue,
+    withDelay,
+    withRepeat,
+    withTiming,
+} from 'react-native-reanimated';
 import { RootStackScreenProps } from 'types';
 import { RootNavigatekey } from 'navigation/navigationKey';
 import { PickupButton } from './components/PickupButton';
 import { HangupButton } from './components/HangupButton';
-import { PhoneIcon, PhoneOffIcon } from 'components/Icons/Light';
+import { PhoneIcon, PhoneOffIcon, VideoIcon } from 'components/Icons/Light';
 import sendCallMessage from 'utils/sendCallMessage';
 import { useAppDispatch, useAppSelector } from 'hooks/index';
 import { CallState, callActions } from 'slice/call';
 
-const COMMING_CALL_TIMEOUT = 10000;
+// const COMMING_CALL_TIMEOUT = 10000;
+const COMMING_CALL_TIMEOUT = 30000;
 
 export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.ComingCall>) => {
     const { colors } = useTheme();
@@ -18,10 +28,14 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
     // const [pickupButtonDragging, setPickupButtonDragging] = useState(false);
     // const [hangupButtonDragging, setHangupButtonDragging] = useState(false);
     useEffect(() => {
+        Vibration.vibrate([2000, 1000], true);
         const timer = setTimeout(() => {
             handleRejectCall();
         }, COMMING_CALL_TIMEOUT);
-        return () => clearTimeout(timer);
+        return () => {
+            clearTimeout(timer);
+            Vibration.cancel();
+        };
     }, []);
 
     useEffect(() => {
@@ -111,15 +125,20 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
                             onDragEnd={handleOnHangupButtonDragEnd}
                             isVisible={!pickupButtonDragging}
                         /> */}
+                        <Box size={70}>
+                            <Ring delay={0} />
+                            <Ring delay={250} />
+                            <Ring delay={500} />
+                            <IconButton
+                                size={70}
+                                bg="green.900"
+                                rounded="full"
+                                icon={<PickupIcon type={callState?.infor?.type} />}
+                                onPress={handleAcceptCall}
+                            />
+                        </Box>
                         <IconButton
-                            size={60}
-                            bg="green.900"
-                            rounded="full"
-                            icon={<PhoneIcon size="lg" color="white" />}
-                            onPress={handleAcceptCall}
-                        />
-                        <IconButton
-                            size={60}
+                            size={70}
                             bg="primary.900"
                             rounded="full"
                             icon={<PhoneOffIcon size="lg" color="white" />}
@@ -131,3 +150,74 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
         </Box>
     );
 };
+
+const Ring = ({ delay }) => {
+    const ring = useSharedValue(0);
+
+    const ringStyle = useAnimatedStyle(() => {
+        return {
+            opacity: 0.8 - ring.value,
+            transform: [
+                {
+                    scale: interpolate(ring.value, [0, 1], [0, 3]),
+                },
+            ],
+        };
+    });
+    useEffect(() => {
+        ring.value = withDelay(
+            delay,
+            withRepeat(
+                withTiming(1, {
+                    duration: 1600,
+                }),
+                -1,
+                false,
+            ),
+        );
+    }, []);
+    return <Animated.View style={[styles.ring, ringStyle]} />;
+};
+
+const PickupIcon = ({ type }) => {
+    const rotate = useSharedValue(0);
+
+    const rotateStyle = useAnimatedStyle(() => {
+        return {
+            transform: [
+                {
+                    rotateZ: `${interpolate(
+                        rotate.value,
+                        [0, 1, 2, 3, 4, 5, 6, 7, 8],
+                        [0, 15, -15, 15, -15, 15, -15, 15, 0],
+                    )}deg`,
+                },
+            ],
+        };
+    });
+    useEffect(() => {
+        rotate.value = withRepeat(
+            withTiming(8, {
+                duration: 1600,
+            }),
+            -1,
+            false,
+        );
+    }, []);
+    return (
+        <Animated.View style={[rotateStyle]}>
+            {type === 'no-video' ? <PhoneIcon size="lg" color="white" /> : <VideoIcon size="10" color="white" />}
+        </Animated.View>
+    );
+};
+
+const styles = StyleSheet.create({
+    ring: {
+        position: 'absolute',
+        width: 70,
+        height: 70,
+        borderRadius: 99999,
+        borderColor: '#2BCEA0',
+        borderWidth: 4,
+    },
+});
