@@ -44,13 +44,14 @@ const servers = {
 
 export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Calling> | any) => {
     const { colors } = useTheme();
-    const [isOnMic, setIsOnMic] = useState(true);
-    const [isOnSpeaker, setIsOnSpeaker] = useState(true);
-    const [isOnVideo, setIsOnVideo] = useState(true);
+    const [isOnMic, setIsOnMic] = useState(props?.route.params?.isOnMic ?? true);
+    const [isOnSpeaker, setIsOnSpeaker] = useState(props?.route.params?.isOnSpeaker ?? true);
+    const [isOnVideo, setIsOnVideo] = useState(props?.route.params?.isOnVideo ?? true);
     const callState = useAppSelector((state) => state.call);
     const user = useAppSelector((state) => state.auth.user);
     const dispatch = useAppDispatch();
     const isFocused = useIsFocused();
+    console.log('On Mic', isOnMic);
 
     const [remoteStream, setRemoteStream] = useState<MediaStream | null>(props?.route.params?.remoteStream || null);
     const [localStream, setLocalStream] = useState<MediaStream | null>(props?.route.params?.localStream || null);
@@ -172,16 +173,12 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         setIsOnSpeaker(!isOnSpeaker);
     }
     function handleSwitchCamera() {
-        // TODO: Change logic
         localStream?.getVideoTracks()[0]._switchCamera();
     }
 
     async function setUpWebcamAndMediaStream() {
         pc.current = new RTCPeerConnection(servers);
         const local = await mediaDevices.getUserMedia({
-            // video: {
-            //     facingMode: 'environment',
-            // },
             video: true,
             audio: true,
         });

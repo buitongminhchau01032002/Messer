@@ -30,6 +30,7 @@ import Animated, {
     interpolate,
 } from 'react-native-reanimated';
 import { StyleSheet } from 'react-native';
+import { SwitchCameraIcon } from 'components/Icons/Light/SwitchCamera';
 
 const servers = {
     iceServers: [
@@ -48,6 +49,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
     const isCallCreated = useRef<Boolean>(false);
     const [isOnMic, setIsOnMic] = useState(true);
     const [isOnSpeaker, setIsOnSpeaker] = useState(true);
+    const [isOnVideo, setIsOnVideo] = useState(true);
     const { toUser, type } = props.route.params;
     const user = useAppSelector((state) => state.auth.user);
     const dispatch = useAppDispatch();
@@ -62,18 +64,33 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
             headerBackVisible: false,
             headerRight: () => (
                 <HStack>
-                    <Feather name="video" size={20} color={colors.primary[900]} />
+                    {/* <Feather name="video" size={20} color={colors.primary[900]} /> */}
+                    <IconButton
+                        rounded="full"
+                        onPress={handleSwitchCamera}
+                        icon={<SwitchCameraIcon size="xl" color={colors.primary[900]} />}
+                    />
                 </HStack>
             ),
         });
-    }, [props.navigation]);
+    }, [props.navigation, localStream]);
 
     function handleToggleMic() {
+        if (isOnMic) {
+            // handle off video
+            localStream!.getAudioTracks()[0].enabled = false;
+        } else {
+            // handle on video
+            localStream!.getAudioTracks()[0].enabled = true;
+        }
         setIsOnMic(!isOnMic);
     }
 
     function handleToggleSpeaker() {
         setIsOnSpeaker(!isOnSpeaker);
+    }
+    function handleSwitchCamera() {
+        localStream?.getVideoTracks()[0]._switchCamera();
     }
 
     useEffect(() => {
@@ -110,6 +127,8 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
                     pc: pc.current,
                     remoteStream,
                     localStream,
+                    isOnMic,
+                    isOnSpeaker,
                 });
             } else if (pc.current?.connectionState === 'disconnected' || pc.current?.connectionState === 'failed') {
                 handleEndCall();
@@ -120,7 +139,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
         return () => {
             pc.current?.removeEventListener('connectionstatechange', eventHandler);
         };
-    }, [localStream, remoteStream]);
+    }, [localStream, remoteStream, isOnMic, isOnSpeaker]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -147,9 +166,6 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
     async function setUpWebcamAndMediaStream() {
         pc.current = new RTCPeerConnection(servers);
         const local = await mediaDevices.getUserMedia({
-            // video: {
-            //     facingMode: 'environment',
-            // },
             video: type === 'no-video' ? false : true,
             audio: true,
         });
