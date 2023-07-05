@@ -289,13 +289,14 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
                     <Box position="absolute" top="0" left="0" right="0" bottom="0" backgroundColor="black:alpha.60" />
                 </Box>
 
-                <Box position="relative" size="40" rounded="full" bg="gray.500">
+                <Box position="relative" size="40" rounded="full">
                     <Ring delay={0} />
-                    <Ring delay={400} />
-                    <Ring delay={800} />
+                    <Ring delay={250} />
+                    <Ring delay={500} />
                     <Image
                         position="absolute"
                         size="40"
+                        bg="gray.500"
                         rounded="full"
                         source={{ uri: callState.infor?.toUser?.avatar }}
                         alt=""
@@ -362,7 +363,7 @@ const Ring = ({ delay }) => {
             delay,
             withRepeat(
                 withTiming(1, {
-                    duration: 2000,
+                    duration: 1600,
                 }),
                 -1,
                 false,
