@@ -36,7 +36,7 @@ import {
 import { AppTabsNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Platform, ScrollView } from 'react-native';
+import { ActivityIndicator, Alert, Platform, ScrollView } from 'react-native';
 import { AppTabsStackScreenProps, RootStackScreenProps } from 'types';
 import { MessageItem } from '../components/MessageItem';
 import { Media, Message, SendType, User } from '../type';
@@ -215,8 +215,14 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
             );
         };
 
-        fetchMessageData().catch(console.error);
-        fetchPinnedMessage().catch(console.error);
+        fetchMessageData().catch((e) => {
+            console.warn(e);
+            setIsLoading(false);
+        });
+        fetchPinnedMessage().catch((e) => {
+            console.warn(e);
+            setIsLoadingPinnedMessage(false);
+        });
         setIsLoading(true);
         setIsLoadingPinnedMessage(true);
         // return () => unsub()
@@ -224,7 +230,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
 
     useEffect(() => {
         scrollRef.current?.scrollToEnd();
-    }, [messages]);
+    }, [messages.length]);
 
     const handleSendMessage = (content: string, type?: string) => {
         if (!content) {
@@ -236,6 +242,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
             content,
             sender: currentUser.id,
             type: type ?? 'text',
+            isDeleted: false,
             createdAt: serverTimestamp(),
         };
         if (quoteMessage) {
@@ -315,6 +322,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
         addDoc(collection(db, 'SingleRoom', currentRoom, 'PinMessage'), {
             id: message.id,
             content: message.content,
+            isDeleted: false,
             createdAt: serverTimestamp(),
         }).then(async (values) => {
             setIsPinning(false);
@@ -368,6 +376,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                 addDoc(collection(db, 'SingleRoom', currentRoom, 'MediaStore'), {
                     url: link.url,
                     type: link.type,
+                    isDeleted: false,
                     createdAt: serverTimestamp(),
                 }),
             );
@@ -417,6 +426,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                 addDoc(collection(db, 'SingleRoom', currentRoom, 'MediaStore'), {
                     url: link.url,
                     type: link.type,
+                    isDeleted: false,
                     createdAt: serverTimestamp(),
                 }),
             );
@@ -425,6 +435,40 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
             setIsSending(false);
         }
         setIsUpFile(false);
+    };
+
+    const handleDeleteMessage = (message: Message) => {
+        Alert.alert(
+            'Warning',
+            "Can't restore after delete, are you sure you want delete?",
+            [
+                {
+                    text: 'OK',
+                    onPress: async () => {
+                        const docRef = doc(db, 'SingleRoom', currentRoom, 'Message', message.id!);
+                        updateDoc(docRef, {
+                            isDeleted: true,
+                        });
+                        if (message.type === 'media') {
+                            const mediaList = JSON.parse(message.content!) as Media[];
+                            const querySnapshot = await getDocs(
+                                collection(db, 'SingleRoom', currentRoom, 'MediaStore'),
+                            );
+                            querySnapshot.forEach((snap) => {
+                                if (mediaList.find((m) => m.url === snap.data().url)) {
+                                    const mediaRef = doc(db, 'SingleRoom', currentRoom, 'MediaStore', snap.id);
+                                    updateDoc(mediaRef, {
+                                        isDeleted: true,
+                                    });
+                                }
+                            });
+                        }
+                    },
+                },
+                { text: 'Cancel', style: 'cancel' },
+            ],
+            { cancelable: true },
+        );
     };
 
     const handleCloseGallery = () => {
@@ -485,6 +529,8 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                                             setCurGallary(gallary);
                                             setIsOpenGallary(true);
                                         }}
+                                        onDelete={() => handleDeleteMessage(message)}
+                                        isDeleted={message.isDeleted}
                                     />
                                 );
                             })}
@@ -507,7 +553,13 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                                 <Text bold color="white">
                                     {(quoteMessage.sender as User).name}
                                 </Text>
-                                <Text numberOfLines={3}>{quoteMessage.content}</Text>
+                                {quoteMessage.type === 'text' ? (
+                                    <Text numberOfLines={3}>{quoteMessage.content}</Text>
+                                ) : (
+                                    <Text numberOfLines={3} fontWeight="bold">
+                                        Media
+                                    </Text>
+                                )}
                             </VStack>
                             <VStack justifyContent="center" h="full">
                                 <Pressable onPress={() => setQuoteMessage(undefined)}>

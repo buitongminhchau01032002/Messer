@@ -27,12 +27,15 @@ export type Message = {
     content?: string;
     createdAt: Timestamp | FieldValue;
     sender: User | string;
-    type: 'text' | 'image' | 'file' | 'notification' | 'story';
+    fileIds?: string[];
+    type: 'text' | 'image' | 'media' | 'notification' | 'story';
+    isDeleted: boolean;
 };
 export type Media = {
     id?: string;
     url: string;
     type: 'image' | 'video';
+    isDeleted: boolean;
 };
 export type User = {
     id: string;
