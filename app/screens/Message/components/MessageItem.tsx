@@ -101,7 +101,7 @@ export const MessageItem = (props: Props) => {
                                 {isFocus ? moment((message.createdAt as Timestamp).seconds).format('HH:mm:ss') : ''}
                             </Text>
                         </Box>
-                    ) : (
+                    ) : message.type !== 'story' ? (
                         <HStack
                             flexWrap={'wrap'}
                             borderWidth={2}
@@ -133,6 +133,28 @@ export const MessageItem = (props: Props) => {
                                 </Box>
                             ))}
                         </HStack>
+                    ) : (
+                        <VStack borderRadius="md" borderTopLeftRadius={0} p={APP_PADDING} bg="primary.900" space="2">
+                            <HStack bg="primary.200" p={APP_PADDING} space="sm" borderRadius={2}>
+                                <Divider orientation="vertical" thickness={2} bg="primary.900"></Divider>
+                                <VStack>
+                                    <Text bold color="white" fontSize="xs">
+                                        Reply story
+                                    </Text>
+                                    <Image
+                                        alignSelf={'flex-end'}
+                                        height={150}
+                                        width={100}
+                                        source={{
+                                            uri: message.fileIds[0],
+                                        }}
+                                        alt=""
+                                    />
+                                </VStack>
+                            </HStack>
+
+                            <Text color="white">{message.content}</Text>
+                        </VStack>
                     )}
                 </TouchableOpacity>
                 <HStack flex={1} alignItems="flex-end">
@@ -255,6 +277,7 @@ export const MessageItem = (props: Props) => {
                         setIsFocus(true);
                     }}
                 >
+                    {/* {message.type ==='story' ? <></> : (true ? <></> : <></>)} */}
                     {message.type === 'text' ? (
                         <Box>
                             {isPinned && (
@@ -292,7 +315,7 @@ export const MessageItem = (props: Props) => {
                                 {isFocus ? moment((message.createdAt as Timestamp).seconds).format('HH:mm:ss') : ''}
                             </Text>
                         </Box>
-                    ) : (
+                    ) : message.type !== 'story' ? (
                         <HStack
                             flexWrap={'wrap'}
                             borderWidth={2}
@@ -330,6 +353,27 @@ export const MessageItem = (props: Props) => {
                                 </Box>
                             ))}
                         </HStack>
+                    ) : (
+                        <VStack borderRadius="md" borderTopRightRadius={0} p={APP_PADDING} bg="blue.900" space="2">
+                            <HStack bg="blue.200" p={APP_PADDING} space="sm" borderRadius={2}>
+                                <Divider orientation="vertical" thickness={2} bg="blue.900"></Divider>
+                                <VStack>
+                                    <Text bold color="white" fontSize="xs">
+                                        Reply story
+                                    </Text>
+                                    <Image
+                                        alignSelf={'flex-end'}
+                                        height={150}
+                                        width={100}
+                                        source={{
+                                            uri: message.fileIds[0],
+                                        }}
+                                        alt=""
+                                    />
+                                </VStack>
+                            </HStack>
+                            <Text color="white">{message.content}</Text>
+                        </VStack>
                     )}
                 </TouchableOpacity>
             </HStack>
