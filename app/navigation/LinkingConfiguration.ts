@@ -15,7 +15,7 @@ import {
 } from "./navigationKey";
 
 const linking: LinkingOptions<RootStackParamList> = {
-  prefixes: [Linking.createURL("/")],
+  prefixes: [Linking.createURL(""), "http", "https"],
   config: {
     screens: {
       [RootNavigatekey.Auth]: {
@@ -24,11 +24,14 @@ const linking: LinkingOptions<RootStackParamList> = {
           [AuthNavigationKey.SignUp]: "sign-up",
         },
       },
-      [RootNavigatekey.AppDrawer]: {
+      [RootNavigatekey.AppTabs]: {
         screens: {
           [AppTabsNavigationKey.Contact]: "home",
           [AppTabsNavigationKey.Message]: "message",
         },
+      },
+      [RootNavigatekey.AddToMulti]: {
+        path: "join-room",
       },
       [RootNavigatekey.Intro]: "intro",
       [RootNavigatekey.Modal]: "modal",

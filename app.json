@@ -36,7 +36,21 @@
                 "android.permission.WAKE_LOCK"
             ],
             "package": "com.anbui.messer",
-            "googleServicesFile": "./google-services.json"
+            "googleServicesFile": "./google-services.json",
+            "intentFilters": [
+                {
+                  "action": "VIEW",
+                  "autoVerify": true,
+                  "data": [
+                    {
+                      "scheme": "https",
+                      "host": "*.myapp.io",
+                      "pathPrefix": "/records"
+                    }
+                  ],
+                  "category": ["BROWSABLE", "DEFAULT"]
+                }
+              ]
         },
         "web": {
             "favicon": "./app/assets/images/favicon.png"

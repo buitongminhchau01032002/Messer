@@ -17,6 +17,7 @@ import {
     doc,
     updateDoc,
     arrayUnion,
+    Query,
 } from 'firebase/firestore';
 import { update } from 'lodash';
 import {
@@ -42,6 +43,7 @@ import { useEffect } from 'react';
 import { RootStackScreenProps } from 'types';
 import { useAppState } from 'native-base/lib/typescript/core/color-mode/hooks';
 import { useAppSelector } from 'hooks/index';
+import * as Linking from 'expo-linking';
 
 export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey.AddToMulti>) => {
     const { navigation, route } = props;
@@ -54,6 +56,38 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
     const [selectedUsers, setSeletectedUser] = useState([]);
     const [roomName, setRoomName] = useState('');
     const [nameDialogVisible, setNameDialogVisible] = useState(false);
+    const [url, setUrl] = useState('');
+
+    //check join by link
+    Linking.getInitialURL().then((url) => {
+        console.log(url)
+        setUrl(url||'')
+    }).catch((error) => {console.error(error.message)})
+
+    
+    useEffect(() => {
+        if(url) {
+           // console.log(url + 'asdfasdfdasdasdf');
+            const {queryParams} = Linking.parse(url)
+            let IdRoom = queryParams?  queryParams.idJoin : '';
+            
+            if(typeof IdRoom === 'string') {
+                
+             //   const currentUser = useAppSelector((state) => state.auth.user);
+                const roomRef = doc(db, 'MultiRoom', IdRoom);
+                console.log(roomRef.id + 'ahihihihihi');
+                 updateDoc(roomRef, {
+                    users: arrayUnion(currentUser?.id),
+                }).then(() => {
+                   // navigation.replace(RootNavigatekey.MultiRoomMessageDetail, { })
+                   console.log('Join duoc roiiii na');
+                }).catch((error)=>{
+                    console.log("Api call error");
+                    alert(error.message);
+                 });;
+            }
+        }
+    }, [url, currentUser])
 
     const fetchUserData = async () => {
         const searchUser = [];
@@ -73,12 +107,13 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
         setSearchingUser(searchUser);
         console.log(selectedUsers);
     };
+
     const handleAddMember = async () => {
-       
+
         if (roomId) {
-          
+
             const roomRef = doc(db, 'MultiRoom', roomId);
-            
+
             await updateDoc(roomRef, {
                 users: arrayUnion(
                     ...selectedUsers.map((u) => {
@@ -103,7 +138,7 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
             lastMessageTimestamp: serverTimestamp()
         });
         // navigation.navigate(RootNavigatekey.MultiRoomMessageDetail, { type: 'multi', room: {id: ""}} );/
-        
+
         const content = currentUser?.name.concat(" created Room")
 
         const newMessage = {
@@ -179,7 +214,7 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
     }, [props.navigation]);
 
     const handleNavigate = async (otherUserId: any) => {
-        
+
         const idx = selectedUsers.indexOf(otherUserId);
         if (idx > -1) {
             selectedUsers.splice(idx, 1);
@@ -281,7 +316,7 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
                         color={'blue.900'}
                         mt="2"
                         backgroundColor={'white'}
-                       // onChange={() => fetchUserData().catch(console.error)}
+                        // onChange={() => fetchUserData().catch(console.error)}
                         onSubmitEditing={() => fetchUserData().catch(console.error)}
                     />
                     <SearchIcon size={'sm'} color={'red.500'} />

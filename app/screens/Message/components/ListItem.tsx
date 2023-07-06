@@ -1,5 +1,7 @@
 import { BellOffIcon, EllipsisIcon, LinkIcon, LogoutIcon, TrashIcon } from 'components/Icons/Light';
 import { auth, db } from 'config/firebase';
+import * as Clipboard from 'expo-clipboard';
+import * as Linking from 'expo-linking';
 // import { timeAgo } from "config/timeAgo";
 import {
     query,
@@ -121,7 +123,17 @@ export const ListItem = (item: {
                         }
                     }}
                 />
-                <IconButton borderRadius={100} bg="gray.700" icon={<LinkIcon color="white" size="sm" />} />
+                <IconButton
+                 borderRadius={100} 
+                 bg="gray.700" 
+                 icon={<LinkIcon color="white" size="sm" />} 
+                 onPress={async () => {
+                    const redirectUrl = Linking.createURL('join-room', {
+                        queryParams: { idJoin: item.id },
+                      });
+                    await Clipboard.setStringAsync(redirectUrl);
+                 }}
+                />
                 <IconButton
                     borderRadius={100}
                     bg="gray.700"
