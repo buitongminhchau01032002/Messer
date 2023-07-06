@@ -8,6 +8,7 @@ import {
     doc,
     updateDoc,
     arrayUnion,
+    getDoc,
 } from 'firebase/firestore';
 
 import {
@@ -23,6 +24,7 @@ import { RootStackScreenProps } from 'types';
 import { useAppState } from 'native-base/lib/typescript/core/color-mode/hooks';
 import { useAppSelector } from 'hooks/index';
 import * as Linking from 'expo-linking';
+import { MultiRoom } from 'screens/Message/type';
 
 export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.JoinWithLink>) => {
     const { navigation, route } = props;
@@ -79,11 +81,42 @@ export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.J
     //     getUrlAsync();
 
     //   }, []);
-    const _handleOpenURL = (obj: any) => {
+    const _handleOpenURL = async (obj: any) => {
         // add your code here
         console.log(obj.url);
         const { queryParams } = Linking.parse(obj.url)
         console.log(queryParams);
+        let IdRoom = queryParams ? queryParams.idJoin : '';
+        if (typeof IdRoom === 'string') {
+            //   const currentUser = useAppSelector((state) => state.auth.user);
+            console.log(IdRoom);
+            const roomRef = doc(db, 'MultiRoom', IdRoom);
+            // console.log(roomRef.id + 'ahihihihihi');
+            await updateDoc(roomRef, {
+                users: arrayUnion(currentUser?.id),
+            }).catch((error) => {
+                console.log("Api call error");
+                alert(error.message);
+            });;
+            console.log('Join duoc roiiii na');
+            setIsLoading(false);
+
+            let multiRoo;
+            await getDoc(roomRef).then(snap => {
+                multiRoom = {
+                    id: snap.id,
+                    lastMessages: snap.data()?.lastMessage,
+                    reads: snap.data()?.reads,
+                    users: snap.data()?.users
+                }
+            })
+            navigation.replace(RootNavigatekey.MultiRoomMessageDetail, {
+                type: "single",
+                room: multiRoom,
+            })
+            // console.log(multiRoom)
+            // console.log(roomRef)
+        }
     }
 
     useEffect(() => {
