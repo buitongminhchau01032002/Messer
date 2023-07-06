@@ -30,7 +30,7 @@ const linking: LinkingOptions<RootStackParamList> = {
           [AppTabsNavigationKey.Message]: "message",
         },
       },
-      [RootNavigatekey.AddToMulti]: {
+      [RootNavigatekey.JoinWithLink]: {
         path: "join-room",
       },
       [RootNavigatekey.Intro]: "intro",

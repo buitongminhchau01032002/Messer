@@ -56,7 +56,8 @@ import { QRScanScreen } from 'screens/QRScan';
 import { NotificationScreen } from 'screens/Notification';
 import { MessageManageScreen } from 'screens/Message/pages/MessageManage';
 import { MultiMessageManageScreen } from 'screens/Message/pages/MultiMessageManage';
-
+import * as Linking from 'expo-linking'
+import { JoinWithLinkScreen } from 'screens/Message/pages/JoinWithLink';
 export default function Navigation() {
     // hooks
     const dispatch = useAppDispatch();
@@ -105,7 +106,15 @@ function RootNavigator() {
     // const { isLogin } = useAppSelector((state) => state.auth);
     const [isLogin, setIsLogin] = useState(auth.currentUser ? true : false);
     const callState = useAppSelector((state) => state.call);
+    const [url, setUrl] = useState<string | null>(null)
 
+    useEffect(() => {
+        const checkUrl = async () => {
+            const u = await Linking.getInitialURL()
+            setUrl(u);
+        }
+        checkUrl();
+    })
     useEffect(() => {
         getToken();
         const unsubscribe = messaging().onMessage(async (payload: FirebaseMessagingTypes.RemoteMessage) => {
@@ -281,6 +290,11 @@ function RootNavigator() {
                 <Stack.Screen
                     name={RootNavigatekey.AddToMulti}
                     component={AddToMultiRoomScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+                <Stack.Screen
+                    name={RootNavigatekey.JoinWithLink}
+                    component={JoinWithLinkScreen}
                     options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
                 />
                 <Stack.Screen

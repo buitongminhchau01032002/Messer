@@ -45,7 +45,7 @@
                     {
                       "scheme": "https",
                       "host": "*.myapp.io",
-                      "pathPrefix": "/records"
+                      "pathPrefix": "/join-room"
                     }
                   ],
                   "category": ["BROWSABLE", "DEFAULT"]
