@@ -47,7 +47,7 @@ export const QRScanScreen = (props: RootStackScreenProps<RootNavigatekey.QRScan>
         });
 
         if (messes.length != 0) {
-            navigation.navigate(RootNavigatekey.MessageDetail, { type: 'single', room: messes[0] });
+            navigation.replace(RootNavigatekey.MessageDetail, { type: 'single', room: messes[0] });
         } else {
             const newRoomData = {
                 user1: currentUser?.id,

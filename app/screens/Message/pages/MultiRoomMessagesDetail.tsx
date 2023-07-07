@@ -37,7 +37,7 @@ import {
 import { AppTabsNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Platform, ScrollView } from 'react-native';
+import { ActivityIndicator, Alert, Platform, ScrollView } from 'react-native';
 import { AppTabsStackScreenProps, RootStackScreenProps } from 'types';
 import { MessageItem } from '../components/MessageItem';
 import { Media, Message, SendType, User } from '../type';
@@ -106,9 +106,6 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
         navigation.setOptions({
             headerRight: () => (
                 <HStack space={4} alignItems={'center'}>
-                    <TouchableOpacity>
-                        <PhoneIcon color="primary.900" size="md" />
-                    </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => {
                             navigation.navigate(RootNavigatekey.AddToMulti, { room: room });
@@ -224,6 +221,7 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
             sender: currentUser?.id,
             senderName: currentUser?.name,
             type: type ?? 'text',
+            isDeleted: false,
             createdAt: serverTimestamp(),
         };
         if (quoteMessage) {
@@ -336,6 +334,40 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
         }
         setIsUpFile(false);
     };
+    const handleDeleteMessage = (message: Message) => {
+        Alert.alert(
+            'Warning',
+            "Can't restore after delete, are you sure you want delete?",
+            [
+                {
+                    text: 'OK',
+                    onPress: async () => {
+                        const docRef = doc(db, 'MultiRoom', currentRoom, 'Message', message.id!);
+                        updateDoc(docRef, {
+                            isDeleted: true,
+                        });
+                        if (message.type === 'media') {
+                            const mediaList = JSON.parse(message.content!) as Media[];
+                            const querySnapshot = await getDocs(
+                                collection(db, 'MultiRoom', currentRoom, 'MediaStore'),
+                            );
+                            querySnapshot.forEach((snap) => {
+                                if (mediaList.find((m) => m.url === snap.data().url)) {
+                                    const mediaRef = doc(db, 'MultiRoom', currentRoom, 'MediaStore', snap.id);
+                                    updateDoc(mediaRef, {
+                                        isDeleted: true,
+                                    });
+                                }
+                            });
+                        }
+                    },
+                },
+                { text: 'Cancel', style: 'cancel' },
+            ],
+            { cancelable: true },
+        );
+    };
+
 
     const handleUploadFileFromCamera = async (mediaType: ImagePicker.MediaTypeOptions) => {
         // No permissions request is necessary for launching the image library
@@ -446,6 +478,8 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
                                             setCurGallary(gallary);
                                             setIsOpenGallary(true);
                                         }}
+                                        onDelete={() => handleDeleteMessage(message)}
+                                        isDeleted={message.isDeleted}
                                     />
                                 );
                             })}
