@@ -31,6 +31,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { StyleSheet } from 'react-native';
 import { SwitchCameraIcon } from 'components/Icons/Light/SwitchCamera';
+import LoudSpeaker from 'react-native-toggle-loud-speaker';
 
 const servers = {
     iceServers: [
@@ -48,7 +49,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
     const callState = useAppSelector((state) => state.call);
     const isCallCreated = useRef<Boolean>(false);
     const [isOnMic, setIsOnMic] = useState(true);
-    const [isOnSpeaker, setIsOnSpeaker] = useState(true);
+    const [isOnSpeaker, setIsOnSpeaker] = useState(false);
     const [isOnVideo, setIsOnVideo] = useState(true);
     const { toUser, type } = props.route.params;
     const user = useAppSelector((state) => state.auth.user);
@@ -87,7 +88,10 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
     }
 
     function handleToggleSpeaker() {
-        setIsOnSpeaker(!isOnSpeaker);
+        setIsOnSpeaker((cur) => {
+            LoudSpeaker.open(!cur);
+            return !cur;
+        });
     }
     function handleSwitchCamera() {
         localStream?.getVideoTracks()[0]._switchCamera();
@@ -113,7 +117,9 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
             );
             return true;
         });
-        return () => { backHandler.remove();}
+        return () => {
+            backHandler.remove();
+        };
     }, []);
 
     useEffect(() => {
@@ -262,7 +268,6 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
                 }
             });
         });
-
     }
 
     async function handleCancelCall() {

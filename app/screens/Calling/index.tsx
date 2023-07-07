@@ -32,6 +32,7 @@ import Animated, {
     withRepeat,
     withTiming,
 } from 'react-native-reanimated';
+import LoudSpeaker from 'react-native-toggle-loud-speaker';
 
 const servers = {
     iceServers: [
@@ -45,7 +46,7 @@ const servers = {
 export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Calling> | any) => {
     const { colors } = useTheme();
     const [isOnMic, setIsOnMic] = useState(props?.route.params?.isOnMic ?? true);
-    const [isOnSpeaker, setIsOnSpeaker] = useState(props?.route.params?.isOnSpeaker ?? true);
+    const [isOnSpeaker, setIsOnSpeaker] = useState(props?.route.params?.isOnSpeaker ?? false);
     const [isOnVideo, setIsOnVideo] = useState(props?.route.params?.isOnVideo ?? true);
     const [isRemoveVideoOn, setIsRemoveVideoOn] = useState(true);
     const callState = useAppSelector((state) => state.call);
@@ -205,7 +206,10 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         setIsOnMic(!isOnMic);
     }
     function handleToggleSpeaker() {
-        setIsOnSpeaker(!isOnSpeaker);
+        setIsOnSpeaker((cur) => {
+            LoudSpeaker.open(!cur);
+            return !cur;
+        });
     }
     function handleSwitchCamera() {
         localStream?.getVideoTracks()[0]._switchCamera();
