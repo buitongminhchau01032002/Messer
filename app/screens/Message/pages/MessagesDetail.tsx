@@ -278,7 +278,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
             console.log(room.unnotifications);
 
             try {
-                if (!room.unnotifications.includes(receiver.id)) {
+                if (!room.unnotifications?.includes(receiver.id)) {
                     console.log(receiver.deviceToken);
                     fetch('https://fcm.googleapis.com/fcm/send', {
                         method: 'POST',

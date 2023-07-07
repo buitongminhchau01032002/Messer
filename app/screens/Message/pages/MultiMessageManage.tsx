@@ -132,7 +132,7 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
         const docSnap = await getDoc(docRef);
         const roomTemp = docSnap.data();
 
-        setIsUnnotify(roomTemp?.unnotifications.includes(currentUser.id));
+        setIsUnnotify(roomTemp.unnotifications?.includes(currentUser.id));
 
         const q = query(collection(db, 'User'), where(documentId(), 'in', roomTemp.users));
         const userList = [];
