@@ -144,6 +144,7 @@ function RootNavigator() {
                     const currentUser = {
                         id: user.uid,
                         ...userSnap.data(),
+                        blockIds: userSnap.data()?.blockIds ?? [],
                     };
                     dispatch(storeUserFromFirestore(currentUser));
                     setIsLogin(true);

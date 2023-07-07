@@ -24,7 +24,7 @@ import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en.json';
 import { update } from 'lodash';
 import { now } from 'moment';
-import { HStack, VStack, Box, Text, Image, IconButton } from 'native-base';
+import { HStack, VStack, Box, Text, Image, IconButton, Toast } from 'native-base';
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { View, Pressable, Alert } from 'react-native';
@@ -60,10 +60,10 @@ export const ListItem = (item: {
     const [roomImage, setRoomImage] = useState('');
 
     useEffect(() => {
-        setRoomImage(item.image??"");
+        setRoomImage(item.image ?? '');
     }, [item.image]);
     useEffect(() => {
-        setName(item.name??"");
+        setName(item.name ?? '');
     }, [item.name]);
 
     const rightSwipeActions = () => {
@@ -144,6 +144,7 @@ export const ListItem = (item: {
                                                 user1: currentUser?.id,
                                                 user2: targetUserId,
                                             });
+                                            Toast.show({ description: 'This user is blocked!' });
                                         },
                                     },
                                     { text: 'Cancel', style: 'cancel' },
@@ -322,7 +323,7 @@ export const ListItem = (item: {
                                 style={{ width: 64, height: 64 }}
                                 borderRadius={100}
                             ></Image>
-                        ) : roomImage == "" ? (
+                        ) : roomImage == '' ? (
                             <Box position={'relative'} width={63} height={63}>
                                 <Image
                                     position={'absolute'}
@@ -345,11 +346,11 @@ export const ListItem = (item: {
                             </Box>
                         ) : (
                             <Image
-                            alt="..."
-                            source={{ uri: roomImage }}
-                            style={{ width: 64, height: 64 }}
-                            borderRadius={100}
-                        ></Image>
+                                alt="..."
+                                source={{ uri: roomImage }}
+                                style={{ width: 64, height: 64 }}
+                                borderRadius={100}
+                            ></Image>
                         )}
 
                         <VStack flex={1} space={0} justifyContent="center">

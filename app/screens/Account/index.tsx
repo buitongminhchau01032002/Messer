@@ -29,6 +29,7 @@ import {
     Menu,
     Actionsheet,
     useDisclose,
+    Toast,
 } from 'native-base';
 import { AppTabsNavigationKey, AuthNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import { Alert, RefreshControl, TouchableOpacity } from 'react-native';
@@ -39,6 +40,7 @@ import { auth, db } from 'config/firebase';
 import { signOut } from 'firebase/auth';
 import {
     Timestamp,
+    arrayRemove,
     collection,
     deleteDoc,
     doc,
@@ -179,18 +181,32 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         ]);
     }
 
-    useEffect(() => {
-        const userRef = collection(db, 'User');
-        const userQuery = query(
-            userRef,
-            where(documentId(), 'in', user?.blockIds.length === 0 ? [''] : user?.blockIds!),
-        );
-        const unSub = onSnapshot(userQuery, (snapshot) => {
-            snapshot.docs.forEach((doc) => setBlockedUsers((cur) => cur.concat(doc.data())));
-        });
+    const handleUnblock = async (blockedUser: any) => {
+        let targetUserId = blockedUser.id;
+        console.log(blockedUser);
 
-        return () => unSub();
-    },[]);
+        const currentRef = doc(db, 'User', user?.id!);
+        // update list blocked
+        Toast.show({ description: `${blockedUser.name} is unblocked!` });
+        onClose();
+        updateDoc(currentRef, {
+            blockIds: arrayRemove(targetUserId),
+        });
+    };
+
+    useEffect(() => {
+        console.log(user);
+        const userRef = collection(db, 'User');
+        let unSub: any = undefined;
+        if (user?.blockIds.length === 0) {
+            setBlockedUsers([]);
+        } else {
+            const userQuery = query(userRef, where(documentId(), 'in', user?.blockIds!));
+            getDocs(userQuery).then((snapshot) => {
+                snapshot.docs.forEach((doc) => setBlockedUsers((cur) => cur.concat({ id: doc.id, ...doc.data() })));
+            });
+        }
+    }, [user]);
 
     return (
         <Box h="full" p={APP_PADDING} bg="white">
@@ -303,9 +319,9 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                                 <Text fontWeight="bold" textBreakStrategy="balanced">
                                     {bU.name}
                                 </Text>
-                                <Pressable>
+                                <TouchableOpacity onPress={() => handleUnblock(bU)}>
                                     <Text color="primary.900">Unblock</Text>
-                                </Pressable>
+                                </TouchableOpacity>
                             </HStack>
                         ))}
                     </ScrollView>

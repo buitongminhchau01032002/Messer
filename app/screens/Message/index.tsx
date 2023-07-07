@@ -152,7 +152,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
 
-                if (!user?.blockIds.includes(data.user2) && !user?.blockIds.includes(data.user1))
+                if (!user?.blockIds?.includes(data.user2) && !user?.blockIds?.includes(data.user1))
                     rooms.push({
                         id: doc.id,
                         type: 'single',
