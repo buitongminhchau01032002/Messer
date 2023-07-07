@@ -40,6 +40,7 @@ import {
     Timestamp,
     updateDoc,
     arrayUnion,
+    and,
 } from 'firebase/firestore';
 import { auth, db } from 'config/firebase';
 import TimeAgo from 'javascript-time-ago';
@@ -125,6 +126,7 @@ import {
 } from 'components/Icons/Light';
 import { ListItem } from './components/ListItem';
 import { useIsFocused } from '@react-navigation/native';
+import { useAppSelector } from 'hooks/index';
 
 export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKey.Message>) => {
     const { navigation } = props;
@@ -132,26 +134,30 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
     const [singleRooms, setSingleRooms] = useState([]);
     const [multiRooms, setMutiRooms] = useState([]);
     const [rooms, setRooms] = useState([]);
+    const currentUser = useAppSelector((state) => state.auth.user);
     const currentUserId = auth.currentUser?.uid;
     const isFocus = useIsFocused();
 
     useEffect(() => {
         // if(isFocus)
-        
         const q = query(
             collection(db, 'SingleRoom'),
             or(where('user1', '==', currentUserId), where('user2', '==', currentUserId)),
             orderBy('lastMessageTimestamp', 'desc'),
         );
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const unsubscribe = onSnapshot(q, async (querySnapshot) => {
             const rooms = [];
+            const userRef = doc(db, 'User', currentUserId!);
+            const user = (await getDoc(userRef)).data();
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                rooms.push({
-                    id: doc.id,
-                    type: 'single',
-                    ...data,
-                });
+
+                if (!user?.blockIds?.includes(data.user2) && !user?.blockIds?.includes(data.user1))
+                    rooms.push({
+                        id: doc.id,
+                        type: 'single',
+                        ...data,
+                    });
             });
             console.log('????what');
             setSingleRooms(rooms);
@@ -194,12 +200,12 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         //     unsubscribeMuti()
         // }
 
-        if (!isFocus){
-            console.log("unfocus")
+        if (!isFocus) {
+            console.log('unfocus');
             unsubscribe();
             unsubscribeMuti();
-        };
-       
+        }
+
         return () => {
             unsubscribe();
             unsubscribeMuti();

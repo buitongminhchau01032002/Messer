@@ -30,6 +30,7 @@ import Animated, {
     interpolate,
 } from 'react-native-reanimated';
 import { StyleSheet } from 'react-native';
+import { SwitchCameraIcon } from 'components/Icons/Light/SwitchCamera';
 
 const servers = {
     iceServers: [
@@ -40,7 +41,7 @@ const servers = {
     iceCandidatePoolSize: 10,
 };
 
-const COMMING_CALL_TIMEOUT = 20000;
+const COMMING_CALL_TIMEOUT = 30000;
 
 export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.CallWaiting>) => {
     const { colors } = useTheme();
@@ -48,6 +49,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
     const isCallCreated = useRef<Boolean>(false);
     const [isOnMic, setIsOnMic] = useState(true);
     const [isOnSpeaker, setIsOnSpeaker] = useState(true);
+    const [isOnVideo, setIsOnVideo] = useState(true);
     const { toUser, type } = props.route.params;
     const user = useAppSelector((state) => state.auth.user);
     const dispatch = useAppDispatch();
@@ -59,25 +61,41 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
     useEffect(() => {
         props.navigation.setOptions({
             headerTintColor: colors.primary[900],
+            headerBackVisible: false,
             headerRight: () => (
                 <HStack>
-                    <Feather name="video" size={20} color={colors.primary[900]} />
+                    {/* <Feather name="video" size={20} color={colors.primary[900]} /> */}
+                    <IconButton
+                        rounded="full"
+                        onPress={handleSwitchCamera}
+                        icon={<SwitchCameraIcon size="xl" color={colors.primary[900]} />}
+                    />
                 </HStack>
             ),
         });
-    }, [props.navigation]);
+    }, [props.navigation, localStream]);
 
     function handleToggleMic() {
+        if (isOnMic) {
+            // handle off video
+            localStream!.getAudioTracks()[0].enabled = false;
+        } else {
+            // handle on video
+            localStream!.getAudioTracks()[0].enabled = true;
+        }
         setIsOnMic(!isOnMic);
     }
 
     function handleToggleSpeaker() {
         setIsOnSpeaker(!isOnSpeaker);
     }
+    function handleSwitchCamera() {
+        localStream?.getVideoTracks()[0]._switchCamera();
+    }
 
     useEffect(() => {
         // if (!isFocused) return;
-        initCall();
+        const unsub = initCall();
 
         const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
             Alert.alert(
@@ -95,7 +113,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
             );
             return true;
         });
-        return () => backHandler.remove();
+        return () => { backHandler.remove(); unsub.then((u) => u())}
     }, []);
 
     useEffect(() => {
@@ -109,6 +127,8 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
                     pc: pc.current,
                     remoteStream,
                     localStream,
+                    isOnMic,
+                    isOnSpeaker,
                 });
             } else if (pc.current?.connectionState === 'disconnected' || pc.current?.connectionState === 'failed') {
                 handleEndCall();
@@ -119,7 +139,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
         return () => {
             pc.current?.removeEventListener('connectionstatechange', eventHandler);
         };
-    }, [localStream, remoteStream]);
+    }, [localStream, remoteStream, isOnMic, isOnSpeaker]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -135,20 +155,20 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
     }, [callState]);
 
     async function initCall() {
+        let ubsub = () => {};
         try {
             await setUpWebcamAndMediaStream();
-            await createOffer(toUser);
+            ubsub = await createOffer(toUser);
         } catch (err) {
             props.navigation.goBack();
+        } finally {
+            return ubsub;
         }
     }
 
     async function setUpWebcamAndMediaStream() {
         pc.current = new RTCPeerConnection(servers);
         const local = await mediaDevices.getUserMedia({
-            // video: {
-            //     facingMode: 'environment',
-            // },
             video: type === 'no-video' ? false : true,
             audio: true,
         });
@@ -199,8 +219,8 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
 
         await setDoc(callDoc, {
             offer,
-            fromUser: user,
-            toUser: toUser,
+            fromUser: { ...user, isOnVideo: true },
+            toUser: { ...toUser, isOnVideo: true },
             type,
             createdAt: serverTimestamp(),
         });
@@ -214,7 +234,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
         isCallCreated.current = true;
 
         // Listen for remote answer
-        onSnapshot(callDoc, (snapshot) => {
+        const unsub = onSnapshot(callDoc, (snapshot) => {
             const data = snapshot.data();
             // @ts-ignore
             if (!pc.current?.currentRemoteDescription && data?.answer) {
@@ -232,6 +252,9 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
                 }
             });
         });
+
+        return unsub;
+
     }
 
     async function handleCancelCall() {

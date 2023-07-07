@@ -36,7 +36,7 @@ import {
 import { AppTabsNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Platform, ScrollView } from 'react-native';
+import { ActivityIndicator, Alert, Platform, ScrollView } from 'react-native';
 import { AppTabsStackScreenProps, RootStackScreenProps } from 'types';
 import { MessageItem } from '../components/MessageItem';
 import { Media, Message, SendType, User } from '../type';
@@ -97,7 +97,8 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
     const [activeIndex, setActiveIndex] = useState(0);
     const [isOpenGallary, setIsOpenGallary] = useState(false);
     const [curGallary, setCurGallary] = useState<Media[]>([]);
-    const [notCurrentUser, setNotCurrentUser] = useState(null)
+    const [notCurrentUser, setNotCurrentUser] = useState(null);
+    const [targetUser, setTargetUser] = useState(null);
 
     // const curentUser = 'CPYyJYf2Rj2kUd8rCvff'\
     // const currentRoom = "3T7VtjOcHbbi2oTVa5gX"
@@ -168,6 +169,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                     navigation.setOptions({
                         headerTitle: doc.data().name,
                     });
+                    setTargetUser({ id: doc.id, ...doc.data() });
                 }
             });
             setUsers(userDatas);
@@ -195,11 +197,13 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                     }
                     // // populate user
                     const sender = userDatas.find((u) => u.id == newMessage.sender);
-                    newMessage.sender = {
-                        id: sender.id ?? '',
-                        avatar: sender.avatar,
-                        name: sender.name,
-                    };
+                    newMessage.sender = sender
+                        ? {
+                              id: sender?.id ?? '',
+                              avatar: sender?.avatar,
+                              name: sender?.name,
+                          }
+                        : undefined;
                     newMessages.push(newMessage);
                 }
                 setMessages(newMessages);
@@ -217,8 +221,14 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
             );
         };
 
-        fetchMessageData().catch(console.error);
-        fetchPinnedMessage().catch(console.error);
+        fetchMessageData().catch((e) => {
+            console.warn(e);
+            setIsLoading(false);
+        });
+        fetchPinnedMessage().catch((e) => {
+            console.warn(e);
+            setIsLoadingPinnedMessage(false);
+        });
         setIsLoading(true);
         setIsLoadingPinnedMessage(true);
         // return () => unsub()
@@ -226,7 +236,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
 
     useEffect(() => {
         scrollRef.current?.scrollToEnd();
-    }, [messages]);
+    }, [messages.length]);
 
     const handleSendMessage = (content: string, type?: string) => {
         if (!content) {
@@ -238,6 +248,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
             content,
             sender: currentUser.id,
             type: type ?? 'text',
+            isDeleted: false,
             createdAt: serverTimestamp(),
         };
         if (quoteMessage) {
@@ -317,6 +328,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
         addDoc(collection(db, 'SingleRoom', currentRoom, 'PinMessage'), {
             id: message.id,
             content: message.content,
+            isDeleted: false,
             createdAt: serverTimestamp(),
         }).then(async (values) => {
             setIsPinning(false);
@@ -370,6 +382,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                 addDoc(collection(db, 'SingleRoom', currentRoom, 'MediaStore'), {
                     url: link.url,
                     type: link.type,
+                    isDeleted: false,
                     createdAt: serverTimestamp(),
                 }),
             );
@@ -419,6 +432,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                 addDoc(collection(db, 'SingleRoom', currentRoom, 'MediaStore'), {
                     url: link.url,
                     type: link.type,
+                    isDeleted: false,
                     createdAt: serverTimestamp(),
                 }),
             );
@@ -427,6 +441,40 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
             setIsSending(false);
         }
         setIsUpFile(false);
+    };
+
+    const handleDeleteMessage = (message: Message) => {
+        Alert.alert(
+            'Warning',
+            "Can't restore after delete, are you sure you want delete?",
+            [
+                {
+                    text: 'OK',
+                    onPress: async () => {
+                        const docRef = doc(db, 'SingleRoom', currentRoom, 'Message', message.id!);
+                        updateDoc(docRef, {
+                            isDeleted: true,
+                        });
+                        if (message.type === 'media') {
+                            const mediaList = JSON.parse(message.content!) as Media[];
+                            const querySnapshot = await getDocs(
+                                collection(db, 'SingleRoom', currentRoom, 'MediaStore'),
+                            );
+                            querySnapshot.forEach((snap) => {
+                                if (mediaList.find((m) => m.url === snap.data().url)) {
+                                    const mediaRef = doc(db, 'SingleRoom', currentRoom, 'MediaStore', snap.id);
+                                    updateDoc(mediaRef, {
+                                        isDeleted: true,
+                                    });
+                                }
+                            });
+                        }
+                    },
+                },
+                { text: 'Cancel', style: 'cancel' },
+            ],
+            { cancelable: true },
+        );
     };
 
     const handleCloseGallery = () => {
@@ -470,7 +518,9 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                                         message={message}
                                         isPinned={pinnedMessage ? true : false}
                                         sendType={
-                                            currentUser.id === (message.sender as User).id
+                                            !message.sender
+                                                ? SendType.Notice
+                                                : currentUser.id === (message.sender as User).id
                                                 ? SendType.Send
                                                 : SendType.Receive
                                         }
@@ -487,6 +537,8 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                                             setCurGallary(gallary);
                                             setIsOpenGallary(true);
                                         }}
+                                        onDelete={() => handleDeleteMessage(message)}
+                                        isDeleted={message.isDeleted}
                                     />
                                 );
                             })}
@@ -509,7 +561,13 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                                 <Text bold color="white">
                                     {(quoteMessage.sender as User).name}
                                 </Text>
-                                <Text numberOfLines={3}>{quoteMessage.content}</Text>
+                                {quoteMessage.type === 'text' ? (
+                                    <Text numberOfLines={3}>{quoteMessage.content}</Text>
+                                ) : (
+                                    <Text numberOfLines={3} fontWeight="bold">
+                                        Media
+                                    </Text>
+                                )}
                             </VStack>
                             <VStack justifyContent="center" h="full">
                                 <Pressable onPress={() => setQuoteMessage(undefined)}>
@@ -552,12 +610,15 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                             value={content}
                             onChangeText={(text) => setContent(text)}
                             flex={1}
-                            placeholder="Message"
+                            placeholder={
+                                targetUser?.blockIds?.includes(currentUser?.id) ? 'You are blocked' : 'Message'
+                            }
                             fontSize="md"
                             bg="gray.100"
                             borderWidth={0}
                             borderRadius={20}
                             multiline
+                            isDisabled={targetUser?.blockIds?.includes(currentUser?.id)}
                             onFocus={() => scrollRef.current?.scrollToEnd({ animated: true })}
                         />
                         <TouchableOpacity px={2} py={3} disabled={isSending} onPress={() => handleSendMessage(content)}>
