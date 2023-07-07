@@ -23,7 +23,15 @@ import { SwitchCameraIcon } from 'components/Icons/Light/SwitchCamera';
 import { VolumeIcon } from 'components/Icons/Light/Volume';
 import { VideoOffIcon } from 'components/Icons/Light/VideoOff';
 import { BackHandler } from 'react-native';
-import { Alert } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
+import Animated, {
+    interpolate,
+    useAnimatedStyle,
+    useSharedValue,
+    withDelay,
+    withRepeat,
+    withTiming,
+} from 'react-native-reanimated';
 
 const servers = {
     iceServers: [
@@ -36,13 +44,15 @@ const servers = {
 
 export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Calling> | any) => {
     const { colors } = useTheme();
-    const [isOnMic, setIsOnMic] = useState(true);
-    const [isOnSpeaker, setIsOnSpeaker] = useState(true);
-    const [isOnVideo, setIsOnVideo] = useState(true);
+    const [isOnMic, setIsOnMic] = useState(props?.route.params?.isOnMic ?? true);
+    const [isOnSpeaker, setIsOnSpeaker] = useState(props?.route.params?.isOnSpeaker ?? true);
+    const [isOnVideo, setIsOnVideo] = useState(props?.route.params?.isOnVideo ?? true);
+    const [isRemoveVideoOn, setIsRemoveVideoOn] = useState(true);
     const callState = useAppSelector((state) => state.call);
     const user = useAppSelector((state) => state.auth.user);
     const dispatch = useAppDispatch();
     const isFocused = useIsFocused();
+    console.log('On Mic', isOnMic);
 
     const [remoteStream, setRemoteStream] = useState<MediaStream | null>(props?.route.params?.remoteStream || null);
     const [localStream, setLocalStream] = useState<MediaStream | null>(props?.route.params?.localStream || null);
@@ -58,31 +68,51 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         }
     }, [callState.infor]);
 
+    // Listen to offvideo
+    useEffect(() => {
+        if (!callState.infor) {
+            return;
+        }
+
+        const unsubscribe = onSnapshot(doc(db, 'calls', callState.infor?.id), (doc) => {
+            // this is from user
+            if (callState.infor?.fromUser.id === user?.id) {
+                setIsRemoveVideoOn(doc.data()?.toUser?.isOnVideo);
+            }
+            // this is to user
+            if (callState.infor?.toUser.id === user?.id) {
+                setIsRemoveVideoOn(doc.data()?.fromUser?.isOnVideo);
+            }
+        });
+
+        return () => unsubscribe();
+    }, [callState.infor]);
+
     useEffect(() => {
         props.navigation.setOptions({
             headerTintColor: colors.primary[900],
-            headerRight: () => (
-                <HStack>
-                    <IconButton
-                        rounded="full"
-                        onPress={handleToggleVideo}
-                        icon={
-                            isOnVideo ? (
-                                <VideoIcon size="xl" color={colors.primary[900]} />
-                            ) : (
-                                <VideoOffIcon size="xl" color={colors.primary[900]} />
-                            )
-                        }
-                        // onPress={handleHangup}
-                    />
-                    <IconButton
-                        rounded="full"
-                        onPress={handleSwitchCamera}
-                        icon={<SwitchCameraIcon size="xl" color={colors.primary[900]} />}
-                        // onPress={handleHangup}
-                    />
-                </HStack>
-            ),
+            headerBackVisible: false,
+            headerRight: () =>
+                callState?.infor?.type !== 'no-video' && (
+                    <HStack>
+                        <IconButton
+                            rounded="full"
+                            onPress={handleToggleVideo}
+                            icon={
+                                isOnVideo ? (
+                                    <VideoIcon size="xl" color={colors.primary[900]} />
+                                ) : (
+                                    <VideoOffIcon size="xl" color={colors.primary[900]} />
+                                )
+                            }
+                        />
+                        <IconButton
+                            rounded="full"
+                            onPress={handleSwitchCamera}
+                            icon={<SwitchCameraIcon size="xl" color={colors.primary[900]} />}
+                        />
+                    </HStack>
+                ),
         });
     }, [props.navigation, isOnVideo, localStream]);
 
@@ -141,14 +171,28 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     }, [localStream, remoteStream]);
 
     function handleToggleVideo() {
-        if (isOnVideo) {
-            // handle off video
-            localStream!.getVideoTracks()[0].enabled = false;
-        } else {
-            // handle on video
-            localStream!.getVideoTracks()[0].enabled = true;
+        // if (isOnVideo) {
+        //     // handle off video
+        //     localStream!.getVideoTracks()[0].enabled = false;
+        // } else {
+        //     // handle on video
+        //     localStream!.getVideoTracks()[0].enabled = true;
+        // }
+        const isOnVideoAfterChange = !isOnVideo;
+        // this is from user
+        if (callState.infor?.fromUser.id === user?.id) {
+            console.log('setting video', isOnVideoAfterChange);
+            updateDoc(doc(db, 'calls', callState.infor?.id), {
+                'fromUser.isOnVideo': isOnVideoAfterChange,
+            });
         }
-        setIsOnVideo(!isOnVideo);
+        // this is from user
+        if (callState.infor?.toUser.id === user?.id) {
+            updateDoc(doc(db, 'calls', callState.infor?.id), {
+                'toUser.isOnVideo': isOnVideoAfterChange,
+            });
+        }
+        setIsOnVideo(isOnVideoAfterChange);
     }
     function handleToggleMic() {
         if (isOnMic) {
@@ -164,16 +208,12 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         setIsOnSpeaker(!isOnSpeaker);
     }
     function handleSwitchCamera() {
-        // TODO: Change logic
         localStream?.getVideoTracks()[0]._switchCamera();
     }
 
     async function setUpWebcamAndMediaStream() {
         pc.current = new RTCPeerConnection(servers);
         const local = await mediaDevices.getUserMedia({
-            // video: {
-            //     facingMode: 'environment',
-            // },
             video: true,
             audio: true,
         });
@@ -283,17 +323,22 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         <Box position="relative" flex={1}>
             <Box backgroundColor="gray.900" position="absolute" top="0" left="0" right="0" bottom="0">
                 {/* VIDEO CALL */}
-                {callState.infor?.type !== 'no-video' && (
-                    <RTCView
-                        // @ts-ignore
-                        streamURL={remoteStream?.toURL() || ''}
-                        objectFit="cover"
-                        style={{
-                            height: '100%',
-                            width: '100%',
-                        }}
-                    />
-                )}
+                {callState.infor?.type !== 'no-video' &&
+                    (isRemoveVideoOn ? (
+                        <RTCView
+                            // @ts-ignore
+                            streamURL={remoteStream?.toURL() || ''}
+                            objectFit="cover"
+                            style={{
+                                height: '100%',
+                                width: '100%',
+                            }}
+                        />
+                    ) : (
+                        <HStack justifyContent="center" alignItems="center" bg="gray.900" w="100%" h="100%">
+                            <VideoOffIcon size="20" color="white" />
+                        </HStack>
+                    ))}
 
                 {callState.infor?.type === 'no-video' && (
                     <>
@@ -324,14 +369,21 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
                             <Text color="white" mt="5" fontSize={24} fontWeight="bold">
                                 {remoteUser?.name}
                             </Text>
-                            <Text color="gray.300" mt="2" fontSize={12}>
-                                Calling...
-                            </Text>
+                            <HStack mt="2" justifyContent="center" alignItems="center" space="2">
+                                <Box position="relative" size="4" rounded="full" bg="red.500">
+                                    <Ring delay={0} />
+                                    <Ring delay={400} />
+                                    <Ring delay={800} />
+                                </Box>
+                                <Text color="gray.300" fontSize={12}>
+                                    Calling...
+                                </Text>
+                            </HStack>
                         </VStack>
                     </>
                 )}
             </Box>
-            {callState.infor?.type !== 'no-video' && <LocalVideo stream={localStream} />}
+            {callState.infor?.type !== 'no-video' && <LocalVideo isOnVideo={isOnVideo} stream={localStream} />}
             <VStack px="7" pt="24" pb="20" justifyContent="space-between" h="full">
                 <Box>
                     {callState.infor?.type !== 'no-video' && (
@@ -377,3 +429,42 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         </Box>
     );
 };
+
+const Ring = ({ delay }) => {
+    const ring = useSharedValue(0);
+
+    const ringStyle = useAnimatedStyle(() => {
+        return {
+            opacity: 0.8 - ring.value,
+            transform: [
+                {
+                    scale: interpolate(ring.value, [0, 1], [0, 3]),
+                },
+            ],
+        };
+    });
+    useEffect(() => {
+        ring.value = withDelay(
+            delay,
+            withRepeat(
+                withTiming(1, {
+                    duration: 1600,
+                }),
+                -1,
+                false,
+            ),
+        );
+    }, []);
+    return <Animated.View style={[styles.ring, ringStyle]} />;
+};
+
+const styles = StyleSheet.create({
+    ring: {
+        position: 'absolute',
+        width: 16,
+        height: 16,
+        borderRadius: 99999,
+        borderColor: '#ef4444',
+        borderWidth: 2,
+    },
+});

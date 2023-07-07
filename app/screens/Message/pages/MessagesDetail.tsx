@@ -97,6 +97,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
     const [activeIndex, setActiveIndex] = useState(0);
     const [isOpenGallary, setIsOpenGallary] = useState(false);
     const [curGallary, setCurGallary] = useState<Media[]>([]);
+    const [notCurrentUser, setNotCurrentUser] = useState(null)
 
     // const curentUser = 'CPYyJYf2Rj2kUd8rCvff'\
     // const currentRoom = "3T7VtjOcHbbi2oTVa5gX"
@@ -137,7 +138,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                     />
                 </HStack>
             ),
-            headerTitle: '',
+            // headerTitle: notCurrentUser?.name??"",
             headerTintColor: colors.primary[900],
             headerTitleStyle: { color: colors.blue[900] },
         });
@@ -170,6 +171,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                 }
             });
             setUsers(userDatas);
+            // setNotCurrentUser(userDatas.find((e) => e.id !== currentUser?.id))
 
             const unsub = onSnapshot(messageQuery.withConverter(converter<Message>()), async (messagesSnap) => {
                 const newMessages = [];

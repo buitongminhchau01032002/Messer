@@ -40,7 +40,7 @@ export type RootStackParamList = {
     [RootNavigatekey.MultiRoomMessageDetail]: {type: "single"|"multi" , room: MultiRoom};
     [RootNavigatekey.MultiMessageManage]: {type: "single"|"multi" , room: MultiRoom};
     [RootNavigatekey.NotFound]: undefined;
-    [RootNavigatekey.AddToMulti]: { roomId?: string };
+    [RootNavigatekey.AddToMulti]: { room?: any };
     [RootNavigatekey.Intro]: undefined;
     [RootNavigatekey.Modal]: undefined;
     [RootNavigatekey.ComingCall]: undefined;
