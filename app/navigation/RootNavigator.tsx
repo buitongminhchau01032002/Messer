@@ -133,7 +133,7 @@ function RootNavigator() {
                 handleEndCall();
             }
             if (payload.data?.type === 'accept') {
-                handleRecievedAcceptCall(payload.data.docId);
+                //handleRecievedAcceptCall(payload.data.docId);
             }
         });
 

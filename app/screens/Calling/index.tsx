@@ -75,18 +75,18 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
             return;
         }
 
-        const unsubscribe = onSnapshot(doc(db, 'calls', callState.infor?.id), (doc) => {
-            // this is from user
-            if (callState.infor?.fromUser.id === user?.id) {
-                setIsRemoveVideoOn(doc.data()?.toUser?.isOnVideo);
-            }
-            // this is to user
-            if (callState.infor?.toUser.id === user?.id) {
-                setIsRemoveVideoOn(doc.data()?.fromUser?.isOnVideo);
-            }
-        });
+        // const unsubscribe = onSnapshot(doc(db, 'calls', callState.infor?.id), (doc) => {
+        //     // this is from user
+        //     if (callState.infor?.fromUser.id === user?.id) {
+        //         setIsRemoveVideoOn(doc.data()?.toUser?.isOnVideo);
+        //     }
+        //     // this is to user
+        //     if (callState.infor?.toUser.id === user?.id) {
+        //         setIsRemoveVideoOn(doc.data()?.fromUser?.isOnVideo);
+        //     }
+        // });
 
-        return () => unsubscribe();
+        // return () => unsubscribe();
     }, [callState.infor]);
 
     useEffect(() => {
@@ -219,7 +219,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         pc.current = new RTCPeerConnection(servers);
         const local = await mediaDevices.getUserMedia({
             video: true,
-            audio: true,
+            audio: false,
         });
         pc.current?.addStream(local);
         setLocalStream(local);

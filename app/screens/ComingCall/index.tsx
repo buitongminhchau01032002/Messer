@@ -108,10 +108,10 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
             await sound?.stopAsync();
             await sound?.unloadAsync();
         })();
-        sendCallMessage(callState.infor?.fromUser?.deviceToken, {
-            type: 'accept',
-            docId: callState.infor?.id,
-        });
+        // sendCallMessage(callState.infor?.fromUser?.deviceToken, {
+        //     type: 'accept',
+        //     docId: callState.infor?.id,
+        // });
         props.navigation.replace(RootNavigatekey.Calling);
     }
 
