@@ -17,7 +17,7 @@ import {
     doc,
     updateDoc,
     arrayUnion,
-    Query,
+    documentId,
 } from 'firebase/firestore';
 import { update } from 'lodash';
 import {
@@ -48,7 +48,7 @@ import * as Linking from 'expo-linking';
 export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey.AddToMulti>) => {
     const { navigation, route } = props;
     const currentUser = useAppSelector((state) => state.auth.user);
-    const { roomId } = route.params;
+    const { room } = route.params;
     const { colors } = useTheme();
     const [searchText, setSearchText] = useState('');
     const [isInputFocused, setInputFocused] = useState(false);
@@ -98,36 +98,75 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
 
     const fetchUserData = async () => {
         const searchUser = [];
-        const q = query(
-            collection(db, 'User'),
-            where('name', '>=', searchText),
-            where('name', '<=', searchText + '\uf8ff'),
-        );
-        const searchUserSnapshot = await getDocs(q);
-        searchUserSnapshot.forEach((u) => {
-            searchUser.push({
-                id: u.id,
-                selected: selectedUsers.includes(u.id),
-                ...u.data(),
+        if(room) {
+            console.log("dsa")
+            const q = query(
+                collection(db, 'User'),
+                and(
+                    where(documentId(), 'not-in', room.users),
+                    where('name', '==', searchText),
+                    // and(where('name', '>=', searchText), where('name', '<=', searchText + '\uf8ff')),
+                ),
+            );
+            const searchUserSnapshot = await getDocs(q);
+            searchUserSnapshot.forEach((u) => {
+                searchUser.push({
+                    id: u.id,
+                    selected: selectedUsers.includes(u.id),
+                    ...u.data(),
+                });
             });
-        });
-        setSearchingUser(searchUser);
+            setSearchingUser(searchUser);
+        } else {
+            const q = query(
+                collection(db, 'User'),
+                where('name', '==', searchText),
+            );
+            const searchUserSnapshot = await getDocs(q);
+            searchUserSnapshot.forEach((u) => {
+                searchUser.push({
+                    id: u.id,
+                    selected: selectedUsers.includes(u.id),
+                    ...u.data(),
+                });
+            });
+            setSearchingUser(searchUser);
+        }
+        
         console.log(selectedUsers);
     };
 
     const handleAddMember = async () => {
-
-        if (roomId) {
-
-            const roomRef = doc(db, 'MultiRoom', roomId);
-
+        if (room.id) {
+            const roomRef = doc(db, 'MultiRoom', room.id);
             await updateDoc(roomRef, {
                 users: arrayUnion(
                     ...selectedUsers.map((u) => {
                         return u.id;
                     }),
                 ),
-            }).then();
+            }).then(() => {
+                selectedUsers.forEach((e) => {
+                    const content = e.name.concat(' added into room');
+
+                    const newMessage = {
+                        content,
+                        sender: '',
+                        senderName: '',
+                        type: 'text',
+                        createdAt: serverTimestamp(),
+                    };
+
+                    addDoc(collection(db, 'MultiRoom', room.id, 'Message'), newMessage).then(async (values) => {
+                        await updateDoc(doc(db, 'MultiRoom', room.id ?? ''), {
+                            lastMessage: newMessage,
+                            lastMessageTimestamp: newMessage.createdAt,
+                            reads: [],
+                        });
+                    });
+                })
+                navigation.goBack();
+            });
         }
     };
 
@@ -142,32 +181,31 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
             name: roomName,
             users: ids,
             owner: currentUser?.id,
-            lastMessageTimestamp: serverTimestamp()
+            lastMessageTimestamp: serverTimestamp(),
         });
         // navigation.navigate(RootNavigatekey.MultiRoomMessageDetail, { type: 'multi', room: {id: ""}} );/
 
-        const content = currentUser?.name.concat(" created Room")
+        const content = currentUser?.name.concat(' created Room');
 
         const newMessage = {
             content,
-            sender: "",
-            senderName: "",
+            sender: '',
+            senderName: '',
             type: 'text',
             createdAt: serverTimestamp(),
         };
 
         addDoc(collection(db, 'MultiRoom', docRef.id, 'Message'), newMessage).then(async (values) => {
-            console.log("a")
+            console.log('a');
             const receivers = selectedUsers.filter((u) => u.id != newMessage.sender);
-            console.log("b")
+            console.log('b');
 
             await updateDoc(doc(db, 'MultiRoom', docRef.id ?? ''), {
                 lastMessage: newMessage,
                 lastMessageTimestamp: newMessage.createdAt,
                 reads: [],
             });
-            console.log("c")
-
+            console.log('c');
 
             receivers.forEach((receiver) => {
                 fetch('https://fcm.googleapis.com/fcm/send', {
@@ -190,10 +228,9 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
                     }),
                 });
             });
-            console.log("d")
-
+            console.log('d');
         });
-        navigation.goBack()
+        navigation.goBack();
     };
     useEffect(() => {
         props.navigation.setOptions({
@@ -202,14 +239,14 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
                     <Button
                         color={'primary.900'}
                         onPress={() => {
-                            if (!roomId) {
+                            if (!room) {
                                 setNameDialogVisible(true);
                             } else {
                                 handleAddMember();
                             }
                         }}
                     >
-                        Create
+                        {room ? 'Add' : 'Create'}
                     </Button>
                 </HStack>
             ),
@@ -221,8 +258,9 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
     }, [props.navigation]);
 
     const handleNavigate = async (otherUserId: any) => {
-
-        const idx = selectedUsers.indexOf(otherUserId);
+        const item = selectedUsers.find((e) => e.id === otherUserId.id);
+        console.log('asd', item);
+        const idx = selectedUsers.indexOf(item);
         if (idx > -1) {
             selectedUsers.splice(idx, 1);
         } else {
