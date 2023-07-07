@@ -70,7 +70,7 @@ import { useAppSelector } from 'hooks/index';
 import { Gallery } from '../components/Gallery';
 import * as ImagePicker from 'expo-image-picker';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { StackActions, NavigationActions } from 'react-navigation'; 
+import { StackActions, NavigationActions } from 'react-navigation';
 
 export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.MultiRoomMessageDetail>) => {
     //navigate
@@ -105,7 +105,7 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
 
 
     // useEffect(() => {
-       
+
     //     if(isJoinWithLink) {
     //         console.log("dime an buoiiii" + isJoinWithLink)
     //         const resetAction = StackActions.reset({
@@ -172,14 +172,14 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
                             )
                         ).data()!;
                         const reply = userDatas.find((u) => u.id == replyMessage.sender);
-                        if(reply){
+                        if (reply) {
                             replyMessage.sender = {
                                 id: reply.id,
                                 avatar: reply.avatar,
                                 name: reply.name,
                             };
                         }
-                     
+
 
                         newMessage.replyMessage = replyMessage;
                     }
@@ -255,28 +255,43 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
                 lastMessageTimestamp: newMessage.createdAt,
                 reads: [currentUser?.id],
             });
+            try {
 
-            receivers.forEach((receiver) => {
-                fetch('https://fcm.googleapis.com/fcm/send', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization:
-                            'key=AAAAu3T5eSI:APA91bFfynL6hecTGjN4jGBUULhccdSWIBKjG0oBWefs3D5KvDu5IWHUJSJD9F3uMjhmuZbXqsUSj6GBsqRYkQgt2d2If4FUaYHy3bZ-E8NpBhqHYjsyfB9D1Nk-hxVKelYn165SqRdL',
-                    },
-                    body: JSON.stringify({
-                        to: receiver.deviceToken,
-                        notification: {
-                            body: newMessage.content,
-                            OrganizationId: '2',
-                            content_available: true,
-                            priority: 'high',
-                            subtitle: 'PhotoMe',
-                            title: sender.name.concat(' texted you'),
-                        },
-                    }),
+                receivers.forEach((receiver) => {
+                    if (!room.unnotifications?.includes(receiver.id)) {
+                        fetch('https://fcm.googleapis.com/fcm/send', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization:
+                                    'key=AAAAu3T5eSI:APA91bFfynL6hecTGjN4jGBUULhccdSWIBKjG0oBWefs3D5KvDu5IWHUJSJD9F3uMjhmuZbXqsUSj6GBsqRYkQgt2d2If4FUaYHy3bZ-E8NpBhqHYjsyfB9D1Nk-hxVKelYn165SqRdL',
+                            },
+                            body: JSON.stringify({
+                                to: receiver.deviceToken,
+                                notification: {
+                                    body: newMessage.content,
+                                    OrganizationId: '2',
+                                    content_available: true,
+                                    priority: 'high',
+                                    subtitle: 'PhotoMe',
+                                    title: sender.name.concat(' texted in '.concat(room.name)),
+
+                                },
+                                data: {
+                                    type: 'multi',
+                                    idRoom: room.id
+                                }
+                            }),
+                        
+                        });
+                    }
                 });
-            });
+
+            } catch (e) {
+
+            }
+
+
         });
         setContent('');
         setQuoteMessage(undefined);
@@ -477,8 +492,8 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
                                             !message.sender
                                                 ? SendType.Notice
                                                 : currentUser.id === (message.sender as User).id
-                                                ? SendType.Send
-                                                : SendType.Receive
+                                                    ? SendType.Send
+                                                    : SendType.Receive
                                         }
                                         onQuote={() => {
                                             setQuoteMessage(message);
@@ -586,7 +601,7 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
                                 <Text fontWeight="bold" textBreakStrategy="balanced">
                                     {pM.content}
                                 </Text>
-                                <Pressable onPress={() => {handleUnpinMessage(pM._id)}}>
+                                <Pressable onPress={() => { handleUnpinMessage(pM._id) }}>
                                     <Text color="primary.900">Unpin</Text>
                                 </Pressable>
                             </HStack>

@@ -207,10 +207,10 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                     const sender = userDatas.find((u) => u.id == newMessage.sender);
                     newMessage.sender = sender
                         ? {
-                              id: sender?.id ?? '',
-                              avatar: sender?.avatar,
-                              name: sender?.name,
-                          }
+                            id: sender?.id ?? '',
+                            avatar: sender?.avatar,
+                            name: sender?.name,
+                        }
                         : undefined;
                     newMessages.push(newMessage);
                 }
@@ -297,6 +297,11 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                                 subtitle: 'PhotoMe',
                                 title: sender.name.concat(' texted you'),
                             },
+                            data: {
+                                type: 'single',
+                                idRoom: room.id
+                            }
+
                         }),
                     });
                 }
@@ -529,8 +534,8 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                                             !message.sender
                                                 ? SendType.Notice
                                                 : currentUser.id === (message.sender as User).id
-                                                ? SendType.Send
-                                                : SendType.Receive
+                                                    ? SendType.Send
+                                                    : SendType.Receive
                                         }
                                         onQuote={() => {
                                             setQuoteMessage(message);
