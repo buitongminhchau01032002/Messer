@@ -12146,6 +12146,11 @@ react-native-timeago@^0.5.0:
   resolved "https://registry.yarnpkg.com/react-native-timeago/-/react-native-timeago-0.5.0.tgz#1b08057e3473dbb5b6720ee5cde4e544a7c250f0"
   integrity sha512-GYrV36FK8ttkl7BIAdh77OlYLYGIKLGNviJqzPUtKaO8ANEtI8ph7UkSTRv9oMKfvDnA5VKV9hVX7GtYoAztRg==
 
+react-native-toggle-loud-speaker@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/react-native-toggle-loud-speaker/-/react-native-toggle-loud-speaker-1.2.0.tgz#10a7ad318473cd2a8d3c2e6d35fab122bfdc3e98"
+  integrity sha512-KEFSKzKqEvAYM36wsouJM8dfX+bE+kQ5rt3bwNyyekU4VFqfYjmcf7U7o1X7KX617jZeGO1ML+tFQGkkzU99HQ==
+
 react-native-url-polyfill@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/react-native-url-polyfill/-/react-native-url-polyfill-1.3.0.tgz#c1763de0f2a8c22cc3e959b654c8790622b6ef6a"

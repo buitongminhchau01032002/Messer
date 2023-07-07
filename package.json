@@ -61,6 +61,7 @@
     "react-native-screens": "~3.18.0",
     "react-native-svg": "13.4.0",
     "react-native-timeago": "^0.5.0",
+    "react-native-toggle-loud-speaker": "^1.2.0",
     "react-native-url-polyfill": "^1.3.0",
     "react-native-web": "~0.18.9",
     "react-native-webrtc": "^1.94.2",

@@ -40,7 +40,7 @@ import { SearchScreen } from 'screens/Search';
 import { InformationScreen } from 'screens/Information';
 import { InformationScreenQR } from 'screens/InformationQR';
 import { PermissionsAndroid } from 'react-native';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from 'config/firebase';
 import { CallState, callActions } from 'slice/call';
 import sendCallMessage from 'utils/sendCallMessage';
@@ -132,8 +132,11 @@ function RootNavigator() {
             if (payload.data?.type === 'hangup') {
                 handleEndCall();
             }
+            if (payload.data?.type === 'accept') {
+                handleRecievedAcceptCall(payload.data.docId);
+            }
         });
-        
+
         messaging().setBackgroundMessageHandler(async (remoteMessage) => {
             console.log('Message handled in the background!', remoteMessage);
         });
@@ -149,13 +152,15 @@ function RootNavigator() {
         onAuthStateChanged(auth, async (user) => {
             if (user != null) {
                 const userRef = doc(db, 'User', user.uid);
-                const userSnap = await getDoc(userRef);
-                const currentUser = {
-                    id: user.uid,
-                    ...userSnap.data(),
-                };
-                dispatch(storeUserFromFirestore(currentUser));
-                setIsLogin(true);
+                onSnapshot(userRef, (userSnap) => {
+                    const currentUser = {
+                        id: user.uid,
+                        ...userSnap.data(),
+                        blockIds: userSnap.data()?.blockIds ?? [],
+                    };
+                    dispatch(storeUserFromFirestore(currentUser));
+                    setIsLogin(true);
+                });
             } else {
                 setIsLogin(false);
             }
@@ -203,10 +208,16 @@ function RootNavigator() {
         }
     }
 
+    function handleRecievedAcceptCall(docId: string) {
+        if (callState.state === CallState.Waiting && docId === callState.infor?.id) {
+            dispatch(callActions.changeCallState(CallState.Calling));
+        }
+    }
+
     // Log
     useEffect(() => {
         console.log('🍍 State call:', callState.state);
-        console.log('🍏 Call infor:', callState.infor && "Has call infor");
+        console.log('🍏 Call infor:', callState.infor && 'Has call infor');
     }, [callState]);
 
     // signOut(auth)

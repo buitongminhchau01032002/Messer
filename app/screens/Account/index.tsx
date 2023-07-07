@@ -27,6 +27,9 @@ import {
     ScrollView,
     useTheme,
     Menu,
+    Actionsheet,
+    useDisclose,
+    Toast,
 } from 'native-base';
 import { AppTabsNavigationKey, AuthNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import { Alert, RefreshControl, TouchableOpacity } from 'react-native';
@@ -37,19 +40,21 @@ import { auth, db } from 'config/firebase';
 import { signOut } from 'firebase/auth';
 import {
     Timestamp,
+    arrayRemove,
     collection,
     deleteDoc,
     doc,
     documentId,
     getDoc,
     getDocs,
+    onSnapshot,
     orderBy,
     query,
     updateDoc,
     where,
 } from 'firebase/firestore';
 import { FlatList } from 'react-native-gesture-handler';
-import { EllipsisIcon } from 'components/Icons/Light';
+import { BellIcon, BlockIcon, EllipsisIcon } from 'components/Icons/Light';
 type MenuItem = {
     title: string;
     icon: React.ReactNode;
@@ -63,6 +68,8 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
     const { colors } = useTheme();
     const user = useAppSelector((state) => state.auth.user);
     const [refreshing, setRefreshing] = React.useState(false);
+    const { isOpen, onOpen, onClose } = useDisclose();
+
     // const currentUser  = auth.currentUser?.uid
     const [currentUser, setCurrentUser] = useState({
         avatar: '',
@@ -71,6 +78,7 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         phone: '',
     });
     const [stories, setStories] = useState([]);
+    const [blockedUsers, setBlockedUsers] = useState([]);
 
     useEffect(() => {
         setCurrentUser(user);
@@ -118,24 +126,24 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
     const menuItem: MenuItem[] = [
         {
             title: 'Nofication',
-            icon: <Icon as={<FontAwesome />} name="bell" size="xl" color={'primary.900'} />,
+            icon: <BellIcon size="xl" color={'primary.900'} />,
             onPress: () => navigation.navigate(RootNavigatekey.Notification),
         },
         {
-            title: 'Pricacy and Security',
-            icon: <Icon as={<FontAwesome />} name="shield" size="xl" color={'primary.900'} />,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
+            title: 'Block',
+            icon: <BlockIcon size="xl" color={'primary.900'} />,
+            onPress: onOpen,
         },
-        {
-            title: 'Theme',
-            icon: <Icon as={<FontAwesome />} name="file" size="xl" color={'primary.900'}></Icon>,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
-        },
-        {
-            title: 'Language',
-            icon: <Icon as={<FontAwesome />} name="globe" size="xl" color={'primary.900'}></Icon>,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
-        },
+        // {
+        //     title: 'Theme',
+        //     icon: <Icon as={<FontAwesome />} name="file" size="xl" color={'primary.900'}></Icon>,
+        //     onPress: () => navigation.navigate(RootNavigatekey.NotFound),
+        // },
+        // {
+        //     title: 'Language',
+        //     icon: <Icon as={<FontAwesome />} name="globe" size="xl" color={'primary.900'}></Icon>,
+        //     onPress: () => navigation.navigate(RootNavigatekey.NotFound),
+        // },
     ];
     const menuItem2: MenuItem[] = [
         {
@@ -148,7 +156,7 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
             icon: <Icon as={<FontAwesome />} name="logout" size="xl" color={'primary.900'}></Icon>,
             onPress: async () => {
                 const docRef = doc(db, 'User', user?.id ?? '');
-                 await updateDoc(docRef, {
+                await updateDoc(docRef, {
                     deviceToken: '',
                 });
                 signOut(auth);
@@ -172,6 +180,33 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
             },
         ]);
     }
+
+    const handleUnblock = async (blockedUser: any) => {
+        let targetUserId = blockedUser.id;
+        console.log(blockedUser);
+
+        const currentRef = doc(db, 'User', user?.id!);
+        // update list blocked
+        Toast.show({ description: `${blockedUser.name} is unblocked!` });
+        onClose();
+        updateDoc(currentRef, {
+            blockIds: arrayRemove(targetUserId),
+        });
+    };
+
+    useEffect(() => {
+        console.log(user);
+        const userRef = collection(db, 'User');
+        let unSub: any = undefined;
+        if (user?.blockIds.length === 0) {
+            setBlockedUsers([]);
+        } else {
+            const userQuery = query(userRef, where(documentId(), 'in', user?.blockIds!));
+            getDocs(userQuery).then((snapshot) => {
+                snapshot.docs.forEach((doc) => setBlockedUsers((cur) => cur.concat({ id: doc.id, ...doc.data() })));
+            });
+        }
+    }, [user]);
 
     return (
         <Box h="full" p={APP_PADDING} bg="white">
@@ -276,6 +311,22 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     </VStack>
                 </VStack>
             </ScrollView>
+            <Actionsheet isOpen={isOpen} onClose={onClose}>
+                <Actionsheet.Content>
+                    <ScrollView style={{ width: '100%' }}>
+                        {blockedUsers.map((bU, idx) => (
+                            <HStack key={idx} padding={APP_PADDING} space={2} justifyContent="space-between">
+                                <Text fontWeight="bold" textBreakStrategy="balanced">
+                                    {bU.name}
+                                </Text>
+                                <TouchableOpacity onPress={() => handleUnblock(bU)}>
+                                    <Text color="primary.900">Unblock</Text>
+                                </TouchableOpacity>
+                            </HStack>
+                        ))}
+                    </ScrollView>
+                </Actionsheet.Content>
+            </Actionsheet>
         </Box>
     );
 };

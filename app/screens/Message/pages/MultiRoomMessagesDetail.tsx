@@ -151,7 +151,7 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
         const pinnedMessageQuery = query(pinnedMessageRef, orderBy('createdAt', 'asc'));
 
         const fetchMessageData = async () => {
-            // await fetchUserData().catch(console.error)
+            // await fetchUserData().catch(console.error)\
             let userDatas = [];
             const q = query(collection(db, 'User'), where(documentId(), 'in', room.users));
             const querySnapshot = await getDocs(q);
@@ -175,11 +175,14 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
                             )
                         ).data()!;
                         const reply = userDatas.find((u) => u.id == replyMessage.sender);
-                        replyMessage.sender = {
-                            id: reply.id,
-                            avatar: reply.avatar,
-                            name: reply.name,
-                        };
+                        if(reply){
+                            replyMessage.sender = {
+                                id: reply.id,
+                                avatar: reply.avatar,
+                                name: reply.name,
+                            };
+                        }
+                     
 
                         newMessage.replyMessage = replyMessage;
                     }
