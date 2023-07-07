@@ -58,10 +58,10 @@ export const ListItem = (item: {
     const [roomImage, setRoomImage] = useState('');
 
     useEffect(() => {
-        setRoomImage(item.image??"");
+        setRoomImage(item.image ?? '');
     }, [item.image]);
     useEffect(() => {
-        setName(item.name??"");
+        setName(item.name ?? '');
     }, [item.name]);
 
     const rightSwipeActions = () => {
@@ -173,10 +173,20 @@ export const ListItem = (item: {
         const timeAgo = new TimeAgo('en-US');
         try {
             if (item.type == 'single') {
-                setLastMessage(item.lastMessage.content);
+                if (item.lastMessage.type == 'media') {
+                    setLastMessage('media sended');
+                } else {
+                    setLastMessage(item.lastMessage.content);
+                }
+               
                 setTime(timeAgo.format(item.lastMessage.createdAt.toDate()));
             } else {
-                setLastMessage(item.lastMessage.senderName.concat(': ').concat(item.lastMessage.content));
+                if (item.lastMessage.type == 'media') {
+                    setLastMessage(item.lastMessage.senderName.concat(': ').concat('send media'));
+                }else {
+                    setLastMessage(item.lastMessage.senderName.concat(': ').concat(item.lastMessage.content));
+                }
+                
                 setTime(timeAgo.format(item.lastMessage.createdAt.toDate()));
             }
         } catch (e) {
@@ -233,7 +243,7 @@ export const ListItem = (item: {
                                 style={{ width: 64, height: 64 }}
                                 borderRadius={100}
                             ></Image>
-                        ) : roomImage == "" ? (
+                        ) : roomImage == '' ? (
                             <Box position={'relative'} width={63} height={63}>
                                 <Image
                                     position={'absolute'}
@@ -256,11 +266,11 @@ export const ListItem = (item: {
                             </Box>
                         ) : (
                             <Image
-                            alt="..."
-                            source={{ uri: roomImage }}
-                            style={{ width: 64, height: 64 }}
-                            borderRadius={100}
-                        ></Image>
+                                alt="..."
+                                source={{ uri: roomImage }}
+                                style={{ width: 64, height: 64 }}
+                                borderRadius={100}
+                            ></Image>
                         )}
 
                         <VStack flex={1} space={0} justifyContent="center">

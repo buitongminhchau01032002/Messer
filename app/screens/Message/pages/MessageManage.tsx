@@ -3,6 +3,7 @@ import { APP_PADDING } from 'app/constants/Layout';
 import { AppBar } from 'components/AppBar';
 import {
     BellIcon,
+    BellOffIcon,
     CameraIcon,
     EllipsisIcon,
     ImageIcon,
@@ -74,6 +75,7 @@ import * as VideoThumbnails from 'expo-video-thumbnails';
 import { Gallery } from '../components/Gallery';
 import { NavigateScreen } from 'components/Navigate';
 import { ResizeMode, Video } from 'expo-av';
+import { localImages } from 'app/constants/Images';
 type MenuItem = {
     title: string;
     icon: React.ReactNode;
@@ -86,6 +88,7 @@ export const MessageManageScreen = (props: RootStackScreenProps<RootNavigatekey.
     const { navigation, route } = props;
     //navigate params
     const { room } = route.params;
+    const currentUser = useAppSelector((state) => state.auth.user);
     // hooks
     const { colors } = useTheme();
     const { width: windowWidth } = useWindowDimensions();
@@ -98,6 +101,8 @@ export const MessageManageScreen = (props: RootStackScreenProps<RootNavigatekey.
     const [videoList, setVideoList] = useState<Media[]>([]);
     const [activeIndex, setActiveIndex] = useState(0);
     const [isOpenGallary, setIsOpenGallary] = useState(false);
+    const [otherUser, setOtherUser] = useState(null);
+    const [isUnnotify, setIsUnnotify] = useState(false);
     // consts
     const spacing = 0;
     const calcImageWidth = (cols: number, spacing: number) => {
@@ -113,6 +118,25 @@ export const MessageManageScreen = (props: RootStackScreenProps<RootNavigatekey.
         });
     }, [navigation]);
 
+    const fetchUserData = async () => {
+
+        let otherUserId = ""
+        if(room.user1 == currentUser?.id){
+            otherUserId = room.user2
+        } else {
+            otherUserId = room.user1
+        }
+
+        const otherUserDoc = await getDoc(doc(db, 'User', otherUserId));
+        setOtherUser(otherUserDoc.data());
+
+        try{
+            setIsUnnotify(room.unnotifications.includes(currentUser?.id));
+        } catch (e){
+
+        }
+    };
+
     useEffect(() => {
         const mediaRef = collection(db, 'SingleRoom', currentRoom, 'MediaStore');
         const mediaQuery = query(mediaRef, orderBy('createdAt', 'asc'));
@@ -120,7 +144,7 @@ export const MessageManageScreen = (props: RootStackScreenProps<RootNavigatekey.
         const unsubPinMessage = onSnapshot(mediaQuery.withConverter(converter<Media>()), async (mediaSnap) => {
             const images: Media[] = [];
             const videos: Media[] = [];
-            console.log("unsupPinMessage")
+            console.log('unsupPinMessage');
             mediaSnap.forEach((media) => {
                 const doc = media.data();
                 if (doc.type === 'image') {
@@ -132,12 +156,14 @@ export const MessageManageScreen = (props: RootStackScreenProps<RootNavigatekey.
             setImageList(images);
             setVideoList(videos);
         });
+
+        fetchUserData().catch(console.error)
         // const fetchPinnedMessage = async () => {
-            
+
         // };
 
         // fetchPinnedMessage().catch(console.error);
-        return () => unsubPinMessage()
+        return () => unsubPinMessage();
     }, []);
 
     const mediaItems: MenuItem[] = [
@@ -154,28 +180,13 @@ export const MessageManageScreen = (props: RootStackScreenProps<RootNavigatekey.
     ];
     const infoItems: MenuItem[] = [
         {
-            title: 'Direct share',
+            title: 'Block user',
             icon: <Icon as={<FontAwesome />} name="share" size="xl" color={'primary.900'}></Icon>,
             onPress: () => navigation.navigate(RootNavigatekey.NotFound),
         },
         {
-            title: 'Nofication',
+            title: 'Delete chat',
             icon: <Icon as={<FontAwesome />} name="bell" size="xl" color={'primary.900'} />,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
-        },
-        {
-            title: 'Pricacy and Security',
-            icon: <Icon as={<FontAwesome />} name="shield" size="xl" color={'primary.900'} />,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
-        },
-        {
-            title: 'Theme',
-            icon: <Icon as={<FontAwesome />} name="file" size="xl" color={'primary.900'}></Icon>,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
-        },
-        {
-            title: 'Language',
-            icon: <Icon as={<FontAwesome />} name="globe" size="xl" color={'primary.900'}></Icon>,
             onPress: () => navigation.navigate(RootNavigatekey.NotFound),
         },
     ];
@@ -189,6 +200,55 @@ export const MessageManageScreen = (props: RootStackScreenProps<RootNavigatekey.
         <Box flex={1} bg="white">
             <KeyboardAvoidingView flex={1}>
                 <ScrollView p={APP_PADDING}>
+                    <Center>
+                        {/* <TouchableOpacity onPress={pickImage}> */}
+                        <VStack space={2}>
+                            <Center>
+                                <Image
+                                    source={{ uri: otherUser?.avatar??"" }}
+                                    fallbackSource={localImages.driverPlaceHoder}
+                                    style={{ width: 100, height: 100 }}
+                                    alt="..."
+                                    borderRadius={100}
+                                ></Image>
+                            </Center>
+                        </VStack>
+                        {/* </TouchableOpacity> */}
+                        <VStack space={2} ml={2} alignItems="center">
+                            {/* <Pressable
+                                onPress={() => {
+                                    if (room.owner != currentUser?.id) {
+                                        Alert.alert('You do not have permission', '', [
+                                            { text: 'OK', onPress: () => console.log('OK Pressed') },
+                                        ]);
+                                        return;
+                                    }
+                                    setNameDialogVisible(true);
+                                }}
+                            > */}
+                            <Text bold fontSize={26}>
+                                {otherUser?.name}
+                            </Text>
+                            {/* </Pressable> */}
+                            <IconButton
+                                borderRadius={100}
+                                bg={isUnnotify ? 'blue.800' : 'gray.700'}
+                                icon={<BellOffIcon color="white" size="sm" />}
+                                onPress={async () => {
+                                    // if (!isUnnotify) {
+                                    //     await updateDoc(doc(db, 'MultiRoom', room.id!), {
+                                    //         unnotifications: arrayUnion(currentUser.id),
+                                    //     });
+                                    // } else {
+                                    //     await updateDoc(doc(db, 'MultiRoom', room.id!), {
+                                    //         unnotifications: arrayRemove(currentUser.id),
+                                    //     });
+                                    // }
+                                    // await fetchUserData();
+                                }}
+                            />
+                        </VStack>
+                    </Center>
                     <Text fontSize="sm" my={2}>
                         Media
                     </Text>
