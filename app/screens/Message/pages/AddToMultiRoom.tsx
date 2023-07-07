@@ -43,6 +43,7 @@ import { useEffect } from 'react';
 import { RootStackScreenProps } from 'types';
 import { useAppState } from 'native-base/lib/typescript/core/color-mode/hooks';
 import { useAppSelector } from 'hooks/index';
+import * as Linking from 'expo-linking';
 
 export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey.AddToMulti>) => {
     const { navigation, route } = props;
@@ -55,6 +56,45 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
     const [selectedUsers, setSeletectedUser] = useState([]);
     const [roomName, setRoomName] = useState('');
     const [nameDialogVisible, setNameDialogVisible] = useState(false);
+    const [url, setUrl] = useState('');
+
+    //check join by link
+    // Linking.getInitialURL().then((url) => {
+    //     console.log(url)
+    //     setUrl(url||'')
+    // }).catch((error) => {console.error(error.message)})
+
+    
+    // useEffect(() => {
+    //     const getUrlAsync = async () => {
+    //       // Get the deep link used to open the app
+    //       const url = await Linking.getInitialURL();
+    //       console.log(url);
+    //       if(url) {
+    //         // console.log(url + 'asdfasdfdasdasdf');
+    //          const {queryParams} = Linking.parse(url)
+    //          let IdRoom = queryParams?  queryParams.idJoin : '';
+             
+    //          if(typeof IdRoom === 'string') {
+    //           //   const currentUser = useAppSelector((state) => state.auth.user);
+    //           console.log(IdRoom);
+    //              const roomRef = doc(db, 'MultiRoom', IdRoom);
+    //              console.log(roomRef.id + 'ahihihihihi');
+    //               updateDoc(roomRef, {
+    //                  users: arrayUnion(currentUser?.id),
+    //              }).then(() => {
+    //                 // navigation.replace(RootNavigatekey.MultiRoomMessageDetail, { })
+    //                 console.log('Join duoc roiiii na');
+    //              }).catch((error)=>{
+    //                  console.log("Api call error");
+    //                  alert(error.message);
+    //               });;
+    //          }
+    //      }
+          
+    //     };
+    //     getUrlAsync();
+    //   }, []);
 
     const fetchUserData = async () => {
         const searchUser = [];
@@ -117,6 +157,7 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
 
         console.log(selectedUsers);
     };
+
     const handleAddMember = async () => {
         if (room.id) {
             const roomRef = doc(db, 'MultiRoom', room.id);
@@ -343,12 +384,13 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
                         color={'blue.900'}
                         mt="2"
                         backgroundColor={'white'}
+                        // onChange={() => fetchUserData().catch(console.error)}
                         onSubmitEditing={() => fetchUserData().catch(console.error)}
                     />
                     <SearchIcon size={'sm'} color={'red.500'} />
                 </View>
                 <Text fontWeight={'bold'} marginY={8}>
-                    Channel
+                    Users
                 </Text>
                 <VStack space={4}>
                     {searchingUsers.map((item, idx) => (

@@ -22,6 +22,7 @@ export enum RootNavigatekey {
     MessageManage = 'MessageManage',
     MultiMessageManage = 'MultiMessageManage',
     MultiRoomMessageDetail = 'MultiRoomMessageDetail',
+    JoinWithLink = 'JoinWithLink',
     Modal = 'Modal',
     Information = 'Information',
     InformationQR = 'InformationQR',

@@ -85,6 +85,10 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
     }
 
     function handleAcceptCall() {
+        sendCallMessage(callState.infor?.fromUser?.deviceToken, {
+            type: 'accept',
+            docId: callState.infor?.id,
+        });
         props.navigation.replace(RootNavigatekey.Calling);
     }
 

@@ -70,12 +70,13 @@ import { useAppSelector } from 'hooks/index';
 import { Gallery } from '../components/Gallery';
 import * as ImagePicker from 'expo-image-picker';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { StackActions, NavigationActions } from 'react-navigation'; 
 
 export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.MultiRoomMessageDetail>) => {
     //navigate
     const { navigation, route } = props;
     //navigate params
-    const { room } = route.params;
+    const { room, isJoinWithLink } = route.params;
     // hooks
     const { colors } = useTheme();
     const { isOpen, onOpen, onClose } = useDisclose();
@@ -101,6 +102,20 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
     const currentUser = useAppSelector((state) => state.auth.user);
 
     const currentRoom = room.id ?? '';
+
+
+    // useEffect(() => {
+       
+    //     if(isJoinWithLink) {
+    //         console.log("dime an buoiiii" + isJoinWithLink)
+    //         const resetAction = StackActions.reset({
+    //             index: 0,
+    //             actions: [NavigationActions.navigate({ routeName: 'home' })],
+    //           });
+    //           navigation.dispatch(resetAction);
+    //     }
+
+    // })
 
     useEffect(() => {
         navigation.setOptions({

@@ -56,7 +56,8 @@ import { QRScanScreen } from 'screens/QRScan';
 import { NotificationScreen } from 'screens/Notification';
 import { MessageManageScreen } from 'screens/Message/pages/MessageManage';
 import { MultiMessageManageScreen } from 'screens/Message/pages/MultiMessageManage';
-
+import * as Linking from 'expo-linking'
+import { JoinWithLinkScreen } from 'screens/Message/pages/JoinWithLink';
 export default function Navigation() {
     // hooks
     const dispatch = useAppDispatch();
@@ -105,7 +106,15 @@ function RootNavigator() {
     // const { isLogin } = useAppSelector((state) => state.auth);
     const [isLogin, setIsLogin] = useState(auth.currentUser ? true : false);
     const callState = useAppSelector((state) => state.call);
+    const [url, setUrl] = useState<string | null>(null)
 
+    useEffect(() => {
+        const checkUrl = async () => {
+            const u = await Linking.getInitialURL()
+            setUrl(u);
+        }
+        checkUrl();
+    })
     useEffect(() => {
         getToken();
         const unsubscribe = messaging().onMessage(async (payload: FirebaseMessagingTypes.RemoteMessage) => {
@@ -122,6 +131,9 @@ function RootNavigator() {
             }
             if (payload.data?.type === 'hangup') {
                 handleEndCall();
+            }
+            if (payload.data?.type === 'accept') {
+                handleRecievedAcceptCall(payload.data.docId);
             }
         });
 
@@ -193,6 +205,12 @@ function RootNavigator() {
         if (callState.state === CallState.Coming && callState.infor?.id === data?.docId) {
             dispatch(callActions.changeCallInfor(null));
             dispatch(callActions.changeCallState(CallState.NoCall));
+        }
+    }
+
+    function handleRecievedAcceptCall(docId: string) {
+        if (callState.state === CallState.Waiting && docId === callState.infor?.id) {
+            dispatch(callActions.changeCallState(CallState.Calling));
         }
     }
 
@@ -283,6 +301,11 @@ function RootNavigator() {
                 <Stack.Screen
                     name={RootNavigatekey.AddToMulti}
                     component={AddToMultiRoomScreen}
+                    options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
+                />
+                <Stack.Screen
+                    name={RootNavigatekey.JoinWithLink}
+                    component={JoinWithLinkScreen}
                     options={{ headerTransparent: true, headerShadowVisible: false, headerTitle: '' }}
                 />
                 <Stack.Screen

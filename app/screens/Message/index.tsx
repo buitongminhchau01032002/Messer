@@ -248,6 +248,7 @@ export const MessageScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={async () => {
+                            //console.log('alooo')
                             navigation.navigate(RootNavigatekey.AddToMulti, { roomId: undefined });
                         }}
                     >

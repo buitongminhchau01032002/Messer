@@ -37,10 +37,11 @@ export type RootStackParamList = {
     [RootNavigatekey.InformationQR]: undefined;
     [RootNavigatekey.MessageDetail]: {type: "single"|"multi" , room: SingleRoom};
     [RootNavigatekey.MessageManage]: {type: "single"|"multi" , room: SingleRoom};
-    [RootNavigatekey.MultiRoomMessageDetail]: {type: "single"|"multi" , room: MultiRoom};
+    [RootNavigatekey.MultiRoomMessageDetail]: {type: "single"|"multi" , room: MultiRoom, isJoinWithLink: boolean};
     [RootNavigatekey.MultiMessageManage]: {type: "single"|"multi" , room: MultiRoom};
     [RootNavigatekey.NotFound]: undefined;
-    [RootNavigatekey.AddToMulti]: { room?: any };
+    [RootNavigatekey.AddToMulti]: { roomId?: string };
+    [RootNavigatekey.JoinWithLink]: { roomId?: string };
     [RootNavigatekey.Intro]: undefined;
     [RootNavigatekey.Modal]: undefined;
     [RootNavigatekey.ComingCall]: undefined;
@@ -67,5 +68,5 @@ export type AuthStackScreenProps<T extends keyof AuthStackParamList> = Composite
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<
     RootStackParamList,
-    Screen
+    Screen,
 >;

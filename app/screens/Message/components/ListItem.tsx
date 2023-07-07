@@ -1,6 +1,8 @@
 import { current } from '@reduxjs/toolkit';
 import { BellOffIcon, BlockIcon, EllipsisIcon, LinkIcon, LogoutIcon, TrashIcon } from 'components/Icons/Light';
 import { auth, db } from 'config/firebase';
+import * as Clipboard from 'expo-clipboard';
+import * as Linking from 'expo-linking';
 // import { timeAgo } from "config/timeAgo";
 import {
     query,
@@ -219,7 +221,19 @@ export const ListItem = (item: {
                         }
                     }}
                 />
-                <IconButton borderRadius={100} bg="gray.700" icon={<LinkIcon color="white" size="sm" />} />
+                <IconButton
+                 borderRadius={100} 
+                 bg="gray.700" 
+                 icon={<LinkIcon color="white" size="sm" />} 
+                 onPress={async () => {
+                    const redirectUrl = Linking.createURL('messer-app.vercel.app/', {
+                        queryParams: { idJoin: item.id },
+                        scheme: 'https'
+                      });
+                      console.log(redirectUrl);
+                    await Clipboard.setStringAsync(redirectUrl);
+                 }}
+                />
                 <IconButton
                     borderRadius={100}
                     bg="gray.700"

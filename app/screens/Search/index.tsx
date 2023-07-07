@@ -125,6 +125,7 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
                 >
                     <Input
                         onChangeText={(text) => {
+                           // console.log('ádfsadfasdf')
                             setSearchText(text);
                         }}
                         flex={1}

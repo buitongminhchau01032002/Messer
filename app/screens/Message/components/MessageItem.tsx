@@ -24,6 +24,7 @@ import moment from 'moment';
 import { FieldValue, Timestamp } from 'firebase/firestore';
 import * as Clipboard from 'expo-clipboard';
 import { Video, ResizeMode } from 'expo-av';
+import Autolink from 'react-native-autolink';
 
 type Props = {
     message: Message;
@@ -168,8 +169,11 @@ export const MessageItem = (props: Props) => {
                                     />
                                 </VStack>
                             </HStack>
-
-                            <Text color="white">{message.content}</Text>
+                            <Autolink text={message.content || ''} 
+                                linkStyle={{ color: 'white', textDecorationLine: 'underline' }}
+                                renderText={(text) => <Text color='white'>{text}</Text>} 
+                                />
+                            {/* <Text color="white">{message.content}</Text> */}
                         </VStack>
                     )}
                 </TouchableOpacity>
@@ -348,7 +352,11 @@ export const MessageItem = (props: Props) => {
                                         </VStack>
                                     </HStack>
                                 ) : undefined}
-                                <Text color="white">{message.content}</Text>
+                                <Autolink text={message.content || ''} 
+                                linkStyle={{ color: 'white', textDecorationLine: 'underline' }}
+                                renderText={(text) => <Text color='white'>{text}</Text>} 
+                                />
+                                 {/* <Text color="white">{message.content}</Text>  */}
                             </VStack>
                             <Text fontSize={'xs'} italic>
                                 {isFocus ? moment((message.createdAt as Timestamp).seconds).format('HH:mm:ss') : ''}
