@@ -123,6 +123,9 @@ function RootNavigator() {
             if (payload.data?.type === 'hangup') {
                 handleEndCall();
             }
+            if (payload.data?.type === 'accept') {
+                handleRecievedAcceptCall(payload.data.docId);
+            }
         });
         
         messaging().setBackgroundMessageHandler(async (remoteMessage) => {
@@ -191,6 +194,12 @@ function RootNavigator() {
         if (callState.state === CallState.Coming && callState.infor?.id === data?.docId) {
             dispatch(callActions.changeCallInfor(null));
             dispatch(callActions.changeCallState(CallState.NoCall));
+        }
+    }
+
+    function handleRecievedAcceptCall(docId: string) {
+        if (callState.state === CallState.Waiting && docId === callState.infor?.id) {
+            dispatch(callActions.changeCallState(CallState.Calling));
         }
     }
 

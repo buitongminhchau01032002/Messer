@@ -152,7 +152,17 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
         if (callState.state === CallState.NoCall) {
             isCallCreated.current && handleEndCall();
         }
-    }, [callState]);
+        if (callState.state === CallState.Calling) {
+            // @ts-ignore
+            props.navigation.replace(RootNavigatekey.Calling, {
+                pc: pc.current,
+                remoteStream,
+                localStream,
+                isOnMic,
+                isOnSpeaker,
+            });
+        }
+    }, [callState, remoteStream, localStream, isOnMic, isOnSpeaker]);
 
     async function initCall() {
         let ubsub = () => {};
