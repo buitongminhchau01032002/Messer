@@ -98,30 +98,52 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
 
     const fetchUserData = async () => {
         const searchUser = [];
-        if(room) {
-            console.log("dsa")
+        if (room) {
+            // const q = query(
+            //     collection(db, 'User'),
+            //     and(
+            //         where(documentId(), 'not-in', room.users),
+            //         where('name', '==', searchText),
+            //         // and(where('name', '>=', searchText), where('name', '<=', searchText + '\uf8ff')),
+            //     ),
+            // );
+            // const searchUserSnapshot = await getDocs(q);
+            // searchUserSnapshot.forEach((u) => {
+            //     searchUser.push({
+            //         id: u.id,
+            //         selected: selectedUsers.includes(u.id),
+            //         ...u.data(),
+            //     });
+            // });
+            // setSearchingUser(searchUser);
+
+            const searchUser = [];
             const q = query(
                 collection(db, 'User'),
-                and(
-                    where(documentId(), 'not-in', room.users),
-                    where('name', '==', searchText),
-                    // and(where('name', '>=', searchText), where('name', '<=', searchText + '\uf8ff')),
-                ),
+                where('name', '>=', searchText),
+                where('name', '<=', searchText + '\uf8ff'),
             );
             const searchUserSnapshot = await getDocs(q);
             searchUserSnapshot.forEach((u) => {
                 searchUser.push({
                     id: u.id,
-                    selected: selectedUsers.includes(u.id),
                     ...u.data(),
                 });
             });
-            setSearchingUser(searchUser);
-        } else {
-            const q = query(
-                collection(db, 'User'),
-                where('name', '==', searchText),
+
+            const roomFilter = searchUser.filter((e) => {
+                return !room.users.includes(e.id);
+            });
+
+            // const blockFilter = roomFilter.filter((e) => {return e.blockIds.includes})
+
+            setSearchingUser(
+                roomFilter.filter((e) => {
+                    return !(e.blockIds?.includes(currentUser?.id) || currentUser.blockIds.includes(e.id) || e.id == currentUser?.id);
+                }),
             );
+        } else {
+            const q = query(collection(db, 'User'), where('name', '==', searchText));
             const searchUserSnapshot = await getDocs(q);
             searchUserSnapshot.forEach((u) => {
                 searchUser.push({
@@ -132,7 +154,7 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
             });
             setSearchingUser(searchUser);
         }
-        
+
         console.log(selectedUsers);
     };
 
@@ -164,7 +186,7 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
                             reads: [],
                         });
                     });
-                })
+                });
                 route.params.onGoBack();
                 navigation.goBack();
             });

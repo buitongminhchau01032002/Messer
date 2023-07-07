@@ -6,7 +6,7 @@ import { AuthNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import { Formik } from 'formik';
 import { UserType } from 'models/User';
-import { Platform, Pressable } from 'react-native';
+import { Alert, Platform, Pressable, ToastAndroid } from 'react-native';
 import * as Yup from 'yup';
 import { auth, db } from 'config/firebase';
 import { signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
@@ -37,9 +37,7 @@ export const LoginScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignIn
                 // ...
             })
             .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                console.log(errorMessage);
+                ToastAndroid.showWithGravity('Login fail', ToastAndroid.SHORT, ToastAndroid.CENTER);
             });
 
         // console.log("sd")

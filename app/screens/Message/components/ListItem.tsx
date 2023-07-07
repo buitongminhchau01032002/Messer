@@ -277,10 +277,20 @@ export const ListItem = (item: {
         const timeAgo = new TimeAgo('en-US');
         try {
             if (item.type == 'single') {
-                setLastMessage(item.lastMessage.content);
+                if (item.lastMessage.type == 'media') {
+                    setLastMessage('media sended');
+                } else {
+                    setLastMessage(item.lastMessage.content);
+                }
+               
                 setTime(timeAgo.format(item.lastMessage.createdAt.toDate()));
             } else {
-                setLastMessage(item.lastMessage.senderName.concat(': ').concat(item.lastMessage.content));
+                if (item.lastMessage.type == 'media') {
+                    setLastMessage(item.lastMessage.senderName.concat(': ').concat('send media'));
+                }else {
+                    setLastMessage(item.lastMessage.senderName.concat(': ').concat(item.lastMessage.content));
+                }
+                
                 setTime(timeAgo.format(item.lastMessage.createdAt.toDate()));
             }
         } catch (e) {
