@@ -11,15 +11,15 @@ export const IntroScreen = () => {
       alignItems="center"
       justifyContent={"center"}
     >
-      <Image
+      {/* <Image
         source={localImages.bg}
         position="absolute"
         width={"100%"}
         height="100%"
         resizeMode="cover"
         alt="bg"
-      />
-      <Image source={localImages.logo2} mb='10' alt="logo"/>
+      /> */}
+      {/* <Image source={localImages.logo2} mb='10' alt="logo"/> */}
       <Spinner size="lg" />
     </Box>
   );
