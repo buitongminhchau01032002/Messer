@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Vibration } from 'react-native';
 import { Box, Center, HStack, IconButton, Image, Text, Toast, VStack, useTheme } from 'native-base';
 import Animated, {
@@ -10,6 +10,7 @@ import Animated, {
     withRepeat,
     withTiming,
 } from 'react-native-reanimated';
+import { Audio } from 'expo-av';
 import { RootStackScreenProps } from 'types';
 import { RootNavigatekey } from 'navigation/navigationKey';
 import { PickupButton } from './components/PickupButton';
@@ -25,6 +26,7 @@ const COMMING_CALL_TIMEOUT = 30000;
 export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.ComingCall>) => {
     const { colors } = useTheme();
     const dispatch = useAppDispatch();
+    const [sound, setSound] = useState<Audio.Sound>();
     // const [pickupButtonDragging, setPickupButtonDragging] = useState(false);
     // const [hangupButtonDragging, setHangupButtonDragging] = useState(false);
     useEffect(() => {
@@ -32,11 +34,23 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
         const timer = setTimeout(() => {
             handleRejectCall();
         }, COMMING_CALL_TIMEOUT);
+        playSound();
         return () => {
             clearTimeout(timer);
             Vibration.cancel();
+            console.log('Unloading Sound');
         };
     }, []);
+
+    async function playSound() {
+        console.log('Loading Sound');
+        const { sound } = await Audio.Sound.createAsync(require('../../assets/sound/ring.mp3'));
+
+        setSound(sound);
+
+        console.log('Playing Sound');
+        await sound.playAsync();
+    }
 
     useEffect(() => {
         props.navigation.setOptions({
@@ -74,6 +88,10 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
     // }, []);
 
     function handleRejectCall() {
+        (async () => {
+            await sound?.stopAsync();
+            await sound?.unloadAsync();
+        })();
         sendCallMessage(callState.infor?.fromUser?.deviceToken, {
             type: 'reject',
             docId: callState.infor?.id,
@@ -82,9 +100,14 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
         dispatch(callActions.changeCallState(CallState.NoCall));
         dispatch(callActions.changeCallInfor(null));
         Toast.show({ description: 'Call ended!' });
+
     }
 
     function handleAcceptCall() {
+        (async () => {
+            await sound?.stopAsync();
+            await sound?.unloadAsync();
+        })();
         sendCallMessage(callState.infor?.fromUser?.deviceToken, {
             type: 'accept',
             docId: callState.infor?.id,
@@ -119,7 +142,7 @@ export const ComingCallScreen = (props: RootStackScreenProps<RootNavigatekey.Com
                         alignItems="center"
                         justifyContent="space-between"
                         style={{ width: 320 }}
-                        // bg={(pickupButtonDragging || hangupButtonDragging) ? 'gray.200' : 'transparent'}
+                    // bg={(pickupButtonDragging || hangupButtonDragging) ? 'gray.200' : 'transparent'}
                     >
                         {/* <PickupButton
                             onDragStart={handleOnPickupButtonDrag}
