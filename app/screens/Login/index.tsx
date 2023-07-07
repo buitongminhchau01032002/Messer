@@ -61,7 +61,7 @@ export const LoginScreen = (props: AuthStackScreenProps<AuthNavigationKey.SignIn
                     Sign up
                 </Text>,
             title: '',
-            headerLeft: (props) => <AntDesign name="arrowleft" size={24} />,
+            // headerLeft: (props) => <AntDesign name="arrowleft" size={24} />,
             headerShadowVisible: false,
         })
     }, [navigation])

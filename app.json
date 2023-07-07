@@ -5,7 +5,7 @@
         "version": "1.0.0",
         "orientation": "portrait",
         "icon": "./app/assets/images/icon.png",
-        "scheme": "myapp",
+        "scheme": "messer",
         "userInterfaceStyle": "automatic",
         "splash": {
             "image": "./app/assets/images/splash.png",
@@ -43,10 +43,15 @@
                   "autoVerify": true,
                   "data": [
                     {
-                      "scheme": "https",
-                      "host": "*.myapp.io",
-                      "pathPrefix": "/join-room"
-                    }
+                      "scheme": "http",
+                      "host": "messer.to",
+                      "pathPrefix": "/join-room/:idJoin"
+                    },
+                    {
+                        "scheme": "https",
+                        "host": "messer.to",
+                        "pathPrefix": "/join-room/:idJoin"
+                      }
                   ],
                   "category": ["BROWSABLE", "DEFAULT"]
                 }

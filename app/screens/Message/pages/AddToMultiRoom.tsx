@@ -65,36 +65,36 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
     // }).catch((error) => {console.error(error.message)})
 
     
-    useEffect(() => {
-        const getUrlAsync = async () => {
-          // Get the deep link used to open the app
-          const url = await Linking.getInitialURL();
-          console.log(url);
-          if(url) {
-            // console.log(url + 'asdfasdfdasdasdf');
-             const {queryParams} = Linking.parse(url)
-             let IdRoom = queryParams?  queryParams.idJoin : '';
+    // useEffect(() => {
+    //     const getUrlAsync = async () => {
+    //       // Get the deep link used to open the app
+    //       const url = await Linking.getInitialURL();
+    //       console.log(url);
+    //       if(url) {
+    //         // console.log(url + 'asdfasdfdasdasdf');
+    //          const {queryParams} = Linking.parse(url)
+    //          let IdRoom = queryParams?  queryParams.idJoin : '';
              
-             if(typeof IdRoom === 'string') {
-              //   const currentUser = useAppSelector((state) => state.auth.user);
-              console.log(IdRoom);
-                 const roomRef = doc(db, 'MultiRoom', IdRoom);
-                 console.log(roomRef.id + 'ahihihihihi');
-                  updateDoc(roomRef, {
-                     users: arrayUnion(currentUser?.id),
-                 }).then(() => {
-                    // navigation.replace(RootNavigatekey.MultiRoomMessageDetail, { })
-                    console.log('Join duoc roiiii na');
-                 }).catch((error)=>{
-                     console.log("Api call error");
-                     alert(error.message);
-                  });;
-             }
-         }
+    //          if(typeof IdRoom === 'string') {
+    //           //   const currentUser = useAppSelector((state) => state.auth.user);
+    //           console.log(IdRoom);
+    //              const roomRef = doc(db, 'MultiRoom', IdRoom);
+    //              console.log(roomRef.id + 'ahihihihihi');
+    //               updateDoc(roomRef, {
+    //                  users: arrayUnion(currentUser?.id),
+    //              }).then(() => {
+    //                 // navigation.replace(RootNavigatekey.MultiRoomMessageDetail, { })
+    //                 console.log('Join duoc roiiii na');
+    //              }).catch((error)=>{
+    //                  console.log("Api call error");
+    //                  alert(error.message);
+    //               });;
+    //          }
+    //      }
           
-        };
-        getUrlAsync();
-      }, []);
+    //     };
+    //     getUrlAsync();
+    //   }, []);
 
     const fetchUserData = async () => {
         const searchUser = [];

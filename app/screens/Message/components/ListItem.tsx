@@ -136,9 +136,11 @@ export const ListItem = (item: {
                  bg="gray.700" 
                  icon={<LinkIcon color="white" size="sm" />} 
                  onPress={async () => {
-                    const redirectUrl = Linking.createURL('join-room', {
+                    const redirectUrl = Linking.createURL('messer-app.vercel.app/', {
                         queryParams: { idJoin: item.id },
+                        scheme: 'https'
                       });
+                      console.log(redirectUrl);
                     await Clipboard.setStringAsync(redirectUrl);
                  }}
                 />
