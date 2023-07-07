@@ -23,6 +23,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { RootStackScreenProps } from 'types';
 import { ListItem } from './component/ListItem';
 import { FontAwesome } from '@expo/vector-icons';
+import { useAppSelector } from 'hooks/index';
 
 export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>) => {
     const { navigation } = props;
@@ -30,7 +31,8 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
     const [searchText, setSearchText] = useState('');
     const [isInputFocused, setInputFocused] = useState(false);
     const [searchingUsers, setSearchingUser] = useState([]);
-    const currentUserId = auth.currentUser?.uid;
+    const currentUser = useAppSelector((state) => state.auth.user);
+
 
     const fetchUserData = async () => {
         const searchUser = [];
@@ -46,7 +48,8 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
                 ...u.data(),
             });
         });
-        setSearchingUser(searchUser);
+        
+        setSearchingUser(searchUser.filter((e) => {return !(currentUser.blockIds.includes(e.id) || e.id == currentUser?.id)}));
     };
 
     useEffect(() => {
@@ -72,8 +75,8 @@ export const SearchScreen = (props: RootStackScreenProps<RootNavigatekey.Search>
         const q = query(
             collection(db, 'SingleRoom'),
             or(
-                and(where('user1', '==', currentUserId), where('user2', '==', otherUserId)),
-                and(where('user2', '==', currentUserId), where('user1', '==', otherUserId)),
+                and(where('user1', '==', currentUser?.id), where('user2', '==', otherUserId)),
+                and(where('user2', '==', currentUser?.id), where('user1', '==', otherUserId)),
             ),
         );
 

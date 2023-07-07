@@ -28,9 +28,10 @@ import {
     View,
     FormControl,
     Input,
+    Alert,
 } from 'native-base';
 import { AppTabsNavigationKey, AuthNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
-import { Platform, TouchableOpacity } from 'react-native';
+import { Platform, ToastAndroid, TouchableOpacity } from 'react-native';
 import { AppTabsStackScreenProps, RootStackScreenProps } from 'types';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { block } from 'react-native-reanimated';
@@ -90,6 +91,11 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
             const deviceToken = await messaging().getToken();
 
             //upload avatar
+
+            if (imageUrl == '') {
+                ToastAndroid.showWithGravity('User image required', ToastAndroid.SHORT, ToastAndroid.CENTER);
+                return
+            }
             const imgResponse = await fetch(imageUrl);
             const blob = await imgResponse.blob();
             const name = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
@@ -111,9 +117,7 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
                             });
                         })
                         .catch((error) => {
-                            const errorCode = error.code;
-                            const errorMessage = error.message;
-                            console.error;
+                            ToastAndroid.showWithGravity('Email in used', ToastAndroid.SHORT, ToastAndroid.CENTER);
                         });
                 });
             });
@@ -157,11 +161,8 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
                                 </VStack>
                             </TouchableOpacity>
                             <VStack space={2} ml={2} alignItems="center">
-                                <Text bold fontSize={26}>
-                                    Dennis
-                                </Text>
                                 <Text color="gray.400" fontSize={16}>
-                                    hello@depper.com
+                                    {email}
                                 </Text>
                             </VStack>
                         </Center>
@@ -225,7 +226,7 @@ export const InformationScreen = (props: RootStackScreenProps<RootNavigatekey.In
                                         });
                                     }}
                                 >
-                                    Sign in
+                                    Sign up
                                 </CButton>
                             </VStack>
                         )}

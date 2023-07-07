@@ -111,28 +111,36 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
             headerRight: () => (
                 // Chau: some style and navigate to call screen
                 <HStack>
-                    <IconButton
-                        onPress={() => {
-                            const otherUser = users.find((e) => e.id !== currentUser?.id);
-                            console.log('other user', otherUser);
-                            props.navigation.navigate(RootNavigatekey.CallWaiting, {
-                                toUser: otherUser,
-                                type: 'no-video',
-                            });
-                        }}
-                        icon={<PhoneIcon color="primary.900" size="md" />}
-                    />
-                    <IconButton
-                        onPress={() => {
-                            const otherUser = users.find((e) => e.id !== currentUser?.id);
-                            console.log('other user', otherUser);
-                            props.navigation.navigate(RootNavigatekey.CallWaiting, {
-                                toUser: otherUser,
-                                type: 'video',
-                            });
-                        }}
-                        icon={<VideoIcon color="primary.900" size="xl" />}
-                    />
+                    {!targetUser?.blockIds?.includes(currentUser?.id) ? (
+                        <IconButton
+                            onPress={() => {
+                                const otherUser = users.find((e) => e.id !== currentUser?.id);
+                                console.log('other user', otherUser);
+                                props.navigation.navigate(RootNavigatekey.CallWaiting, {
+                                    toUser: otherUser,
+                                    type: 'no-video',
+                                });
+                            }}
+                            icon={<PhoneIcon color="primary.900" size="md" />}
+                        />
+                    ) : (
+                        <></>
+                    )}
+                    {!targetUser?.blockIds?.includes(currentUser?.id) ? (
+                        <IconButton
+                            onPress={() => {
+                                const otherUser = users.find((e) => e.id !== currentUser?.id);
+                                console.log('other user', otherUser);
+                                props.navigation.navigate(RootNavigatekey.CallWaiting, {
+                                    toUser: otherUser,
+                                    type: 'video',
+                                });
+                            }}
+                            icon={<VideoIcon color="primary.900" size="xl" />}
+                        />
+                    ) : (
+                        <></>
+                    )}
                     <IconButton
                         onPress={() => navigation.navigate(RootNavigatekey.MessageManage, route.params)}
                         icon={<EllipsisIcon color="primary.900" size="md" />}
