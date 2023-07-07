@@ -193,11 +193,13 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                     }
                     // // populate user
                     const sender = userDatas.find((u) => u.id == newMessage.sender);
-                    newMessage.sender = {
-                        id: sender.id ?? '',
-                        avatar: sender.avatar,
-                        name: sender.name,
-                    };
+                    newMessage.sender = sender
+                        ? {
+                              id: sender?.id ?? '',
+                              avatar: sender?.avatar,
+                              name: sender?.name,
+                          }
+                        : undefined;
                     newMessages.push(newMessage);
                 }
                 setMessages(newMessages);
@@ -512,7 +514,9 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                                         message={message}
                                         isPinned={pinnedMessage ? true : false}
                                         sendType={
-                                            currentUser.id === (message.sender as User).id
+                                            !message.sender
+                                                ? SendType.Notice
+                                                : currentUser.id === (message.sender as User).id
                                                 ? SendType.Send
                                                 : SendType.Receive
                                         }
