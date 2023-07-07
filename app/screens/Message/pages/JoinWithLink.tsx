@@ -18,7 +18,7 @@ import {
 
 } from 'native-base';
 import { AppTabsNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { useEffect } from 'react';
 import { RootStackScreenProps } from 'types';
 import { useAppState } from 'native-base/lib/typescript/core/color-mode/hooks';
@@ -112,93 +112,7 @@ export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.J
             await getDoc(roomRef).then(snap => {
                 multiRoom = {
                     id: snap.id,
-                    lastMessages: snap.data()?.lastMessage,
-                    reads: snap.data()?.reads,
-                    users: snap.data()?.users
-                }
-            })
-            // const resetAction = StackActions.reset({
-            //     index: 0,
-            //     actions: [NavigationActions.navigate({ routeName: RootNavigatekey.MultiRoomMessageDetail  })],
-            // });
-            // navigation.po
-            // navigation.dispatch(
-            //     CommonActions.reset({
-            //       index: 0,
-            //       routes: [
-            //         { name: AppTabsNavigationKey.Message,
-            //             // params: {
-            //             //     type: "single",
-            //             //     room: multiRoom,
-            //             //     isJoinWithLink: true,
-            //             // }
-            //         },
-
-            //       ],
-            //     })
-            //   );
-            // navigation.dispatch(resetAction);
-            navigation.navigate(RootNavigatekey.MultiRoomMessageDetail, {
-                type: "single",
-                room: multiRoom,
-                isJoinWithLink: true,
-            })
-        }
-    }
-
-    // useEffect(() => {
-
-
-    //     const componentDidMount = async () => {
-
-    //         await Linking.getInitialURL().then((ev) => {
-    //             if (ev) {
-
-    //                 _handleOpenURL({ url: ev });
-    //             }
-    //            else  {
-
-    //             Linking.addEventListener('url', _handleOpenURL)
-    //            }
-
-    //         }).catch(err => {
-    //             console.log("Api call error");
-    //             alert(err.message);
-    //         }); 
-    //        //  Linking.addEventListener('url', _handleOpenURL)
-
-    //     }
-
-    //     componentDidMount();
-
-    // }, []);
-    const handleDeepLink = async (obj: any) => {
-        const { queryParams } = Linking.parse(obj.url)
-        console.log(queryParams);
-        let IdRoom = queryParams ? queryParams.idJoin : '';
-        console.log(IdRoom);
-        if (typeof IdRoom === 'string') {
-            //   const currentUser = useAppSelector((state) => state.auth.user);
-            console.log(IdRoom);
-            const roomRef = doc(db, 'MultiRoom', IdRoom);
-            // console.log(roomRef.id + 'ahihihihihi');
-            console.log(roomRef.id + ' ' + currentUser.id)
-            await updateDoc(roomRef, {
-                users: arrayUnion(currentUser?.id),
-            }).catch((error) => {
-                console.log("Api call error");
-                alert(error.message);
-            });;
-            console.log('Join duoc roiiii na');
-            setIsLoading(false);
-
-            let multiRoom;
-            await getDoc(roomRef).then(snap => {
-                multiRoom = {
-                    id: snap.id,
-                    lastMessages: snap.data()?.lastMessage,
-                    reads: snap.data()?.reads,
-                    users: snap.data()?.users
+                    ...snap.data()
                 }
             })
             // const resetAction = StackActions.reset({
@@ -230,18 +144,106 @@ export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.J
             })
         }
     }
+
     useEffect(() => {
 
-        const linkingEvent = Linking.addEventListener('url', handleDeepLink);
-        Linking.getInitialURL().then(url => {
-            if (url) {
-                handleDeepLink({ url });
-            }
-        });
-        return () => {
-            linkingEvent.remove();
-        };
-    }, [handleDeepLink]);
+
+        const componentDidMount = async () => {
+
+            await Linking.getInitialURL().then((ev) => {
+                if (ev) {
+
+                    _handleOpenURL({ url: ev });
+                }
+               else  {
+
+                Linking.addEventListener('url', _handleOpenURL)
+               }
+
+            }).catch(err => {
+                console.log("Api call error");
+                alert(err.message);
+            }); 
+            Linking.addEventListener('url', _handleOpenURL)
+
+        }
+
+        componentDidMount();
+
+    }, []);
+    const handleDeepLink = async (obj: any) => {
+        const { queryParams } = Linking.parse(obj.url)
+        console.log(queryParams);
+        let IdRoom = queryParams ? queryParams.idJoin : '';
+        console.log(IdRoom);
+        if (typeof IdRoom === 'string') {
+            //   const currentUser = useAppSelector((state) => state.auth.user);
+            console.log(IdRoom);
+            const roomRef = doc(db, 'MultiRoom', IdRoom);
+            // console.log(roomRef.id + 'ahihihihihi');
+            console.log(roomRef.id + ' ' + currentUser.id)
+            await updateDoc(roomRef, {
+                users: arrayUnion(currentUser?.id),
+            }).catch((error) => {
+                console.log("Api call error");
+                alert(error.message);
+            });;
+           
+            let multiRoom;
+            await getDoc(roomRef).then(snap => {
+                multiRoom = {
+                    id: snap.id,
+                    lastMessages: snap.data()?.lastMessage,
+                    reads: snap.data()?.reads,
+                    users: snap.data()?.users
+                }
+            })
+            // const resetAction = StackActions.reset({
+            //     index: 0,
+            //     actions: [NavigationActions.navigate({ routeName: RootNavigatekey.MultiRoomMessageDetail  })],
+            // });
+            // navigation.po
+            // navigation.dispatch(
+            //     CommonActions.reset({
+            //       index: 0,
+            //       routes: [
+            //         { name: AppTabsNavigationKey.Message,
+            //             // params: {
+            //             //     type: "single",
+            //             //     room: multiRoom,
+            //             //     isJoinWithLink: true,
+            //             // }
+            //         },
+
+            //       ],
+            //     })
+            //   );
+            // navigation.dispatch(resetAction);
+            console.log('Join duoc roiiii na');
+            setIsLoading(false);
+
+            navigation.popToTop();
+            navigation.replace(RootNavigatekey.MultiRoomMessageDetail, {
+                type: "single",
+                room: multiRoom,
+                isJoinWithLink: true,
+            })
+        }
+    }
+    // useLayoutEffect(() => {
+      
+    //     const linkingEvent = Linking.addEventListener('url', handleDeepLink);
+    //     Linking.getInitialURL().then(url => {
+    //         if (url) {
+    //             console.log(url);
+    //             handleDeepLink({ url });
+    //         }
+    //     });
+    //     return () => {
+           
+    //         linkingEvent.remove();
+    //     };
+    // }, [handleDeepLink]);
 
 
 

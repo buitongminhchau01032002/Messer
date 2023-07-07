@@ -296,7 +296,11 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                                 priority: 'high',
                                 subtitle: 'PhotoMe',
                                 title: sender.name.concat(' texted you'),
+                               
                             },
+                            data: {
+                                idRoom: room.id
+                            }
                         }),
                     });
                 }

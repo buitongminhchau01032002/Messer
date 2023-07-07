@@ -18,7 +18,7 @@ import LinkingConfiguration from './LinkingConfiguration';
 import AuthNavigator from './AuthNavigator';
 import AppTabsNavigator from './AppTabsNavigator';
 import React, { useEffect, useRef, useState } from 'react';
-import { AuthNavigationKey, RootNavigatekey } from './navigationKey';
+import { AppTabsNavigationKey, AuthNavigationKey, RootNavigatekey } from './navigationKey';
 import { IntroScreen } from 'screens/Intro';
 import { waitAsyncAction } from 'utils/async';
 import { i18Config } from 'i18n/index';
@@ -107,6 +107,8 @@ function RootNavigator() {
     const [isLogin, setIsLogin] = useState(auth.currentUser ? true : false);
     const callState = useAppSelector((state) => state.call);
     const [url, setUrl] = useState<string | null>(null)
+    const [loading, setLoading] = useState(true);
+    const [initialRoute, setInitialRoute] = useState(AppTabsNavigationKey.Message);
 
     useEffect(() => {
         const checkUrl = async () => {
@@ -137,13 +139,50 @@ function RootNavigator() {
             }
         });
 
-        messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-            console.log('Message handled in the background!', remoteMessage);
-        });
+        // messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+        //     console.log('Message handled in the background!', remoteMessage);
+        // });
 
-        messaging().onNotificationOpenedApp((remoteMessage) => {
-            console.log('Notification caused app to open from background state:', remoteMessage);
-        });
+        // messaging().onNotificationOpenedApp((remoteMessage) => {
+        //     console.log('Notification caused app to open from background state:', remoteMessage);
+        // });
+        messaging().onNotificationOpenedApp(async remoteMessage => {
+            console.log(
+              'Notification caused app to open from background state:',
+             // remoteMessage.data.idRoom,
+            //  remoteMessage.data?.idRoom,
+            //  remoteMessage.data?.type
+             
+            ); 
+            const idRoom = remoteMessage.data?.idRoom || ''
+            const type = remoteMessage.data?.type
+            if(type == 'single'){
+                const a = await getDoc(doc(db, "SingleRoom",idRoom))
+                const room = {
+                    id: a.id,
+                    ...a.data(),
+                    type:'single'
+                }
+                
+                navigation.navigate(RootNavigatekey.MessageDetail, {room, type: 'single'});
+            }
+            
+          
+          });
+      
+          // Check whether an initial notification is available
+          messaging()
+            .getInitialNotification()
+            .then(remoteMessage => {
+              if (remoteMessage) {
+                console.log(
+                  'Notification caused app to open from quit state:',
+                  remoteMessage.notification,
+                );
+                setInitialRoute(remoteMessage.data.type); // e.g. "Settings"
+              }
+              setLoading(false);
+            });
 
         return unsubscribe;
     }, [user, callState]);

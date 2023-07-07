@@ -111,7 +111,11 @@ export const MessageItem = (props: Props) => {
                                         </VStack>
                                     </HStack>
                                 ) : undefined}
-                                <Text color="white">{message.content}</Text>
+                                 <Autolink text={message.content || ''} 
+                                linkStyle={{ color: 'white', textDecorationLine: 'underline' }}
+                                renderText={(text) => <Text color='white'>{text}</Text>} 
+                                />
+                                {/* <Text color="white">{message.content}</Text> */}
                             </VStack>
 
                             <Text fontSize={'xs'} italic>
@@ -169,11 +173,8 @@ export const MessageItem = (props: Props) => {
                                     />
                                 </VStack>
                             </HStack>
-                            <Autolink text={message.content || ''} 
-                                linkStyle={{ color: 'white', textDecorationLine: 'underline' }}
-                                renderText={(text) => <Text color='white'>{text}</Text>} 
-                                />
-                            {/* <Text color="white">{message.content}</Text> */}
+
+                            <Text color="white">{message.content}</Text>
                         </VStack>
                     )}
                 </TouchableOpacity>
@@ -352,11 +353,11 @@ export const MessageItem = (props: Props) => {
                                         </VStack>
                                     </HStack>
                                 ) : undefined}
-                                <Autolink text={message.content || ''} 
+                                 <Autolink text={message.content || ''} 
                                 linkStyle={{ color: 'white', textDecorationLine: 'underline' }}
                                 renderText={(text) => <Text color='white'>{text}</Text>} 
                                 />
-                                 {/* <Text color="white">{message.content}</Text>  */}
+                                {/* <Text color="white">{message.content}</Text> */}
                             </VStack>
                             <Text fontSize={'xs'} italic>
                                 {isFocus ? moment((message.createdAt as Timestamp).seconds).format('HH:mm:ss') : ''}
