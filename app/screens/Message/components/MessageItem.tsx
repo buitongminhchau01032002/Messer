@@ -98,9 +98,15 @@ export const MessageItem = (props: Props) => {
                                             <Text bold color="white" fontSize="xs">
                                                 {((message.replyMessage as Message).sender as User).name}
                                             </Text>
-                                            <Text numberOfLines={4} fontSize="xs">
-                                                {(message.replyMessage as Message).content}
-                                            </Text>
+                                            {(message.replyMessage as Message).type === 'text' ? (
+                                                <Text numberOfLines={4} fontSize="xs">
+                                                    {(message.replyMessage as Message).content}
+                                                </Text>
+                                            ) : (
+                                                <Text numberOfLines={4} fontSize="xs" bold>
+                                                    Media
+                                                </Text>
+                                            )}
                                         </VStack>
                                     </HStack>
                                 ) : undefined}
@@ -112,7 +118,7 @@ export const MessageItem = (props: Props) => {
                             </Text>
                         </Box>
                     ) : message.type !== 'story' ? (
-                        <HStack flexWrap={'wrap'} borderRadius={12} p={2} bg="primary.900" overflow="hidden">
+                        <HStack flexWrap={'wrap'} maxWidth={216} borderRadius={12} p={2} bg="primary.900" overflow="hidden">
                             {(JSON.parse(message.content!) as Media[]).map((file, idx) => (
                                 <Box w={100} h={100} position="relative">
                                     {file.type === 'image' ? (
@@ -330,9 +336,15 @@ export const MessageItem = (props: Props) => {
                                             <Text bold color="white" fontSize="xs">
                                                 {((message.replyMessage as Message).sender as User).name}
                                             </Text>
-                                            <Text numberOfLines={2} fontSize="xs">
-                                                {(message.replyMessage as Message).content}
-                                            </Text>
+                                            {(message.replyMessage as Message).type === 'text' ? (
+                                                <Text numberOfLines={4} fontSize="xs">
+                                                    {(message.replyMessage as Message).content}
+                                                </Text>
+                                            ) : (
+                                                <Text numberOfLines={4} fontSize="xs" bold>
+                                                    Media
+                                                </Text>
+                                            )}
                                         </VStack>
                                     </HStack>
                                 ) : undefined}
@@ -343,7 +355,7 @@ export const MessageItem = (props: Props) => {
                             </Text>
                         </Box>
                     ) : message.type !== 'story' ? (
-                        <HStack flexWrap={'wrap'} borderRadius={12} p={2} bg="blue.900" overflow="hidden">
+                        <HStack flexWrap={'wrap'} maxWidth={216} borderRadius={12} p={2} bg="blue.900" overflow="hidden">
                             {(JSON.parse(message.content!) as Media[]).map((file, idx) => (
                                 <Box w={100} h={100} position="relative">
                                     {file.type === 'image' ? (

@@ -106,7 +106,7 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
                 ),
             }).then(() => {
                 selectedUsers.forEach((e) => {
-                    const content = e.name.concat(' added into room');
+                    const content = e.name.concat(' is added into room');
 
                     const newMessage = {
                         content,
@@ -124,6 +124,7 @@ export const AddToMultiRoomScreen = (props: RootStackScreenProps<RootNavigatekey
                         });
                     });
                 })
+                route.params.onGoBack();
                 navigation.goBack();
             });
         }

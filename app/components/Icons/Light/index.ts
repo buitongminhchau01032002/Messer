@@ -18,3 +18,4 @@ export { SearchIcon } from './Search';
 export { PlusIcon } from './Plus';
 export { AttachIcon } from './Attach';
 export { CameraIcon } from './Camera';
+export { BlockIcon } from './Block';

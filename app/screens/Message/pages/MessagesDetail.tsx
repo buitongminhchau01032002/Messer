@@ -97,6 +97,8 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
     const [activeIndex, setActiveIndex] = useState(0);
     const [isOpenGallary, setIsOpenGallary] = useState(false);
     const [curGallary, setCurGallary] = useState<Media[]>([]);
+    const [notCurrentUser, setNotCurrentUser] = useState(null);
+    const [targetUser, setTargetUser] = useState(null);
 
     // const curentUser = 'CPYyJYf2Rj2kUd8rCvff'\
     // const currentRoom = "3T7VtjOcHbbi2oTVa5gX"
@@ -137,7 +139,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                     />
                 </HStack>
             ),
-            headerTitle: '',
+            // headerTitle: notCurrentUser?.name??"",
             headerTintColor: colors.primary[900],
             headerTitleStyle: { color: colors.blue[900] },
         });
@@ -167,9 +169,11 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                     navigation.setOptions({
                         headerTitle: doc.data().name,
                     });
+                    setTargetUser({ id: doc.id, ...doc.data() });
                 }
             });
             setUsers(userDatas);
+            // setNotCurrentUser(userDatas.find((e) => e.id !== currentUser?.id))
 
             const unsub = onSnapshot(messageQuery.withConverter(converter<Message>()), async (messagesSnap) => {
                 const newMessages = [];
@@ -193,11 +197,13 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                     }
                     // // populate user
                     const sender = userDatas.find((u) => u.id == newMessage.sender);
-                    newMessage.sender = {
-                        id: sender.id ?? '',
-                        avatar: sender.avatar,
-                        name: sender.name,
-                    };
+                    newMessage.sender = sender
+                        ? {
+                              id: sender?.id ?? '',
+                              avatar: sender?.avatar,
+                              name: sender?.name,
+                          }
+                        : undefined;
                     newMessages.push(newMessage);
                 }
                 setMessages(newMessages);
@@ -512,7 +518,9 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                                         message={message}
                                         isPinned={pinnedMessage ? true : false}
                                         sendType={
-                                            currentUser.id === (message.sender as User).id
+                                            !message.sender
+                                                ? SendType.Notice
+                                                : currentUser.id === (message.sender as User).id
                                                 ? SendType.Send
                                                 : SendType.Receive
                                         }
@@ -602,12 +610,15 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                             value={content}
                             onChangeText={(text) => setContent(text)}
                             flex={1}
-                            placeholder="Message"
+                            placeholder={
+                                targetUser?.blockIds?.includes(currentUser?.id) ? 'You are blocked' : 'Message'
+                            }
                             fontSize="md"
                             bg="gray.100"
                             borderWidth={0}
                             borderRadius={20}
                             multiline
+                            isDisabled={targetUser?.blockIds?.includes(currentUser?.id)}
                             onFocus={() => scrollRef.current?.scrollToEnd({ animated: true })}
                         />
                         <TouchableOpacity px={2} py={3} disabled={isSending} onPress={() => handleSendMessage(content)}>

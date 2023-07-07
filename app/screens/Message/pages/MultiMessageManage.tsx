@@ -3,6 +3,7 @@ import { APP_PADDING } from 'app/constants/Layout';
 import { AppBar } from 'components/AppBar';
 import {
     BellIcon,
+    BellOffIcon,
     CameraIcon,
     EllipsisIcon,
     ImageIcon,
@@ -38,7 +39,7 @@ import {
 import { AppTabsNavigationKey, RootNavigatekey } from 'navigation/navigationKey';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Platform, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Alert, Platform, useWindowDimensions } from 'react-native';
 import { AppTabsStackScreenProps, RootStackScreenProps } from 'types';
 import { MessageItem } from '../components/MessageItem';
 import { Media, Message, SendType, User } from '../type';
@@ -66,6 +67,7 @@ import {
     setDoc,
     deleteDoc,
     arrayRemove,
+    and,
 } from 'firebase/firestore';
 import { auth, converter, db, storage } from 'config/firebase';
 import { useAppSelector } from 'hooks/index';
@@ -108,6 +110,8 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
     const [users, setUser] = useState([]);
     const [roomNameChange, setRoomNameChange] = useState('');
     const [roomName, setRoomName] = useState('');
+    const [isUnnotify, setIsUnnotify] = useState(false);
+    // const
     // consts
     const spacing = 0;
     const calcImageWidth = (cols: number, spacing: number) => {
@@ -122,6 +126,22 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
             headerTitleStyle: { color: colors.blue[900] },
         });
     }, [navigation]);
+
+    const fetchUserData = async () => {
+        const docRef = doc(db, 'MultiRoom', room.id!);
+        const docSnap = await getDoc(docRef);
+        const roomTemp = docSnap.data();
+
+        setIsUnnotify(roomTemp?.unnotifications.includes(currentUser.id));
+
+        const q = query(collection(db, 'User'), where(documentId(), 'in', roomTemp.users));
+        const userList = [];
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            userList.push({ id: doc.id, ...doc.data() });
+        });
+        setUser(userList);
+    };
 
     useEffect(() => {
         const mediaRef = collection(db, 'MultiRoom', currentRoom, 'MediaStore');
@@ -146,15 +166,6 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
 
         fetchPinnedMessage().catch(console.error);
 
-        const fetchUserData = async () => {
-            const q = query(collection(db, 'User'), where(documentId(), 'in', room.users));
-            const userList = [];
-            const querySnapshot = await getDocs(q);
-            querySnapshot.forEach((doc) => {
-                userList.push({ id: doc.id, ...doc.data() });
-            });
-            setUser(userList);
-        };
         fetchUserData().catch(console.error);
 
         setRoomImage(room.image ?? '');
@@ -162,6 +173,59 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
         setRoomNameChange(room.name);
         // return () => unsub()
     }, []);
+    const handleLeaveRoom = async () => {
+        if (room.owner == currentUser?.id) {
+            Alert.alert('Owner cannot leave room', '', [{ text: 'OK', onPress: () => console.log('OK Pressed') }]);
+            return;
+        }
+        const roomRef = doc(db, 'MultiRoom', room.id ?? '');
+        await updateDoc(roomRef, {
+            users: arrayRemove(currentUser.id),
+        });
+
+        const content = users
+            .find((e) => {
+                return e.id == currentUser.id;
+            })
+            .name.concat(' leaved room');
+
+        const newMessage = {
+            content,
+            sender: '',
+            senderName: '',
+            type: 'text',
+            createdAt: serverTimestamp(),
+        };
+
+        await addDoc(collection(db, 'MultiRoom', room.id!, 'Message'), newMessage).then(async (values) => {
+            await updateDoc(doc(db, 'MultiRoom', room.id ?? ''), {
+                lastMessage: newMessage,
+                lastMessageTimestamp: newMessage.createdAt,
+                reads: [],
+            });
+        });
+        navigation.pop(2);
+    };
+    const handleDeleteRoom = async () => {
+        if (room.owner != currentUser?.id) {
+            Alert.alert('You do not have permission', '', [{ text: 'OK', onPress: () => console.log('OK Pressed') }]);
+            return;
+        }
+        Alert.alert('Delete chat', 'You want to delete this channel?', [
+            {
+                text: 'Cancel',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+            },
+            {
+                text: 'OK',
+                onPress: async () => {
+                    await deleteDoc(doc(db, 'MultiRoom', room.id!));
+                    navigation.pop(2);
+                },
+            },
+        ]);
+    };
 
     const mediaItems: MenuItem[] = [
         {
@@ -182,24 +246,14 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
             onPress: onOpenMembers,
         },
         {
-            title: 'Nofication',
+            title: 'Leave Room',
             icon: <Icon as={<FontAwesome />} name="bell" size="xl" color={'primary.900'} />,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
+            onPress: handleLeaveRoom,
         },
         {
-            title: 'Pricacy and Security',
+            title: 'Delete Channel',
             icon: <Icon as={<FontAwesome />} name="shield" size="xl" color={'primary.900'} />,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
-        },
-        {
-            title: 'Theme',
-            icon: <Icon as={<FontAwesome />} name="file" size="xl" color={'primary.900'}></Icon>,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
-        },
-        {
-            title: 'Language',
-            icon: <Icon as={<FontAwesome />} name="globe" size="xl" color={'primary.900'}></Icon>,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
+            onPress: handleDeleteRoom,
         },
     ];
 
@@ -209,6 +263,11 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
     };
     const pickImage = async () => {
         // No permissions request is necessary for launching the image library
+        if (room.owner != currentUser?.id) {
+            Alert.alert('You do not have permission', '', [{ text: 'OK', onPress: () => console.log('OK Pressed') }]);
+            return;
+        }
+
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsEditing: true,
@@ -250,13 +309,76 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
         await updateDoc(roomRef, {
             users: arrayRemove(u.id),
         });
-        setUser(
-            users.filter((e) => {
-                return e.id != u.id;
-            }),
-        );
-        // console.log(u)
+
+        const content = users
+            .find((e) => {
+                return e.id == u.id;
+            })
+            .name.concat(' is removed from room');
+
+        const newMessage = {
+            content,
+            sender: '',
+            senderName: '',
+            type: 'text',
+            createdAt: serverTimestamp(),
+        };
+
+        addDoc(collection(db, 'MultiRoom', room.id!, 'Message'), newMessage).then(async (values) => {
+            await updateDoc(doc(db, 'MultiRoom', room.id ?? ''), {
+                lastMessage: newMessage,
+                lastMessageTimestamp: newMessage.createdAt,
+                reads: [],
+            });
+        });
+        // setUser(
+        //     users.filter((e) => {
+        //         return e.id != u.id;
+        //     }),
+        // );
+        console.log(u);
+        fetchUserData().catch(console.error);
     }
+
+    const handleUserClick = async (otherUserId: string) => {
+        // const roomeRef = collection(db, 'SingleRoom');
+        const q = query(
+            collection(db, 'SingleRoom'),
+            or(
+                and(where('user1', '==', currentUser?.id), where('user2', '==', otherUserId)),
+                and(where('user2', '==', currentUser?.id), where('user1', '==', otherUserId)),
+            ),
+        );
+
+        const messes = [];
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            messes.push({
+                id: doc.id,
+                type: 'single',
+                ...data,
+            });
+        });
+
+        if (messes.length != 0) {
+            navigation.navigate(RootNavigatekey.MessageDetail, { type: 'single', room: messes[0] });
+        } else {
+            const newRoomData = {
+                user1: auth.currentUser?.uid,
+                user2: otherUserId,
+            };
+            const newRoom = await addDoc(collection(db, 'SingleRoom'), newRoomData);
+
+            const roomData = {
+                id: newRoom.id,
+                ...newRoomData,
+                type: 'single',
+            };
+            // console.log(roomData);
+            navigation.navigate(RootNavigatekey.MessageDetail, { type: 'single', room: roomData });
+        }
+    };
 
     return (
         <Box flex={1} bg="white">
@@ -323,11 +445,38 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
                             </VStack>
                         </TouchableOpacity>
                         <VStack space={2} ml={2} alignItems="center">
-                            <Pressable onPress={() => setNameDialogVisible(true)}>
+                            <Pressable
+                                onPress={() => {
+                                    if (room.owner != currentUser?.id) {
+                                        Alert.alert('You do not have permission', '', [
+                                            { text: 'OK', onPress: () => console.log('OK Pressed') },
+                                        ]);
+                                        return;
+                                    }
+                                    setNameDialogVisible(true);
+                                }}
+                            >
                                 <Text bold fontSize={26}>
                                     {roomName}
                                 </Text>
                             </Pressable>
+                            <IconButton
+                                borderRadius={100}
+                                bg={isUnnotify ? 'blue.800' : 'gray.700'}
+                                icon={<BellOffIcon color="white" size="sm" />}
+                                onPress={async () => {
+                                    if (!isUnnotify) {
+                                        await updateDoc(doc(db, 'MultiRoom', room.id!), {
+                                            unnotifications: arrayUnion(currentUser.id),
+                                        });
+                                    } else {
+                                        await updateDoc(doc(db, 'MultiRoom', room.id!), {
+                                            unnotifications: arrayRemove(currentUser.id),
+                                        });
+                                    }
+                                    await fetchUserData();
+                                }}
+                            />
                         </VStack>
                     </Center>
                     <Text fontSize="sm" my={2}>
@@ -410,8 +559,19 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
                                 bg={'primary.900'}
                                 padding={2}
                                 onPress={() => {
-                                    navigation.navigate(RootNavigatekey.AddToMulti, { room: room });
-                                    handleCloseGallery()
+                                    if (room.owner != currentUser?.id) {
+                                        Alert.alert('You do not have permission', '', [
+                                            { text: 'OK', onPress: () => console.log('OK Pressed') },
+                                        ]);
+                                        return;
+                                    }
+                                    navigation.navigate(RootNavigatekey.AddToMulti, {
+                                        room: { ...room, users: users.map((u) => u.id) },
+                                        onGoBack: () => {
+                                            fetchUserData();
+                                        },
+                                    });
+                                    onCloseMembers();
                                 }}
                             >
                                 <Text fontWeight="bold" textBreakStrategy="balanced">
@@ -419,36 +579,49 @@ export const MultiMessageManageScreen = (props: RootStackScreenProps<RootNavigat
                                 </Text>
                             </Pressable>
                             {users.map((u, idx) => (
-                                <HStack
-                                    key={idx}
-                                    padding={APP_PADDING}
-                                    space={2}
-                                    justifyContent="space-between"
-                                    alignItems={'center'}
+                                <Pressable
+                                    onPress={() => {
+                                        handleUserClick(u.id);
+                                        onCloseMembers();
+                                    }}
                                 >
-                                    <HStack space={2} alignItems={'center'}>
-                                        <Image
-                                            alt="..."
-                                            source={{ uri: u.avatar }}
-                                            style={{ width: 64, height: 64 }}
-                                            borderRadius={100}
-                                        />
-                                        <Text fontWeight="bold" textBreakStrategy="balanced">
-                                            {u.name}
-                                        </Text>
+                                    <HStack
+                                        key={idx}
+                                        padding={APP_PADDING}
+                                        space={2}
+                                        justifyContent="space-between"
+                                        alignItems={'center'}
+                                    >
+                                        <HStack space={2} alignItems={'center'}>
+                                            <Image
+                                                alt="..."
+                                                source={{ uri: u.avatar }}
+                                                style={{ width: 64, height: 64 }}
+                                                borderRadius={100}
+                                            />
+                                            <Text fontWeight="bold" textBreakStrategy="balanced">
+                                                {u.name}
+                                            </Text>
+                                        </HStack>
+                                        {u.id != currentUser?.id ? (
+                                            <Pressable
+                                                onPress={() => {
+                                                    if (room.owner != currentUser?.id) {
+                                                        Alert.alert('You do not have permission', '', [
+                                                            { text: 'OK', onPress: () => console.log('OK Pressed') },
+                                                        ]);
+                                                        return;
+                                                    }
+                                                    handleRemoveUser(u);
+                                                }}
+                                            >
+                                                <Text color="primary.900">Remove</Text>
+                                            </Pressable>
+                                        ) : (
+                                            <></>
+                                        )}
                                     </HStack>
-                                    {u.id != currentUser?.id ? (
-                                        <Pressable
-                                            onPress={() => {
-                                                handleRemoveUser(u);
-                                            }}
-                                        >
-                                            <Text color="primary.900">Remove</Text>
-                                        </Pressable>
-                                    ) : (
-                                        <></>
-                                    )}
-                                </HStack>
+                                </Pressable>
                             ))}
                         </VStack>
                     </ScrollView>

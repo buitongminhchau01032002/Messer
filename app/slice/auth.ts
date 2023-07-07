@@ -14,6 +14,7 @@ export type AuthStateType = {
       gender: string,
       name: string, 
       phone: string
+      blockIds: string[]
     };
 };
 
