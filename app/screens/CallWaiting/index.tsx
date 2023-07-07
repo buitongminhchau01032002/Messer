@@ -113,7 +113,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
             );
             return true;
         });
-        return () => { backHandler.remove(); unsub.then((u) => u())}
+        return () => { backHandler.remove();}
     }, []);
 
     useEffect(() => {
@@ -168,7 +168,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
         let ubsub = () => {};
         try {
             await setUpWebcamAndMediaStream();
-            ubsub = await createOffer(toUser);
+            await createOffer(toUser);
         } catch (err) {
             props.navigation.goBack();
         } finally {
@@ -244,7 +244,7 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
         isCallCreated.current = true;
 
         // Listen for remote answer
-        const unsub = onSnapshot(callDoc, (snapshot) => {
+        onSnapshot(callDoc, (snapshot) => {
             const data = snapshot.data();
             // @ts-ignore
             if (!pc.current?.currentRemoteDescription && data?.answer) {
@@ -262,8 +262,6 @@ export const CallWaitingScreen = (props: RootStackScreenProps<RootNavigatekey.Ca
                 }
             });
         });
-
-        return unsub;
 
     }
 
