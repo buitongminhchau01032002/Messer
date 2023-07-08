@@ -25,10 +25,12 @@ import { useAppState } from 'native-base/lib/typescript/core/color-mode/hooks';
 import { useAppSelector } from 'hooks/index';
 import * as Linking from 'expo-linking';
 import { MultiRoom } from 'screens/Message/type';
-import { StackActions, NavigationActions } from 'react-navigation';
+//import { StackActions, NavigationActions } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import AppTabsNavigator from 'navigation/AppTabsNavigator';
 import { ToastAndroid } from 'react-native';
+
+
 
 
 export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.JoinWithLink>) => {
@@ -42,9 +44,9 @@ export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.J
 
     useEffect(() => {
         props.navigation.setOptions({
-            headerLeft: () => (
-                <></>
-            ),
+            // headerLeft: () => (
+            //     <></>
+            // ),
 
         });
     }, [props.navigation]);
@@ -116,33 +118,39 @@ export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.J
                     ...snap.data()
                 }
             })
-            // const resetAction = StackActions.reset({
-            //     index: 0,
-            //     actions: [NavigationActions.navigate({ routeName: RootNavigatekey.MultiRoomMessageDetail  })],
-            // });
-            // navigation.po
+            const resetAction = StackActions.reset({
+                index: 0,
+                actions: [NavigationActions.navigate({ routeName: RootNavigatekey.MultiRoomMessageDetail })],
+            });
+
             // navigation.dispatch(
             //     CommonActions.reset({
             //       index: 0,
             //       routes: [
-            //         { name: AppTabsNavigationKey.Message,
-            //             // params: {
-            //             //     type: "single",
-            //             //     room: multiRoom,
-            //             //     isJoinWithLink: true,
-            //             // }
+            //         { name: RootNavigatekey.MultiRoomMessageDetail,
+            //             params: {
+            //                 type: "single",
+            //                 room: multiRoom,
+            //                 isJoinWithLink: true,
+            //             }
             //         },
+            //         { name: AppTabsNavigationKey.Message,
 
+            //         },
             //       ],
             //     })
             //   );
-            // navigation.dispatch(resetAction);
-            navigation.popToTop();
-            navigation.navigate(RootNavigatekey.MultiRoomMessageDetail, {
-                type: "single",
-                room: multiRoom,
-                isJoinWithLink: true,
-            })
+
+
+
+
+          
+            // navigation.popToTop();
+            // navigation.navigate(RootNavigatekey.MultiRoomMessageDetail, {
+            //     type: "single",
+            //     room: multiRoom,
+            //     isJoinWithLink: true,
+            // })
         }
     }
 
@@ -207,7 +215,24 @@ export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.J
             setIsLoading(false);
 
             //navigation.pop(0);
-           // navigation.popToTop();
+            // navigation.popToTop();
+            // navigation.dispatch(
+            //     CommonActions.reset({
+            //         index: 1,
+            //         routes: [
+            //             {
+            //                 name: RootNavigatekey.MultiRoomMessageDetail,
+            //                 params: {
+            //                     type: "multi",
+            //                     room: multiRoom,
+            //                 }
+            //             },
+            //             {
+            //                 name: AppTabsNavigationKey.Message,
+            //             },
+            //         ],
+            //     })
+            // );
             navigation.navigate(RootNavigatekey.MultiRoomMessageDetail, {
                 type: "single",
                 room: multiRoom,
@@ -215,7 +240,7 @@ export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.J
 
         }
     }
-    useLayoutEffect(() => {
+    useEffect(() => {
 
         const linkingEvent = Linking.addEventListener('url', handleDeepLink);
         Linking.getInitialURL().then(url => {
@@ -223,9 +248,14 @@ export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.J
                 console.log(url);
                 handleDeepLink({ url });
             }
+            else {
+                console.log(url);
+                linkingEvent.remove();
+                navigation.goBack();
+            }
         });
         return () => {
-
+            console.log(url);
             linkingEvent.remove();
         };
     }, [handleDeepLink]);
