@@ -264,7 +264,7 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
                             headers: {
                                 'Content-Type': 'application/json',
                                 Authorization:
-                                    'key=AAAAu3T5eSI:APA91bFfynL6hecTGjN4jGBUULhccdSWIBKjG0oBWefs3D5KvDu5IWHUJSJD9F3uMjhmuZbXqsUSj6GBsqRYkQgt2d2If4FUaYHy3bZ-E8NpBhqHYjsyfB9D1Nk-hxVKelYn165SqRdL',
+                                    'key=AAAA_NhSjHE:APA91bG6cuT7eAiPJEz59D1bG9QaC-0F-UEKLt16bIGz29Q7LPZuoWmQFHldzhVuJthqv6ozkVwN3n7Cz1IKYmsQ7u-SbjgxVnOD83kzI6qtESYP0o5FcwCDkUqOXKieo8DDiBiQUihv',
                             },
                             body: JSON.stringify({
                                 to: receiver.deviceToken,
