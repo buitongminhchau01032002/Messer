@@ -251,7 +251,7 @@ export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.J
             else {
                 console.log(url);
                 linkingEvent.remove();
-                navigation.goBack();
+                navigation.popToTop();
             }
         });
         return () => {
