@@ -37,7 +37,7 @@ export type RootStackParamList = {
     [RootNavigatekey.InformationQR]: undefined;
     [RootNavigatekey.MessageDetail]: {type: "single"|"multi" , room: SingleRoom};
     [RootNavigatekey.MessageManage]: {type: "single"|"multi" , room: SingleRoom};
-    [RootNavigatekey.MultiRoomMessageDetail]: {type: "single"|"multi" , room: MultiRoom, isJoinWithLink: boolean};
+    [RootNavigatekey.MultiRoomMessageDetail]: {type: "single"|"multi" , room: MultiRoom};
     [RootNavigatekey.MultiMessageManage]: {type: "single"|"multi" , room: MultiRoom};
     [RootNavigatekey.NotFound]: undefined;
     [RootNavigatekey.AddToMulti]: { roomId?: string };

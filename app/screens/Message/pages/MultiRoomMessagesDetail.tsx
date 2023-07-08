@@ -76,7 +76,7 @@ export const MultiRoomMessageDetailScreen = (props: RootStackScreenProps<RootNav
     //navigate
     const { navigation, route } = props;
     //navigate params
-    const { room, isJoinWithLink } = route.params;
+    const { room } = route.params;
     // hooks
     const { colors } = useTheme();
     const { isOpen, onOpen, onClose } = useDisclose();

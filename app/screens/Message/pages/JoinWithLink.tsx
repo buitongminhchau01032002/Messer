@@ -146,38 +146,38 @@ export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.J
         }
     }
 
-    useEffect(() => {
+    // useEffect(() => {
 
 
-        const componentDidMount = async () => {
+    //     const componentDidMount = async () => {
 
-            await Linking.getInitialURL().then((ev) => {
-                if (ev) {
+    //         await Linking.getInitialURL().then((ev) => {
+    //             if (ev) {
 
-                    _handleOpenURL({ url: ev });
-                }
-                else {
-                    
-                    ToastAndroid.showWithGravity(
-                        'Cannot join room due to internet connection',
-                        ToastAndroid.SHORT,
-                        ToastAndroid.CENTER,
-                    );
-                    navigation.popToTop();
-                  //  Linking.addEventListener('url', _handleOpenURL)
-                }
+    //                 _handleOpenURL({ url: ev });
+    //             }
+    //             else {
+    //                 console.log(ev + 'huhuhu');
+    //                 ToastAndroid.showWithGravity(
+    //                     'Cannot join room due to internet connection',
+    //                     ToastAndroid.SHORT,
+    //                     ToastAndroid.CENTER,
+    //                 );
+    //               //  navigation.popToTop();
+    //               //  Linking.addEventListener('url', _handleOpenURL)
+    //             }
 
-            }).catch(err => {
-                console.log("Api call error");
-                alert(err.message);
-            });
-            //Linking.addEventListener('url', _handleOpenURL)
+    //         }).catch(err => {
+    //             console.log("Api call error");
+    //             alert(err.message);
+    //         });
+    //         //Linking.addEventListener('url', _handleOpenURL)
 
-        }
+    //     }
 
-        componentDidMount();
+    //     componentDidMount();
 
-    }, [_handleOpenURL]);
+    // }, [_handleOpenURL]);
     const handleDeepLink = async (obj: any) => {
         const { queryParams } = Linking.parse(obj.url)
         console.log(queryParams);
@@ -200,57 +200,35 @@ export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.J
             await getDoc(roomRef).then(snap => {
                 multiRoom = {
                     id: snap.id,
-                    lastMessages: snap.data()?.lastMessage,
-                    reads: snap.data()?.reads,
-                    users: snap.data()?.users
+                    ...snap.data()
                 }
             })
-            // const resetAction = StackActions.reset({
-            //     index: 0,
-            //     actions: [NavigationActions.navigate({ routeName: RootNavigatekey.MultiRoomMessageDetail  })],
-            // });
-            // navigation.po
-            // navigation.dispatch(
-            //     CommonActions.reset({
-            //       index: 0,
-            //       routes: [
-            //         { name: AppTabsNavigationKey.Message,
-            //             // params: {
-            //             //     type: "single",
-            //             //     room: multiRoom,
-            //             //     isJoinWithLink: true,
-            //             // }
-            //         },
-
-            //       ],
-            //     })
-            //   );
-            // navigation.dispatch(resetAction);
             console.log('Join duoc roiiii na');
             setIsLoading(false);
 
-            navigation.popToTop();
-            navigation.replace(RootNavigatekey.MultiRoomMessageDetail, {
+            //navigation.pop(0);
+           // navigation.popToTop();
+            navigation.navigate(RootNavigatekey.MultiRoomMessageDetail, {
                 type: "single",
                 room: multiRoom,
-                isJoinWithLink: true,
             })
+
         }
     }
-    // useLayoutEffect(() => {
+    useLayoutEffect(() => {
 
-    //     const linkingEvent = Linking.addEventListener('url', handleDeepLink);
-    //     Linking.getInitialURL().then(url => {
-    //         if (url) {
-    //             console.log(url);
-    //             handleDeepLink({ url });
-    //         }
-    //     });
-    //     return () => {
+        const linkingEvent = Linking.addEventListener('url', handleDeepLink);
+        Linking.getInitialURL().then(url => {
+            if (url) {
+                console.log(url);
+                handleDeepLink({ url });
+            }
+        });
+        return () => {
 
-    //         linkingEvent.remove();
-    //     };
-    // }, [handleDeepLink]);
+            linkingEvent.remove();
+        };
+    }, [handleDeepLink]);
 
 
 
