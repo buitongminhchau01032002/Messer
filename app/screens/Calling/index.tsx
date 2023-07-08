@@ -48,7 +48,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
     const [isOnMic, setIsOnMic] = useState(props?.route.params?.isOnMic ?? true);
     const [isOnSpeaker, setIsOnSpeaker] = useState(props?.route.params?.isOnSpeaker ?? false);
     const [isOnVideo, setIsOnVideo] = useState(props?.route.params?.isOnVideo ?? true);
-    const [isRemoveVideoOn, setIsRemoveVideoOn] = useState(true);
+    const [isRemoteVideoOn, setIsRemoteVideoOn] = useState(true);
     const callState = useAppSelector((state) => state.call);
     const user = useAppSelector((state) => state.auth.user);
     const dispatch = useAppDispatch();
@@ -75,19 +75,21 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
             return;
         }
 
-        // const unsubscribe = onSnapshot(doc(db, 'calls', callState.infor?.id), (doc) => {
-        //     // this is from user
-        //     if (callState.infor?.fromUser.id === user?.id) {
-        //         setIsRemoveVideoOn(doc.data()?.toUser?.isOnVideo);
-        //     }
-        //     // this is to user
-        //     if (callState.infor?.toUser.id === user?.id) {
-        //         setIsRemoveVideoOn(doc.data()?.fromUser?.isOnVideo);
-        //     }
-        // });
+        const unsubscribe = onSnapshot(doc(db, 'calls', callState.infor?.id), (doc) => {
+            // this is from user
+            if (callState.infor?.fromUser.id === user?.id) {
+                doc.data()?.toUser?.isOnVideo ?? setIsRemoteVideoOn(doc.data()?.toUser?.isOnVideo);
+                // console.log('📹:', doc.data()?.toUser?.isOnVideo)
+            }
+            // this is to user
+            if (callState.infor?.toUser.id === user?.id) {
+                doc.data()?.toUser?.isOnVideo ?? setIsRemoteVideoOn(doc.data()?.fromUser?.isOnVideo);
+            }
+        });
 
-        // return () => unsubscribe();
+        return () => unsubscribe();
     }, [callState.infor]);
+
 
     useEffect(() => {
         props.navigation.setOptions({
@@ -125,7 +127,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
                 'Hang up',
                 'Do you want to hang up now!',
                 [
-                    { text: 'Keep call', style: 'cancel', onPress: () => {} },
+                    { text: 'Keep call', style: 'cancel', onPress: () => { } },
                     {
                         text: 'Hang up',
                         style: 'destructive',
@@ -219,7 +221,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
         pc.current = new RTCPeerConnection(servers);
         const local = await mediaDevices.getUserMedia({
             video: true,
-            audio: false,
+            audio: true,
         });
         pc.current?.addStream(local);
         setLocalStream(local);
@@ -328,7 +330,7 @@ export const CallingScreen = (props: RootStackScreenProps<RootNavigatekey.Callin
             <Box backgroundColor="gray.900" position="absolute" top="0" left="0" right="0" bottom="0">
                 {/* VIDEO CALL */}
                 {callState.infor?.type !== 'no-video' &&
-                    (isRemoveVideoOn ? (
+                    (isRemoteVideoOn ? (
                         <RTCView
                             // @ts-ignore
                             streamURL={remoteStream?.toURL() || ''}

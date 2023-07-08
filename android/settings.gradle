@@ -1,4 +1,4 @@
-rootProject.name = 'expo-starter'
+rootProject.name = 'build-1'
 
 apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute(null, rootDir).text.trim(), "../scripts/autolinking.gradle");
 useExpoModules()

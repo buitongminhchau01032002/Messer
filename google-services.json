@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "805121390882",
-    "project_id": "messer-4c81b",
-    "storage_bucket": "messer-4c81b.appspot.com"
+    "project_number": "1085961047153",
+    "project_id": "anothermesser",
+    "storage_bucket": "anothermesser.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:805121390882:android:06def83177a9d05eb04d7b",
+        "mobilesdk_app_id": "1:1085961047153:android:449994bb2e418a9791dfd0",
         "android_client_info": {
           "package_name": "com.anbui.messer"
         }
       },
       "oauth_client": [
         {
-          "client_id": "805121390882-urequu2sca69c16rg3h4btc6j5kf17nt.apps.googleusercontent.com",
+          "client_id": "1085961047153-i2dq4mhh04bec6710d88kpon7evk9ggk.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAw2CPFmZfmVk93-uIAWfa0LTnyinl_0qs"
+          "current_key": "AIzaSyCUUu5trhiBFokhyUn5SY7qGTjn9ZlWBUg"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "805121390882-urequu2sca69c16rg3h4btc6j5kf17nt.apps.googleusercontent.com",
+              "client_id": "1085961047153-i2dq4mhh04bec6710d88kpon7evk9ggk.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
