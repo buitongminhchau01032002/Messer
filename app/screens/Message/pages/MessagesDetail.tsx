@@ -653,7 +653,7 @@ export const MessageDetailScreen = (props: RootStackScreenProps<RootNavigatekey.
                                 <Text fontWeight="bold" textBreakStrategy="balanced">
                                     {pM.content}
                                 </Text>
-                                <Pressable>
+                                <Pressable onPress={() => {handleUnpinMessage(pM._id)}}>
                                     <Text color="primary.900">Unpin</Text>
                                 </Pressable>
                             </HStack>
