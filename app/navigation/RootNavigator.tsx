@@ -148,40 +148,71 @@ function RootNavigator() {
         // });
         messaging().onNotificationOpenedApp(async remoteMessage => {
             console.log(
-              'Notification caused app to open from background state:',
-             // remoteMessage.data.idRoom,
-            //  remoteMessage.data?.idRoom,
-            //  remoteMessage.data?.type
-             
-            ); 
+                'Notification caused app to open from background state:',
+                // remoteMessage.data.idRoom,
+                //  remoteMessage.data?.idRoom,
+                //  remoteMessage.data?.type
+
+            );
             const idRoom = remoteMessage.data?.idRoom || ''
             const type = remoteMessage.data?.type
-            if(type == 'single'){
-                const a = await getDoc(doc(db, "SingleRoom",idRoom))
+            if (type == 'single') {
+                const a = await getDoc(doc(db, "SingleRoom", idRoom))
                 const room = {
                     id: a.id,
                     ...a.data(),
-                    type:'single'
+                    type: 'single'
                 }
-                
-                navigation.navigate(RootNavigatekey.MessageDetail, {room, type: 'single'});
+
+                navigation.navigate(RootNavigatekey.MessageDetail, { room, type: 'single' });
+            } else {
+                console.log(idRoom + 'hhhhhhhhhhhhhhhhhhhhhhhhhhhhhh')
+                const a = await getDoc(doc(db, "MultiRoom", idRoom))
+                const room = {
+                    id: a.id,
+                    ...a.data(),
+                    type: 'multi'
+                }
+
+                navigation.navigate(RootNavigatekey.MultiRoomMessageDetail, { room, type: 'multi' });
             }
-            
-          
-          });
-      
-          // Check whether an initial notification is available
-          messaging()
+
+
+        });
+
+        // Check whether an initial notification is available
+        messaging()
             .getInitialNotification()
-            .then(remoteMessage => {
-              if (remoteMessage) {
-                console.log(
-                  'Notification caused app to open from quit state:',
-                  remoteMessage.notification,
-                );
-                setInitialRoute(remoteMessage.data.type); // e.g. "Settings"
-              }
-              setLoading(false);
+            .then(async remoteMessage => {
+                if (remoteMessage) {
+                    console.log(
+                        'Notification caused app to open from quit state:',
+                        remoteMessage.notification,
+                    );
+                    const idRoom = remoteMessage.data?.idRoom || ''
+                    const type = remoteMessage.data?.type
+                    if (type == 'single') {
+                        const a = await getDoc(doc(db, "SingleRoom", idRoom))
+                        const room = {
+                            id: a.id,
+                            ...a.data(),
+                            type: 'single'
+                        }
+
+                        navigation.navigate(RootNavigatekey.MessageDetail, { room, type: 'single' });
+                    } else {
+                        const a = await getDoc(doc(db, "MultiRoom", idRoom))
+                        const room = {
+                            id: a.id,
+                            ...a.data(),
+                            type: 'multi'
+                        }
+
+                        navigation.navigate(RootNavigatekey.MessageDetail, { room, type: 'multi' });
+                    }
+                    // setInitialRoute(remoteMessage.data.type); // e.g. "Settings"
+                }
+                setLoading(false);
             });
 
         return unsubscribe;

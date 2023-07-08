@@ -36,26 +36,8 @@
                 "android.permission.WAKE_LOCK"
             ],
             "package": "com.anbui.messer",
-            "googleServicesFile": "./google-services.json",
-            "intentFilters": [
-                {
-                  "action": "VIEW",
-                  "autoVerify": true,
-                  "data": [
-                    {
-                      "scheme": "http",
-                      "host": "messer.to",
-                      "pathPrefix": "/join-room/:idJoin"
-                    },
-                    {
-                        "scheme": "https",
-                        "host": "messer.to",
-                        "pathPrefix": "/join-room/:idJoin"
-                      }
-                  ],
-                  "category": ["BROWSABLE", "DEFAULT"]
-                }
-              ]
+            "googleServicesFile": "./google-services.json"
+            
         },
         "web": {
             "favicon": "./app/assets/images/favicon.png"

@@ -221,19 +221,24 @@ export const ListItem = (item: {
                         }
                     }}
                 />
-                <IconButton
-                 borderRadius={100} 
-                 bg="gray.700" 
-                 icon={<LinkIcon color="white" size="sm" />} 
-                 onPress={async () => {
-                    const redirectUrl = Linking.createURL('messer-app.vercel.app/', {
-                        queryParams: { idJoin: item.id },
-                        scheme: 'https'
-                      });
-                      console.log(redirectUrl);
-                    await Clipboard.setStringAsync(redirectUrl);
-                 }}
-                />
+                {
+                    (item.type == 'multi') ? (<>
+                        <IconButton
+                            borderRadius={100}
+                            bg="gray.700"
+                            icon={<LinkIcon color="white" size="sm" />}
+                            onPress={async () => {
+                                const redirectUrl = Linking.createURL('messer-app.vercel.app/', {
+                                    queryParams: { idJoin: item.id },
+                                    scheme: 'https'
+                                });
+                                console.log(redirectUrl);
+                                await Clipboard.setStringAsync(redirectUrl);
+                            }}
+                        />
+                    </>) : <></>
+                }
+
                 <IconButton
                     borderRadius={100}
                     bg="gray.700"
@@ -282,15 +287,15 @@ export const ListItem = (item: {
                 } else {
                     setLastMessage(item.lastMessage.content);
                 }
-               
+
                 setTime(timeAgo.format(item.lastMessage.createdAt.toDate()));
             } else {
                 if (item.lastMessage.type == 'media') {
                     setLastMessage(item.lastMessage.senderName.concat(': ').concat('send media'));
-                }else {
+                } else {
                     setLastMessage(item.lastMessage.senderName.concat(': ').concat(item.lastMessage.content));
                 }
-                
+
                 setTime(timeAgo.format(item.lastMessage.createdAt.toDate()));
             }
         } catch (e) {

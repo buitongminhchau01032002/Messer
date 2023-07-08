@@ -32,14 +32,7 @@ export const InformationScreenQR = (props: RootStackScreenProps<RootNavigatekey.
     // hooks
     useEffect(() => {
         props.navigation.setOptions({
-            headerRight: () => (
-                <HStack
-                    space={2}
-                >
-                    <Icon as={<FontAwesome />} name="hashtag" size={4} color={"blacks"} mr={2}></Icon>
-                    <Icon as={<FontAwesome />} name="list" size={4} color={"blacks"} mr={5}></Icon>
-                </HStack>
-            ),
+            
         });
     }, [props.navigation]);
 

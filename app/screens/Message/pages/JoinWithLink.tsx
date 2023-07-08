@@ -28,6 +28,7 @@ import { MultiRoom } from 'screens/Message/type';
 import { StackActions, NavigationActions } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import AppTabsNavigator from 'navigation/AppTabsNavigator';
+import { ToastAndroid } from 'react-native';
 
 
 export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.JoinWithLink>) => {
@@ -155,22 +156,28 @@ export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.J
 
                     _handleOpenURL({ url: ev });
                 }
-               else  {
-
-                Linking.addEventListener('url', _handleOpenURL)
-               }
+                else {
+                    
+                    ToastAndroid.showWithGravity(
+                        'Cannot join room due to internet connection',
+                        ToastAndroid.SHORT,
+                        ToastAndroid.CENTER,
+                    );
+                    navigation.popToTop();
+                  //  Linking.addEventListener('url', _handleOpenURL)
+                }
 
             }).catch(err => {
                 console.log("Api call error");
                 alert(err.message);
-            }); 
-            Linking.addEventListener('url', _handleOpenURL)
+            });
+            //Linking.addEventListener('url', _handleOpenURL)
 
         }
 
         componentDidMount();
 
-    }, []);
+    }, [_handleOpenURL]);
     const handleDeepLink = async (obj: any) => {
         const { queryParams } = Linking.parse(obj.url)
         console.log(queryParams);
@@ -188,7 +195,7 @@ export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.J
                 console.log("Api call error");
                 alert(error.message);
             });;
-           
+
             let multiRoom;
             await getDoc(roomRef).then(snap => {
                 multiRoom = {
@@ -231,7 +238,7 @@ export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.J
         }
     }
     // useLayoutEffect(() => {
-      
+
     //     const linkingEvent = Linking.addEventListener('url', handleDeepLink);
     //     Linking.getInitialURL().then(url => {
     //         if (url) {
@@ -240,7 +247,7 @@ export const JoinWithLinkScreen = (props: RootStackScreenProps<RootNavigatekey.J
     //         }
     //     });
     //     return () => {
-           
+
     //         linkingEvent.remove();
     //     };
     // }, [handleDeepLink]);

@@ -117,7 +117,7 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
                     <TouchableOpacity onPress={() => navigation.navigate(RootNavigatekey.InformationQR)}>
                         <Icon as={<FontAwesome />} name="hashtag" size={4} color={'blacks'} mr={2}></Icon>
                     </TouchableOpacity>
-                    <Icon as={<FontAwesome />} name="list" size={4} color={'blacks'} mr={5}></Icon>
+                   
                 </HStack>
             ),
         });
@@ -146,14 +146,14 @@ export const AccountScreen = (props: AppTabsStackScreenProps<AppTabsNavigationKe
         // },
     ];
     const menuItem2: MenuItem[] = [
-        {
-            title: 'Direct share',
-            icon: <Icon as={<FontAwesome />} name="share" size="xl" color={'primary.900'}></Icon>,
-            onPress: () => navigation.navigate(RootNavigatekey.NotFound),
-        },
+        // {
+        //     title: 'Direct share',
+        //     icon: <Icon as={<FontAwesome />} name="share" size="xl" color={'primary.900'}></Icon>,
+        //     onPress: () => navigation.navigate(RootNavigatekey.NotFound),
+        // },
         {
             title: 'Logout',
-            icon: <Icon as={<FontAwesome />} name="logout" size="xl" color={'primary.900'}></Icon>,
+            icon: <Icon as={<FontAwesome />} name="share" size="xl" color={'primary.900'}></Icon>,
             onPress: async () => {
                 const docRef = doc(db, 'User', user?.id ?? '');
                 await updateDoc(docRef, {

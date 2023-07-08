@@ -32,6 +32,7 @@ const linking: LinkingOptions<RootStackParamList> = {
       },
       [RootNavigatekey.JoinWithLink]: {
         path: "join-room",
+      
       },
       [RootNavigatekey.Intro]: "intro",
       [RootNavigatekey.Modal]: "modal",
